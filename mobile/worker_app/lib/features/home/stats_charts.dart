@@ -126,11 +126,11 @@ class StatsChartWidget extends StatelessWidget {
       case 'pending':
         return 'Đang chờ';
       case 'confirmed':
-        return AppStrings.statusLabels['confirmed'];
+        return AppStrings.statusLabels['confirmed'] ?? 'Đã xác nhận';
       case 'done':
-        return AppStrings.statusLabels['done'];
+        return AppStrings.statusLabels['done'] ?? 'Hoàn thành';
       case 'cancelled':
-        return AppStrings.statusLabels['cancelled'];
+        return AppStrings.statusLabels['cancelled'] ?? 'Đã hủy';
       case 'total':
         return 'Tổng';
       case 'active':

@@ -11,10 +11,8 @@ class AuthProvider with ChangeNotifier {
   String? errorCode;
   Map<String, dynamic>? errorDetails;
   bool loading = false;
-  NotificationsProvider? _notificationsProvider;
 
   void setNotificationsProvider(NotificationsProvider provider) {
-    _notificationsProvider = provider;
     SocketService().setNotificationsProvider(provider);
   }
 

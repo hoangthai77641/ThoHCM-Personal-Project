@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'env.dart';
+import 'app_strings.dart';
 
 class ApiClient {
   static final ApiClient _instance = ApiClient._internal();

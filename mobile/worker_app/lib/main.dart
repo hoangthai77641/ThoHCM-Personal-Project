@@ -17,6 +17,7 @@ import 'core/providers/review_provider.dart';
 import 'core/repositories/review_repository.dart';
 import 'core/services/notification_service.dart';
 import 'providers/work_mode_provider.dart';
+import 'providers/socket_provider.dart';
 import 'features/wallet/wallet_provider.dart';
 
 void main() async {
@@ -51,6 +52,7 @@ class MyApp extends StatelessWidget {
           create: (_) => ReviewProvider(ReviewRepository(ApiClient())),
         ),
         ChangeNotifierProvider(create: (_) => WalletProvider()),
+        ChangeNotifierProvider(create: (_) => SocketProvider()..initialize()),
       ],
       child: MaterialApp(
         title: 'Thợ HCM',

@@ -130,27 +130,27 @@ class _BookingsScreenState extends State<BookingsScreen>
                 ],
               ),
             ),
-            const Tab(
+            Tab(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.check_circle_outline, size: 20),
                   SizedBox(height: 2),
                   Text(
-                    AppStrings.statusLabels['done'],
+                    AppStrings.statusLabels['done'] ?? 'Hoàn thành',
                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
             ),
-            const Tab(
+            Tab(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.cancel_outlined, size: 20),
                   SizedBox(height: 2),
                   Text(
-                    AppStrings.statusLabels['cancelled'],
+                    AppStrings.statusLabels['cancelled'] ?? 'Đã hủy',
                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
                   ),
                 ],
@@ -299,7 +299,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                 PopupMenuItem(value: 'cancelled', child: Text(AppStrings.cancel)),
               ] else if (b.status == 'confirmed') // Đã xác nhận
               ...[
-                PopupMenuItem(value: 'done', child: Text(AppStrings.statusLabels['done'])),
+                PopupMenuItem(value: 'done', child: Text(AppStrings.statusLabels['done'] ?? 'Hoàn thành')),
                 const PopupMenuItem(
                   value: '__extend_time__',
                   child: Text('Gia hạn thời gian'),
@@ -423,13 +423,13 @@ class _BookingsScreenState extends State<BookingsScreen>
   String _getStatusText(String status) {
     switch (status.toLowerCase()) {
       case 'pending':
-        return AppStrings.statusLabels['pending'];
+        return AppStrings.statusLabels['pending'] ?? 'Đang chờ';
       case 'confirmed':
-        return AppStrings.statusLabels['confirmed'];
+        return AppStrings.statusLabels['confirmed'] ?? 'Đã xác nhận';
       case 'done':
-        return AppStrings.statusLabels['done'];
+        return AppStrings.statusLabels['done'] ?? 'Hoàn thành';
       case 'cancelled':
-        return AppStrings.statusLabels['cancelled'];
+        return AppStrings.statusLabels['cancelled'] ?? 'Đã hủy';
       default:
         return status;
     }

@@ -29,6 +29,9 @@ class SocketService {
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
+          .enableReconnection()
+          .setReconnectionAttempts(5)
+          .setReconnectionDelay(2000)
           .setExtraHeaders({
             if (token != null) 'Authorization': 'Bearer $token',
           })
@@ -36,8 +39,21 @@ class SocketService {
     );
 
     _socket!.onConnect((_) {
+      print('🔗 Socket connected');
       // Join room by workerId string to match backend server.js
       _socket!.emit('join', workerId);
+    });
+
+    _socket!.onDisconnect((_) {
+      print('🔌 Socket disconnected');
+    });
+
+    _socket!.onConnectError((data) {
+      print('❌ Socket connect error: $data');
+    });
+
+    _socket!.onError((data) {
+      print('❌ Socket error: $data');
     });
 
     if (onCreated != null) {
@@ -73,6 +89,15 @@ class SocketService {
   void disconnect() {
     _socket?.disconnect();
     _socket = null;
+  }
+
+  bool get isConnected => _socket?.connected ?? false;
+
+  void reconnect() {
+    if (_socket != null && !_socket!.connected) {
+      print('🔄 Attempting to reconnect socket...');
+      _socket!.connect();
+    }
   }
 
   void _showNewOrderNotification(Map<String, dynamic> booking) {

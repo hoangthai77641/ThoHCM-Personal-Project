@@ -8,7 +8,6 @@ import '../home/service_rating_provider.dart';
 import '../services/services_repository.dart';
 import '../services/services_screen.dart';
 import '../widgets/banner_slider.dart';
-import '../widgets/service_rating_chart.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});

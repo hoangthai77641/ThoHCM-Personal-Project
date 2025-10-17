@@ -11,7 +11,6 @@ import '../receive_orders/active_orders_provider.dart';
 import '../notifications/notifications_provider.dart';
 import 'worker_stats_provider.dart';
 import 'service_rating_provider.dart';
-import '../../providers/work_mode_provider.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});

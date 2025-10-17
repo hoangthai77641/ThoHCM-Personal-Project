@@ -224,7 +224,9 @@ class _CardPaymentScreenState extends State<CardPaymentScreen> {
                             },
                           ),
                           const SizedBox(width: 8),
-                          const Text('Visa'),
+                          const Expanded(
+                            child: Text('Visa'),
+                          ),
                         ],
                       ),
                       value: 'visa',
@@ -259,7 +261,9 @@ class _CardPaymentScreenState extends State<CardPaymentScreen> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Text('Mastercard'),
+                          const Expanded(
+                            child: Text('Mastercard'),
+                          ),
                         ],
                       ),
                       value: 'mastercard',

@@ -1,4 +1,4 @@
-package com.dienlanhquy.workerapp
+package com.thohcm.workerapp
 
 import io.flutter.embedding.android.FlutterActivity
 

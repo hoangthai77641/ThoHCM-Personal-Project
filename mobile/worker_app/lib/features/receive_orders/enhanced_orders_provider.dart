@@ -158,13 +158,13 @@ class EnhancedOrdersProvider with ChangeNotifier {
   String _getStatusText(String status) {
     switch (status) {
       case 'pending':
-        return AppStrings.statusLabels['pending'];
+        return AppStrings.statusLabels['pending'] ?? 'Đang chờ';
       case 'confirmed':
-        return AppStrings.statusLabels['confirmed'];
+        return AppStrings.statusLabels['confirmed'] ?? 'Đã xác nhận';
       case 'done':
-        return AppStrings.statusLabels['done'];
+        return AppStrings.statusLabels['done'] ?? 'Hoàn thành';
       case 'cancelled':
-        return AppStrings.statusLabels['cancelled'];
+        return AppStrings.statusLabels['cancelled'] ?? 'Đã hủy';
       default:
         return status;
     }
