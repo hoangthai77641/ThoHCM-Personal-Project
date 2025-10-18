@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 
 // Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, '../uploads');
+const uploadsDir = path.join(__dirname, '../storage');
 const servicesDir = path.join(uploadsDir, 'services');
 const bannersDir = path.join(uploadsDir, 'banners');
 const avatarsDir = path.join(uploadsDir, 'avatars');

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import api from '../api'
-import { UI_MESSAGES, SUCCESS_TEMPLATES, ERROR_TEMPLATES, formatMessage } from '../utils/messages'
+import { UI_MESSAGES, SUCCESS_TEMPLATES, ERROR_TEMPLATES, formatMessage } from '../config/messages'
 import { useNavigate, Link } from 'react-router-dom'
 
 export default function ForgotPassword() {

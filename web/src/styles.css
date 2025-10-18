@@ -1515,7 +1515,7 @@ img {
   border-top: 1px solid var(--border);
 }
 
-/* Nút Thêm Banner */
+/* Add Banner Button */}
 .add-banner-btn {
   background: linear-gradient(135deg, var(--primary), #06b6d4);
   color: white;
@@ -2393,6 +2393,155 @@ img {
   justify-content: center;
 }
 
+/* User menu dropdown */
+.user-menu-wrapper {
+  position: relative;
+}
+
+.user-menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px !important;
+  cursor: pointer;
+}
+
+.user-avatar-small {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border);
+}
+
+.user-avatar-placeholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+}
+
+.user-name-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+/* Theme toggle button */
+.theme-toggle-btn {
+  position: relative;
+  padding: 8px !important;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--bg);
+  transform: rotate(20deg);
+}
+
+.theme-icon {
+  position: absolute;
+  transition: all 0.3s ease;
+}
+
+/* Show sun icon in dark theme, moon in light theme */
+[data-theme="light"] .sun-icon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+[data-theme="light"] .moon-icon {
+  opacity: 0;
+  transform: rotate(90deg) scale(0);
+}
+
+[data-theme="dark"] .sun-icon {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0);
+}
+
+[data-theme="dark"] .moon-icon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+/* Hide text on desktop */
+.theme-text {
+  display: none;
+}
+
+.user-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+  min-width: 200px;
+  display: none;
+  flex-direction: column;
+  padding: 8px;
+  gap: 4px;
+  z-index: 1000;
+}
+
+.user-dropdown-menu.show {
+  display: flex;
+}
+
+.user-dropdown-menu a,
+.user-dropdown-menu .dropdown-item {
+  padding: 10px 14px;
+  text-align: left;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  width: 100%;
+  font-size: 14px;
+}
+
+.user-dropdown-menu a:hover,
+.user-dropdown-menu .dropdown-item:hover {
+  background-color: var(--bg);
+}
+
+/* Mobile user section */
+.mobile-user-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+
+.mobile-user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  font-weight: 600;
+}
+
 .nav-mobile-search {
   display: none;
 }
@@ -2468,6 +2617,29 @@ img {
 .nav-mobile button:hover {
   background-color: var(--bg);
 }
+
+/* Theme toggle in mobile - show text with icon */
+.nav-mobile .theme-toggle-btn {
+  width: auto;
+  border-radius: 4px;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 8px 0 !important;
+}
+
+.nav-mobile .theme-toggle-btn:hover {
+  transform: none;
+}
+
+.nav-mobile .theme-text {
+  display: inline;
+}
+
+.nav-mobile .theme-icon {
+  position: relative;
+  flex-shrink: 0;
+}
+
 .brand { 
   display: flex; 
   align-items: center; 

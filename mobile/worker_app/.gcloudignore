@@ -1,0 +1,27 @@
+# .gcloudignore for Flutter mobile app
+build/
+.dart_tool/
+.idea/
+.vscode/
+*.iml
+*.log
+*.tmp
+*.swp
+*~
+.DS_Store
+.git/
+.gitignore
+
+# Test/demo files
+test/
+test/widget_test.dart
+run-debug-wifi.txt
+ios_test_guide.md
+tools/wifi_debug.ps1
+
+# Environment files
+.env
+.env.*
+
+# Others
+pubspec.lock

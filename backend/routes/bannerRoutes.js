@@ -5,7 +5,7 @@ const auth = require('../middleware/auth');
 const { uploadBanner } = require('../middleware/upload');
 const { validateObjectIdParam } = require('../middleware/validation');
 
-// Public routes (cho mobile app)
+// Public routes (for mobile app)
 router.get('/active', bannerController.getActiveBanners);
 router.post('/:id/view', validateObjectIdParam('id'), bannerController.incrementViewCount);
 router.post('/:id/click', validateObjectIdParam('id'), bannerController.incrementClickCount);

@@ -119,7 +119,7 @@ class SocketService {
         payload: notification.toString(),
       );
 
-      // Gửi đến NotificationsProvider để thêm vào danh sách
+      // Gửi đến NotificationsProvider để add vào danh sách
       if (_notificationsProvider != null) {
         _notificationsProvider!.addNotificationFromSocket(notification);
         log('✅ Notification added to provider');

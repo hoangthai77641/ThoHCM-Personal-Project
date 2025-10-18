@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import api from '../api'
-import { UI_MESSAGES, SUCCESS_TEMPLATES, ERROR_TEMPLATES, formatMessage } from '../utils/messages'
+import { UI_MESSAGES, SUCCESS_TEMPLATES, ERROR_TEMPLATES, formatMessage } from '../config/messages'
 
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState([])
@@ -13,7 +13,7 @@ export default function NotificationBell() {
     if (user) {
       loadNotifications()
     }
-  }, []) // Chỉ chạy một lần khi component mount
+  }, []) // Run only once when component mounts
 
   const loadNotifications = async () => {
     if (!user) return
@@ -29,7 +29,7 @@ export default function NotificationBell() {
       setUnreadCount(notifs.filter(n => !n.read).length)
     } catch (error) {
       console.error('Error loading notifications:', error)
-      // Nếu lỗi 401, không gọi lại API để tránh infinite loop
+      // If error 401, do not call API again to avoid infinite loop
       if (error.response?.status === 401) {
         setNotifications([])
         setUnreadCount(0)

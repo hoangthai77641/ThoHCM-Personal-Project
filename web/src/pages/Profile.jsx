@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import api from '../api'
-import { UI_MESSAGES, SUCCESS_TEMPLATES, ERROR_TEMPLATES, formatMessage } from '../utils/messages'
+import { UI_MESSAGES, SUCCESS_TEMPLATES, ERROR_TEMPLATES, formatMessage } from '../config/messages'
 import { useNavigate } from 'react-router-dom'
 
 export default function Profile() {
@@ -175,6 +175,15 @@ export default function Profile() {
       setProfile(prev => ({ ...prev, avatar: response.data.user.avatar }))
       setAvatarPreview(null)
       setMsg('Cập nhật ảnh đại diện thành công!')
+      
+      // Update localStorage to reflect new avatar
+      const currentUser = JSON.parse(localStorage.getItem('user') || 'null')
+      if (currentUser) {
+        currentUser.avatar = response.data.user.avatar
+        localStorage.setItem('user', JSON.stringify(currentUser))
+        // Trigger re-render by dispatching a custom event
+        window.dispatchEvent(new Event('storage'))
+      }
     } catch (error) {
       console.error('Upload error:', error)
       console.error('Error response:', error.response?.data)
@@ -200,6 +209,15 @@ export default function Profile() {
       
       setProfile(prev => ({ ...prev, avatar: null }))
       setMsg('Đã xóa ảnh đại diện!')
+      
+      // Update localStorage to remove avatar
+      const currentUser = JSON.parse(localStorage.getItem('user') || 'null')
+      if (currentUser) {
+        delete currentUser.avatar
+        localStorage.setItem('user', JSON.stringify(currentUser))
+        // Trigger re-render by dispatching a custom event
+        window.dispatchEvent(new Event('storage'))
+      }
     } catch (error) {
       setMsg('Lỗi xóa ảnh: ' + (error.response?.data?.message || error.message))
     } finally {

@@ -21,7 +21,7 @@ const {
 const auth = require('../middleware/auth');
 
 // Routes công khai - khách hàng có thể xem lịch thợ
-router.get('/workers', getAllWorkersSchedule); // Get danh sách tất cả thợ và lịch rãnh
+router.get('/workers', getAllWorkersSchedule); // Get list of tất cả thợ và lịch rãnh
 router.get('/worker/:workerId', getWorkerSchedule); // Get lịch rãnh của một thợ cụ thể
 
 // Routes cho khách hàng đã đăng nhập
@@ -34,7 +34,7 @@ router.get('/my-schedule', auth(['worker']), (req, res, next) => {
 }); // Xem lịch của mình
 
 router.put('/my-schedule', auth(['worker']), updateWorkerSchedule); // Update lịch
-router.post('/add-slot', auth(['worker']), addAvailableSlot); // Thêm khung giờ rãnh
+router.post('/add-slot', auth(['worker']), addAvailableSlot); // Add khung giờ rãnh
 router.delete('/remove-slot/:slotId', auth(['worker']), removeAvailableSlot); // Delete khung giờ rãnh
 router.post('/update-after-completion', auth(['worker']), updateStatusAfterCompletion); // Update sau hoàn thành
 router.post('/generate-schedule', auth(['worker']), generateScheduleForDays); // Tự động create lịch

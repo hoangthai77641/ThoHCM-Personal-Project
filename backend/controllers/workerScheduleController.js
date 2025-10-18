@@ -39,7 +39,7 @@ exports.getWorkerSchedule = async (req, res) => {
   }
 };
 
-// Get danh sách tất cả thợ và lịch rãnh của họ
+// Get list of tất cả thợ và lịch rãnh của họ
 exports.getAllWorkersSchedule = async (req, res) => {
   try {
     const { date, status, limit = 20, page = 1 } = req.query;
@@ -350,7 +350,7 @@ exports.updateStatusAfterCompletion = async (req, res) => {
       schedule = await WorkerSchedule.createDefaultSchedule(workerId);
     }
 
-    // Thêm các khung giờ rãnh mới sau khi hoàn successful việc
+    // Add các khung giờ rãnh mới sau khi hoàn successful việc
     if (nextAvailableSlots && nextAvailableSlots.length > 0) {
       for (const newSlot of nextAvailableSlots) {
         const start = new Date(newSlot.startTime);
@@ -737,7 +737,7 @@ exports.extendWorkTime = async (req, res) => {
       currentTime.setHours(currentTime.getHours() + 1);
     }
 
-    // Thêm các slot bị ẩn vào lịch
+    // Add các slot bị ẩn vào lịch
     schedule.availableSlots.push(...slotsToBlock);
     
     // Update thời gian

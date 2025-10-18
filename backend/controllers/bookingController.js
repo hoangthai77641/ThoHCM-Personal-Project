@@ -105,7 +105,7 @@ exports.createBooking = async (req, res) => {
     customer, 
     worker: finalWorker, 
     date: bookingDate, 
-    preferredTime: bookingDate, // Thêm preferredTime field
+    preferredTime: bookingDate, // Add preferredTime field
     address: address.trim(), 
     note, 
     finalPrice,
@@ -193,12 +193,12 @@ exports.updateBookingStatus = async (req, res) => {
 
     const previousStatus = booking.status
 
-    // Nếu worker xác receive receive đơn lần đầu mà booking chưa có worker -> gán worker
+    // If worker accepts the order for the first time and booking has no worker yet -> assign worker
     if (status === 'confirmed' && !booking.worker) {
       booking.worker = req.user.id
     }
 
-    // Chỉ cho phép chuyển sang done nếu đang ở confirmed
+    // Only allow move to done status nếu currently in confirmed status
     if (status === 'done' && previousStatus !== 'confirmed') {
       return res.status(400).json({ message: 'Cannot complete booking that is not confirmed' })
     }
@@ -206,7 +206,7 @@ exports.updateBookingStatus = async (req, res) => {
     booking.status = status
     await booking.save()
 
-    // Khi thợ xác receive receive đơn (status = 'confirmed'), update lịch rãnh dự kiến
+    // When worker accepts the order (status = 'confirmed'), update lịch rãnh dự kiến
     if (status === 'confirmed' && estimatedCompletionTime) {
       try {
         const WorkerSchedule = require('../models/WorkerSchedule');
@@ -220,7 +220,7 @@ exports.updateBookingStatus = async (req, res) => {
         workerSchedule.lastUpdated = new Date();
         await workerSchedule.save();
 
-        // Emit realtime update về lịch rãnh mới
+        // Emit realtime update about new available schedule
         try {
           const io = req.app.get('io');
           if (io) {
@@ -237,7 +237,7 @@ exports.updateBookingStatus = async (req, res) => {
         }
       } catch (scheduleErr) {
         console.error('Worker schedule update error', scheduleErr)
-        // Không fail toàn bộ request vì error lịch – chỉ log lại
+        // Do not fail entire request due to error lịch – just log it
       }
     }
 
@@ -349,7 +349,7 @@ exports.updateBookingStatus = async (req, res) => {
         }
       } catch (loyaltyErr) {
         console.error('Loyalty update error', loyaltyErr);
-        // Không fail toàn bộ request vì error loyalty update – chỉ log lại
+        // Do not fail entire request due to error loyalty update – just log it
       }
     }
     const populated = await Booking.findById(id)
@@ -657,7 +657,7 @@ exports.getAvailableWorkers = async (req, res) => {
     const availableWorkers = workersWithAvailability.filter(w => w.available);
     const unavailableWorkers = workersWithAvailability.filter(w => !w.available);
 
-    // Sort available workers by workload (ascending - ít việc nhất lên đầu)
+    // Sort available workers by workload (ascending - least busy first)
     availableWorkers.sort((a, b) => a.workload - b.workload);
 
     res.json({

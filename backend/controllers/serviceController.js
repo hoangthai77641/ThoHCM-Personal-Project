@@ -59,14 +59,14 @@ exports.createService = async (req, res) => {
       // Process uploaded images
       if (req.files.images) {
         req.files.images.forEach(file => {
-          imageUrls.push(`/uploads/services/${file.filename}`);
+          imageUrls.push(`/storage/services/${file.filename}`);
         });
       }
       
       // Process uploaded videos
       if (req.files.videos) {
         req.files.videos.forEach(file => {
-          videoUrls.push(`/uploads/services/${file.filename}`);
+          videoUrls.push(`/storage/services/${file.filename}`);
         });
       }
     }
@@ -267,14 +267,14 @@ exports.updateService = async (req, res) => {
       // Process uploaded images
       if (req.files.images) {
         req.files.images.forEach(file => {
-          newImageUrls.push(`/uploads/services/${file.filename}`);
+          newImageUrls.push(`/storage/services/${file.filename}`);
         });
       }
       
       // Process uploaded videos
       if (req.files.videos) {
         req.files.videos.forEach(file => {
-          newVideoUrls.push(`/uploads/services/${file.filename}`);
+          newVideoUrls.push(`/storage/services/${file.filename}`);
         });
       }
     }

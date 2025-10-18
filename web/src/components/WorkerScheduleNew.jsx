@@ -14,7 +14,7 @@ const WorkerScheduleNew = ({ selectedService }) => {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [services, setServices] = useState([]);
 
-  // Khung giờ mặc định
+  // Default time slots
   const timeSlots = {
     morning: ["08:00", "09:00", "10:00", "11:00", "12:00"],
     afternoon: ["13:00", "14:00", "15:00", "16:00", "17:00"],
@@ -33,16 +33,16 @@ const WorkerScheduleNew = ({ selectedService }) => {
       setLoading(true);
       setError('');
       
-      // Chỉ lấy lịch của thợ trong service được chọn
+      // Only get schedule of worker in selected service
       const workerId = selectedService.worker._id || selectedService.worker;
       const response = await api.get(`/api/worker-schedule/worker/${workerId}`, {
         params: { date: selectedDate }
       });
       
-      // Đặt thợ làm selected worker luôn
+      // Set worker as selected worker immediately
       const workerData = response.data;
       setSelectedWorker(workerData);
-      setWorkers([workerData]); // Chỉ có 1 thợ
+      setWorkers([workerData]); // Only 1 worker
     } catch (err) {
       console.error('Error fetching worker schedule:', err);
       setError('Lỗi khi tải lịch thợ');
@@ -84,7 +84,7 @@ const WorkerScheduleNew = ({ selectedService }) => {
       const slotDate = new Date(targetDate);
       slotDate.setHours(hour, minute, 0, 0);
       
-      // Tìm slot tương ứng trong database
+      // Find corresponding slot in database
       const dbSlot = worker.availableSlots.find(slot => {
         const slotStartTime = new Date(slot.startTime);
         return slotStartTime.getHours() === hour && 
@@ -255,7 +255,7 @@ const WorkerScheduleNew = ({ selectedService }) => {
               </div>
 
               <div className="time-slots">
-                {/* Khung giờ sáng */}
+                {/* Morning time slots */}
                 <div className="time-group">
                   <h5 className="time-group-title">🌅 Sáng</h5>
                   <div className="slots-grid">
@@ -273,7 +273,7 @@ const WorkerScheduleNew = ({ selectedService }) => {
                   </div>
                 </div>
 
-                {/* Khung giờ chiều */}
+                {/* Afternoon time slots */}
                 <div className="time-group">
                   <h5 className="time-group-title">☀️ Chiều</h5>
                   <div className="slots-grid">
@@ -291,7 +291,7 @@ const WorkerScheduleNew = ({ selectedService }) => {
                   </div>
                 </div>
 
-                {/* Khung giờ tối */}
+                {/* Evening time slots */}
                 <div className="time-group">
                   <h5 className="time-group-title">🌙 Tối</h5>
                   <div className="slots-grid">

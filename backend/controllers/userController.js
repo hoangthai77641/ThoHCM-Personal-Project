@@ -461,14 +461,14 @@ exports.uploadAvatar = async (req, res) => {
 
     // Delete old avatar file if exists
     if (user.avatar) {
-      const oldAvatarPath = path.join(__dirname, '../uploads/avatars', path.basename(user.avatar));
+  const oldAvatarPath = path.join(__dirname, '../storage/avatars', path.basename(user.avatar));
       if (fs.existsSync(oldAvatarPath)) {
         fs.unlinkSync(oldAvatarPath);
       }
     }
 
     // Save new avatar path
-    user.avatar = `/uploads/avatars/${req.file.filename}`;
+  user.avatar = `/storage/avatars/${req.file.filename}`;
     await user.save();
 
     const updatedUser = await User.findById(user._id).select('-password -resetOTP');
@@ -479,7 +479,7 @@ exports.uploadAvatar = async (req, res) => {
   } catch (error) {
     // Clean up uploaded file if error occurs
     if (req.file) {
-      const filePath = path.join(__dirname, '../uploads/avatars', req.file.filename);
+  const filePath = path.join(__dirname, '../storage/avatars', req.file.filename);
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
@@ -509,7 +509,7 @@ exports.deleteAvatar = async (req, res) => {
     }
 
     // Delete avatar file
-    const avatarPath = path.join(__dirname, '../uploads/avatars', path.basename(user.avatar));
+  const avatarPath = path.join(__dirname, '../storage/avatars', path.basename(user.avatar));
     if (fs.existsSync(avatarPath)) {
       fs.unlinkSync(avatarPath);
     }

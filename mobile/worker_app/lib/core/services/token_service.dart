@@ -6,7 +6,7 @@ class TokenService {
   static const String _userRoleKey = 'user_role';
   static const String _userNameKey = 'user_name';
 
-  // Lưu token và thông tin user
+  // Lưu token và information user
   Future<void> saveAuthData({
     required String token,
     required String userId,

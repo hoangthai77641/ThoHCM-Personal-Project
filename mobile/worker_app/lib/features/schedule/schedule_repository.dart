@@ -8,7 +8,7 @@ import 'schedule_model.dart';
 class ScheduleRepository {
   final TokenService _tokenService = TokenService();
 
-  // Lấy thông tin công việc hiện tại
+  // Get information current job
   Future<ApiResponse<CurrentJobResponse>> getCurrentJob() async {
     try {
       final token = await _tokenService.getToken();
@@ -38,7 +38,7 @@ class ScheduleRepository {
     }
   }
 
-  // Lấy lịch rãnh của thợ
+  // Get available schedule of worker
   Future<ApiResponse<WorkerSchedule>> getMySchedule() async {
     try {
       final token = await _tokenService.getToken();
@@ -68,7 +68,7 @@ class ScheduleRepository {
     }
   }
 
-  // Cập nhật thời gian dự kiến hoàn thành khi bắt đầu công việc
+  // Update estimated time complete when starting work
   Future<ApiResponse<String>> startJobWithEstimatedTime({
     required String bookingId,
     required DateTime estimatedCompletionTime,
@@ -108,7 +108,7 @@ class ScheduleRepository {
     }
   }
 
-  // Cập nhật thời gian dự kiến hoàn thành
+  // Update estimated time complete
   Future<ApiResponse<String>> updateEstimatedTime({
     required DateTime newEstimatedCompletionTime,
   }) async {
@@ -144,7 +144,7 @@ class ScheduleRepository {
     }
   }
 
-  // Hoàn thành công việc hiện tại
+  // Complete work current
   Future<ApiResponse<String>> completeCurrentJob({String? bookingId}) async {
     try {
       final token = await _tokenService.getToken();
@@ -177,7 +177,7 @@ class ScheduleRepository {
     }
   }
 
-  // Thêm khung giờ rãnh mới
+  // Add new available time slot
   Future<ApiResponse<String>> addAvailableSlot({
     required DateTime startTime,
     required DateTime endTime,
@@ -218,7 +218,7 @@ class ScheduleRepository {
     }
   }
 
-  // Xóa khung giờ rãnh
+  // Delete available time slot
   Future<ApiResponse<String>> removeAvailableSlot(String slotId) async {
     try {
       final token = await _tokenService.getToken();
@@ -250,7 +250,7 @@ class ScheduleRepository {
     }
   }
 
-  // Tự động tạo lịch rãnh cho nhiều ngày
+  // Automatically create available schedule for multiple days
   Future<ApiResponse<String>> generateScheduleForDays(int days) async {
     try {
       final token = await _tokenService.getToken();
@@ -283,7 +283,7 @@ class ScheduleRepository {
     }
   }
 
-  // Lấy khung giờ mặc định
+  // Get default time slots
   Future<ApiResponse<DefaultTimeSlots>> getDefaultTimeSlots() async {
     try {
       final token = await _tokenService.getToken();
@@ -313,7 +313,7 @@ class ScheduleRepository {
     }
   }
 
-  // Cập nhật lịch sau khi hoàn thành đơn
+  // Update schedule after completing order
   Future<ApiResponse<String>> updateAvailabilityAfterBooking({
     DateTime? completedBookingTime,
     int additionalDays = 3,
@@ -355,7 +355,7 @@ class ScheduleRepository {
     }
   }
 
-  // Thợ tự cập nhật khung giờ khả dụng
+  // Worker self-update available time slots
   Future<ApiResponse<String>> updateCustomAvailability({
     required String date,
     required List<String> availableHours,
@@ -391,7 +391,7 @@ class ScheduleRepository {
     }
   }
 
-  // Gia hạn thời gian làm việc
+  // Extend working time
   Future<ApiResponse<String>> extendWorkTime({
     required String bookingId,
     required int additionalHours,

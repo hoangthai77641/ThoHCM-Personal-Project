@@ -42,7 +42,7 @@ export default function BannerManagement() {
       
       console.log('API response:', response.data) // Debug log
       
-      // Xử lý response data
+      // Handle response data
       if (Array.isArray(response.data)) {
         setBanners(response.data)
       } else if (response.data && Array.isArray(response.data.items)) {

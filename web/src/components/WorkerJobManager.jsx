@@ -69,7 +69,7 @@ const WorkerJobManager = () => {
     try {
       const token = localStorage.getItem('token');
       
-      // Cập nhật trạng thái booking thành confirmed với thời gian dự kiến
+      // Update booking status to confirmed with estimated time
       const response = await fetch(`/api/bookings/${selectedBooking._id}`, {
         method: 'PUT',
         headers: {
@@ -140,7 +140,7 @@ const WorkerJobManager = () => {
     try {
       const token = localStorage.getItem('token');
       
-      // Cập nhật booking status thành done
+      // Update booking status to done
       const bookingResponse = await fetch(`/api/bookings/${currentJob.currentJob.booking._id}`, {
         method: 'PUT',
         headers: {
@@ -152,7 +152,7 @@ const WorkerJobManager = () => {
         })
       });
 
-      // Hoàn thành công việc trong schedule
+      // Complete work in schedule
       const scheduleResponse = await fetch('/api/schedules/complete-job', {
         method: 'POST',
         headers: {

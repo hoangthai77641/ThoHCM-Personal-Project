@@ -68,7 +68,7 @@ class _BookingsScreenState extends State<BookingsScreen>
 
     final bookingsProv = context.read<BookingsProvider>();
     try {
-      // Chờ một chút để tránh conflict với global refresh events
+      // Chờ một chút để tránh conflict with global refresh events
       await Future.delayed(const Duration(milliseconds: 100));
       await bookingsProv.load(statuses: _statusFilters[_currentTabIndex]);
       await context.read<ActiveOrdersProvider>().refresh();
@@ -289,7 +289,7 @@ class _BookingsScreenState extends State<BookingsScreen>
                 value: '__details__',
                 child: Text('Xem chi tiết'),
               ),
-              // Hiển thị action phù hợp với trạng thái cụ thể của booking
+              // Hiển thị action phù hợp with trạng thái cụ thể of booking
               if (b.status == 'pending') // Chờ xác nhận
               ...[
                 const PopupMenuItem(
@@ -395,7 +395,7 @@ class _BookingsScreenState extends State<BookingsScreen>
   }
 
   void _showExtendTimeDialog(BuildContext context, Booking booking) {
-    // Tính thời gian kết thúc hiện tại (preferredTime + 1 giờ + additionalHours)
+    // Tính time kết thúc current (preferredTime + 1 giờ + additionalHours)
     final currentEndTime = booking.date.add(
       Duration(hours: 1 + booking.additionalHours),
     );
@@ -408,7 +408,7 @@ class _BookingsScreenState extends State<BookingsScreen>
       ),
     ).then((result) {
       if (result == true && mounted) {
-        // Refresh bookings sau khi gia hạn thành công
+        // Refresh bookings after gia hạn thành công
         final prov = this.context.read<BookingsProvider>();
         prov.load(statuses: _statusFilters[_currentTabIndex]);
       }

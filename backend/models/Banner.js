@@ -11,7 +11,7 @@ const bannerSchema = new mongoose.Schema({
   },
   targetUrl: { type: String }, // Link đến khi click
   isActive: { type: Boolean, default: true },
-  order: { type: Number, default: 0 }, // Thứ tự hiển thị
+  order: { type: Number, default: 0 }, // Thứ tự displayed
   startDate: { type: Date, default: Date.now },
   endDate: { type: Date }, // Có thể null nếu không có ngày kết thúc
   clickCount: { type: Number, default: 0 }, // Đếm số lần click

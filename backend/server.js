@@ -66,7 +66,7 @@ const staticLimiter = rateLimit({
 });
 
 // Serve static files with security headers and rate limiting
-app.use('/uploads', staticLimiter, (req, res, next) => {
+app.use('/storage', staticLimiter, (req, res, next) => {
   // Prevent directory traversal by rejecting suspicious paths early
   const normalizedPath = path.posix.normalize(req.path);
   if (normalizedPath.includes('..')) {
@@ -97,7 +97,7 @@ app.use('/uploads', staticLimiter, (req, res, next) => {
   res.setHeader('X-Frame-Options', 'DENY');
 
   next();
-}, express.static(path.join(__dirname, 'uploads'), {
+}, express.static(path.join(__dirname, 'storage'), {
   dotfiles: 'deny', // Deny access to dotfiles
   index: false, // Disable directory indexing 
   setHeaders: (res, filePath) => {

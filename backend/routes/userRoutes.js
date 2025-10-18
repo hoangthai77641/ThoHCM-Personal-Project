@@ -11,7 +11,7 @@ const {
   validatePagination
 } = require('../middleware/validation');
 
-// Đăng ký, đăng nhập with rate limiting and validation
+// Register, đăng nhập with rate limiting and validation
 router.post('/register', authLimiter, validateUserRegistration, userController.register);
 router.post('/login', authLimiter, validateUserLogin, userController.login);
 router.post('/request-otp', userController.requestOTP);
@@ -52,7 +52,7 @@ router.get('/customers/:id/bookings', auth(['worker','admin']), userController.g
 
 // (Theo yêu cầu: không cho create user thủ công) -> vô hiệu hóa route create
 // router.post('/', auth(['worker','admin']), userController.createUser);
-// Get danh sách user (worker hoặc admin)
+// Get list of user (worker hoặc admin)
 router.get('/', auth(['worker','admin']), validatePagination, userController.getUsers);
 router.put('/:id/status', auth(['admin']), validateObjectIdParam('id'), userController.updateUserStatus);
 router.put('/:id/role', auth(['admin']), validateObjectIdParam('id'), userController.updateUserRole);

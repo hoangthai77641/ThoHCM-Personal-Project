@@ -4,7 +4,7 @@ const axios = require('axios');
 
 class ZaloPayService {
   constructor() {
-    // ZaloPay configuration - sử dụng sandbox cho test
+    // ZaloPay configuration - using sandbox for testing
     this.app_id = process.env.ZALOPAY_APP_ID || '2553'; // App ID từ ZaloPay
     this.key1 = process.env.ZALOPAY_KEY1 || 'PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL'; // Key1 cho create đơn hàng
     this.key2 = process.env.ZALOPAY_KEY2 || 'kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz'; // Key2 cho callback
@@ -19,7 +19,7 @@ class ZaloPayService {
     const {
       amount,
       description,
-      app_trans_id, // Mã giao dịch từ ứng dụng
+      app_trans_id, // Transaction code from application
       app_user = 'user123'
     } = params;
 
@@ -47,7 +47,7 @@ class ZaloPayService {
       callback_url: this.callback_url
     };
 
-    // Create MAC cho đơn hàng
+    // Create MAC for order
     const data = order.app_id + "|" + order.app_trans_id + "|" + order.app_user + "|" + order.amount + "|" + order.app_time + "|" + order.embed_data + "|" + order.item;
     order.mac = crypto.createHmac('sha256', this.key1).update(data).digest('hex');
 

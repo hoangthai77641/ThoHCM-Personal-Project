@@ -96,7 +96,7 @@ async function createSampleBanners() {
     });
 
     console.log('\nSample banners created successfully!');
-    console.log('\nNote: Make sure to add actual image files to backend/uploads/banners/ directory');
+  console.log('\nNote: Make sure to add actual image files to backend/storage/banners/ directory');
     
     await mongoose.disconnect();
   } catch (error) {

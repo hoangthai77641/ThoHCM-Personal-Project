@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import '../../services/api_service.dart';
+import '../../core/services/api_service.dart';
 
 class BannerSlider extends StatefulWidget {
   const BannerSlider({Key? key}) : super(key: key);

@@ -5,7 +5,7 @@ import '../bookings/bookings_provider.dart';
 import '../bookings/booking_model.dart';
 import 'active_orders_provider.dart';
 import 'pending_orders_provider.dart';
-import '../../widgets/work_mode_toggle.dart';
+import '../../core/widgets/work_mode_toggle.dart';
 
 class ReceiveOrdersScreen extends StatefulWidget {
   const ReceiveOrdersScreen({super.key});
@@ -173,7 +173,7 @@ class _ReceiveOrdersScreenState extends State<ReceiveOrdersScreen> {
       ),
       child: Column(
         children: [
-          // Header với thời gian
+          // Header with time
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
@@ -200,7 +200,7 @@ class _ReceiveOrdersScreenState extends State<ReceiveOrdersScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Service status badge
-                // ...removed 'Đơn mới' badge...
+                // ...removed 'New Order' badge...
                 const SizedBox(height: 16),
 
                 // Route info
@@ -273,7 +273,7 @@ class _ReceiveOrdersScreenState extends State<ReceiveOrdersScreen> {
 
                 const SizedBox(height: 16),
 
-                // Toggle button và details
+                // Toggle button and details
                 TextButton.icon(
                   onPressed: () => _toggleOrderDetails(booking.id),
                   icon: Icon(

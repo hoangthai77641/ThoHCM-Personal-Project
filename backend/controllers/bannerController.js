@@ -2,7 +2,7 @@ const Banner = require('../models/Banner');
 const fs = require('fs');
 const path = require('path');
 
-// Get danh sách banner active (cho mobile app)
+// Get list of banner active (for mobile app)
 exports.getActiveBanners = async (req, res) => {
   try {
     const { type } = req.query;
@@ -25,7 +25,7 @@ exports.getActiveBanners = async (req, res) => {
     const banners = await Banner.find(filter)
       .sort({ order: 1, createdAt: -1 })
       .populate('createdBy', 'name')
-      .select('-clickCount -viewCount'); // Không trả về metrics cho client
+      .select('-clickCount -viewCount'); // Do not return metrics to client
     
     res.json(banners);
   } catch (error) {
@@ -33,7 +33,7 @@ exports.getActiveBanners = async (req, res) => {
   }
 };
 
-// Admin: Lấy tất cả banner
+// Admin: Get all banner
 exports.getAllBanners = async (req, res) => {
   try {
     const { page = 1, limit = 20, type, isActive } = req.query;
@@ -65,7 +65,7 @@ exports.getAllBanners = async (req, res) => {
   }
 };
 
-// Admin: Tạo banner mới
+// Admin: Create banner mới
 exports.createBanner = async (req, res) => {
   try {
     const { title, content, description, type, targetUrl, order, startDate, endDate } = req.body;
@@ -77,7 +77,7 @@ exports.createBanner = async (req, res) => {
       return res.status(400).json({ message: 'Banner image is required' });
     }
     
-    const imageUrl = `/uploads/banners/${req.file.filename}`;
+  const imageUrl = `/storage/banners/${req.file.filename}`;
     
     const banner = new Banner({
       title,
@@ -107,7 +107,7 @@ exports.createBanner = async (req, res) => {
   }
 };
 
-// Admin: Cập nhật banner
+// Admin: Update banner
 exports.updateBanner = async (req, res) => {
   try {
     const { id } = req.params;
@@ -137,12 +137,12 @@ exports.updateBanner = async (req, res) => {
     if (req.file) {
       // Delete old image
       if (banner.imageUrl) {
-        const oldImagePath = path.join(__dirname, '../uploads/banners', path.basename(banner.imageUrl));
+  const oldImagePath = path.join(__dirname, '../storage/banners', path.basename(banner.imageUrl));
         if (fs.existsSync(oldImagePath)) {
           fs.unlinkSync(oldImagePath);
         }
       }
-      banner.imageUrl = `/uploads/banners/${req.file.filename}`;
+  banner.imageUrl = `/storage/banners/${req.file.filename}`;
     }
     
     await banner.save();
@@ -161,7 +161,7 @@ exports.updateBanner = async (req, res) => {
   }
 };
 
-// Admin: Xóa banner
+// Admin: Delete banner
 exports.deleteBanner = async (req, res) => {
   try {
     const { id } = req.params;
@@ -173,7 +173,7 @@ exports.deleteBanner = async (req, res) => {
     
     // Delete image file
     if (banner.imageUrl) {
-      const imagePath = path.join(__dirname, '../uploads/banners', path.basename(banner.imageUrl));
+  const imagePath = path.join(__dirname, '../storage/banners', path.basename(banner.imageUrl));
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
       }
@@ -186,7 +186,7 @@ exports.deleteBanner = async (req, res) => {
   }
 };
 
-// Tăng view count khi banner được hiển thị
+// Increase view count when banner is displayed
 exports.incrementViewCount = async (req, res) => {
   try {
     const { id } = req.params;
@@ -198,7 +198,7 @@ exports.incrementViewCount = async (req, res) => {
   }
 };
 
-// Tăng click count khi banner được click
+// Increase click count when banner is clicked
 exports.incrementClickCount = async (req, res) => {
   try {
     const { id } = req.params;

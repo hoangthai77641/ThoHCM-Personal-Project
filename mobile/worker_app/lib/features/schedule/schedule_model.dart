@@ -207,7 +207,7 @@ class CurrentJobResponse {
   }
 }
 
-// Model cho khung giờ mặc định
+// Model cho time slot default
 class DefaultTimeSlots {
   final List<String> morning;
   final List<String> afternoon;

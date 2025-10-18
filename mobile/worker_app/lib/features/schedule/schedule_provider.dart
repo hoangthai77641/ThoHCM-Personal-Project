@@ -20,7 +20,7 @@ class ScheduleProvider extends ChangeNotifier {
   bool get hasCurrentJob => _currentJob?.hasCurrentJob ?? false;
   bool get isAvailable => _currentJob?.status == 'available';
 
-  // Lấy thông tin công việc hiện tại
+  // Get information current job
   Future<void> getCurrentJob() async {
     _setLoading(true);
     _clearError();
@@ -36,7 +36,7 @@ class ScheduleProvider extends ChangeNotifier {
     _setLoading(false);
   }
 
-  // Lấy lịch rãnh của thợ
+  // Get available schedule of worker
   Future<void> getMySchedule() async {
     _setLoading(true);
     _clearError();
@@ -52,7 +52,7 @@ class ScheduleProvider extends ChangeNotifier {
     _setLoading(false);
   }
 
-  // Bắt đầu công việc với thời gian dự kiến
+  // Start work with estimated time
   Future<bool> startJobWithEstimatedTime({
     required String bookingId,
     required DateTime estimatedCompletionTime,
@@ -80,7 +80,7 @@ class ScheduleProvider extends ChangeNotifier {
     }
   }
 
-  // Cập nhật thời gian dự kiến
+  // Update estimated time
   Future<bool> updateEstimatedTime(DateTime newEstimatedTime) async {
     _setLoading(true);
     _clearError();
@@ -102,7 +102,7 @@ class ScheduleProvider extends ChangeNotifier {
     }
   }
 
-  // Hoàn thành công việc hiện tại
+  // Complete work current
   Future<bool> completeCurrentJob({String? bookingId}) async {
     _setLoading(true);
     _clearError();
@@ -122,7 +122,7 @@ class ScheduleProvider extends ChangeNotifier {
     }
   }
 
-  // Thêm khung giờ rãnh mới
+  // Add new available time slot
   Future<bool> addAvailableSlot({
     required DateTime startTime,
     required DateTime endTime,
@@ -153,7 +153,7 @@ class ScheduleProvider extends ChangeNotifier {
     }
   }
 
-  // Xóa khung giờ rãnh
+  // Delete available time slot
   Future<bool> removeAvailableSlot(String slotId) async {
     _setLoading(true);
     _clearError();
@@ -172,7 +172,7 @@ class ScheduleProvider extends ChangeNotifier {
     }
   }
 
-  // Tự động tạo lịch rãnh
+  // Automatically create available schedule
   Future<bool> generateScheduleForDays(int days) async {
     _setLoading(true);
     _clearError();
@@ -212,7 +212,7 @@ class ScheduleProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Tính thời gian còn lại đến khi hoàn thành (tính theo phút)
+  // Tính time còn lại đến when complete (tính theo phút)
   int? get timeRemainingInMinutes {
     if (_currentJob?.estimatedCompletion == null) return null;
 
@@ -223,7 +223,7 @@ class ScheduleProvider extends ChangeNotifier {
     return difference > 0 ? difference : 0;
   }
 
-  // Kiểm tra có quá thời gian dự kiến không
+  // Kiểm tra có quá time estimated không
   bool get isOverdue {
     if (_currentJob?.estimatedCompletion == null) return false;
     return DateTime.now().isAfter(_currentJob!.estimatedCompletion!);
@@ -246,7 +246,7 @@ class ScheduleProvider extends ChangeNotifier {
     return upcomingSlots.isNotEmpty ? upcomingSlots.first : null;
   }
 
-  // Lấy khung giờ mặc định
+  // Get default time slots
   Future<ApiResponse<DefaultTimeSlots>> getDefaultTimeSlots() async {
     _setLoading(true);
     _clearError();
@@ -261,7 +261,7 @@ class ScheduleProvider extends ChangeNotifier {
     return response;
   }
 
-  // Cập nhật lịch sau khi hoàn thành đơn
+  // Update schedule after completing order
   Future<ApiResponse<String>> updateAvailabilityAfterBooking({
     DateTime? completedBookingTime,
     int additionalDays = 3,
@@ -285,7 +285,7 @@ class ScheduleProvider extends ChangeNotifier {
     return response;
   }
 
-  // Thợ tự cập nhật khung giờ khả dụng
+  // Worker self-update available time slots
   Future<ApiResponse<String>> updateCustomAvailability({
     required String date,
     required List<String> availableHours,
@@ -309,7 +309,7 @@ class ScheduleProvider extends ChangeNotifier {
     return response;
   }
 
-  // Gia hạn thời gian làm việc (ẩn thêm khung giờ)
+  // Extend working time (ẩn add time slot)
   Future<bool> extendWorkTime({
     required String bookingId,
     required int additionalHours,

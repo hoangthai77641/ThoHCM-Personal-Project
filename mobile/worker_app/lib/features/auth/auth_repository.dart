@@ -45,7 +45,7 @@ class AuthRepository {
       final user = data['user'] as Map<String, dynamic>?;
 
       if (token != null && user != null) {
-        // Sử dụng TokenService để lưu token và thông tin user
+        // Sử dụng TokenService để lưu token và information user
         await _tokenService.saveAuthData(
           token: token,
           userId: user['_id'] ?? user['id'] ?? '',
@@ -84,7 +84,7 @@ class AuthRepository {
     // Xóa token từ TokenService
     await _tokenService.clearAuthData();
 
-    // Vẫn xóa từ SharedPreferences cho compatibility
+    // Vẫn delete từ SharedPreferences cho compatibility
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
     await prefs.remove('me');

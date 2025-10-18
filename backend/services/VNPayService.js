@@ -4,9 +4,9 @@ const qs = require('querystring');
 
 class VNPayService {
   constructor() {
-    // VNPay configuration - sử dụng sandbox cho test
-    this.vnp_TmnCode = process.env.VNP_TMN_CODE || 'VNPAYSANDBOX'; // Mã website tại VNPay
-    this.vnp_HashSecret = process.env.VNP_HASH_SECRET || 'SANDBOXHASHSECRET'; // Chuỗi bí mật
+    // VNPay configuration - using sandbox for testing
+    this.vnp_TmnCode = process.env.VNP_TMN_CODE || 'VNPAYSANDBOX'; // Website code at VNPay
+    this.vnp_HashSecret = process.env.VNP_HASH_SECRET || 'SANDBOXHASHSECRET'; // Secret key
     this.vnp_Url = process.env.VNP_URL || 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
     this.vnp_Api = process.env.VNP_API || 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction';
     this.vnp_ReturnUrl = process.env.VNP_RETURN_URL || 'http://localhost:5000/api/wallet/vnpay-return';
@@ -35,24 +35,24 @@ class VNPayService {
     vnp_Params['vnp_TxnRef'] = txnRef;
     vnp_Params['vnp_OrderInfo'] = orderInfo;
     vnp_Params['vnp_OrderType'] = orderType;
-    vnp_Params['vnp_Amount'] = amount * 100; // VNPay tính bằng đồng (x100)
+    vnp_Params['vnp_Amount'] = amount * 100; // VNPay calculated in VND (x100)
     vnp_Params['vnp_ReturnUrl'] = this.vnp_ReturnUrl;
     vnp_Params['vnp_IpAddr'] = ipAddr;
     vnp_Params['vnp_CreateDate'] = createDate;
 
-    // Sắp xếp tham số theo thứ tự alphabet
+    // Sort parameters in alphabetical order
     vnp_Params = this.sortObject(vnp_Params);
 
-    // Tạo query string
+    // Create query string
     const signData = qs.stringify(vnp_Params, { encode: false });
     
-    // Tạo secure hash
+    // Create secure hash
     const hmac = crypto.createHmac("sha512", this.vnp_HashSecret);
     const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
     
     vnp_Params['vnp_SecureHash'] = signed;
     
-    // Tạo URL cuối cùng
+    // Create URL cuối cùng
     const paymentUrl = this.vnp_Url + '?' + qs.stringify(vnp_Params, { encode: false });
     
     return {
@@ -72,7 +72,7 @@ class VNPayService {
     // Sắp xếp tham số
     vnpParams = this.sortObject(vnpParams);
     
-    // Tạo lại chữ ký
+    // Create lại chữ ký
     const signData = qs.stringify(vnpParams, { encode: false });
     const hmac = crypto.createHmac("sha512", this.vnp_HashSecret);
     const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");
@@ -103,7 +103,7 @@ class VNPayService {
     // Sắp xếp tham số
     vnp_Params = this.sortObject(vnp_Params);
     
-    // Tạo secure hash
+    // Create secure hash
     const signData = qs.stringify(vnp_Params, { encode: false });
     const hmac = crypto.createHmac("sha512", this.vnp_HashSecret);
     const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest("hex");

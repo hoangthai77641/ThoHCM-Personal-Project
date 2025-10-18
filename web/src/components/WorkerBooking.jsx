@@ -13,7 +13,7 @@ const WorkerBooking = ({ selectedService }) => {
   const [bookedSlots, setBookedSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
-  // Khung giờ cố định từ 8:00 sáng đến 8:00 tối, cách nhau 1 tiếng
+  // Fixed time slots from 8:00 AM to 8:00 PM, 1 hour apart
   const timeSlots = [
     '08:00', '09:00', '10:00', '11:00', '12:00',
     '13:00', '14:00', '15:00', '16:00', '17:00',

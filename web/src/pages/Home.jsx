@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import api from '../api'
-import { UI_MESSAGES, SUCCESS_TEMPLATES, ERROR_TEMPLATES, formatMessage } from '../utils/messages'
+import { UI_MESSAGES, SUCCESS_TEMPLATES, ERROR_TEMPLATES, formatMessage } from '../config/messages'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ServiceMediaGallery } from '../components/ServiceMediaGallery'
 import ReviewSection from '../components/ReviewSection'
@@ -62,7 +62,7 @@ export default function Home(){
   )
   return (
     <div>
-      {/* Banner Slider - chỉ hiển thị khi không tìm kiếm */}
+      {/* Banner Slider - only show when not searching */}
       {!searchQuery && <BannerSlider />}
       
       {searchQuery ? (
