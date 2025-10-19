@@ -6,27 +6,36 @@ const path = require('path');
 const storage = new Storage();
 const bucketName = process.env.GCS_BUCKET_NAME || 'thohcm-storage';
 
-// Create bucket if it doesn't exist
+// Check if bucket exists - don't create automatically in production
 async function ensureBucket() {
   try {
     await storage.bucket(bucketName).getMetadata();
-    console.log(`Bucket ${bucketName} exists`);
+    console.log(`Bucket ${bucketName} exists and is accessible`);
+    return true;
   } catch (error) {
     if (error.code === 404) {
-      // Create bucket
-      await storage.createBucket(bucketName, {
-        location: 'asia-southeast1',
-        storageClass: 'STANDARD',
-      });
-      console.log(`Bucket ${bucketName} created`);
+      console.error(`Bucket ${bucketName} does not exist. Please create it manually.`);
+      return false;
     } else {
-      console.error('Bucket error:', error);
+      console.error('Bucket access error:', error);
+      return false;
     }
   }
 }
 
-// Initialize bucket
-ensureBucket().catch(console.error);
+// Initialize bucket check
+let bucketReady = false;
+ensureBucket().then(ready => {
+  bucketReady = ready;
+  if (ready) {
+    console.log('Google Cloud Storage is ready');
+  } else {
+    console.error('Google Cloud Storage setup failed');
+  }
+}).catch(error => {
+  console.error('Bucket initialization error:', error);
+  bucketReady = false;
+});
 
 // Allowed MIME types
 const allowedImageTypes = [
@@ -142,6 +151,10 @@ const bannerUpload = multer({
 
 // Upload to Google Cloud Storage
 async function uploadToGCS(file, folder) {
+  if (!bucketReady) {
+    throw new Error('Google Cloud Storage is not ready. Please check bucket configuration.');
+  }
+
   const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
   const extension = path.extname(file.originalname);
   const filename = `${folder}/${file.fieldname}-${uniqueSuffix}${extension}`;

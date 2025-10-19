@@ -3,7 +3,7 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const auth = require('../middleware/auth');
 const { authLimiter } = require('../middleware/security');
-const { uploadAvatar } = require('../middleware/upload-simple');
+const { uploadAvatar } = require('../middleware/upload-gcs');
 const { 
   validateUserRegistration, 
   validateUserLogin,

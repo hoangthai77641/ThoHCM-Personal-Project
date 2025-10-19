@@ -550,22 +550,27 @@ exports.uploadAvatar = async (req, res) => {
       return res.status(403).json({ message: 'Không thể update avatar cho tài khoản khác.' });
     }
 
-    // Delete old avatar file if exists
-    if (user.avatar && !user.avatar.startsWith('http')) {
-      const oldAvatarPath = path.join(__dirname, '..', user.avatar);
+    // Upload to Google Cloud Storage
+    const { uploadToGCS, deleteFromGCS } = require('../middleware/upload-gcs');
+    
+    // Delete old avatar from GCS if exists
+    if (user.avatar && user.avatar.includes('storage.googleapis.com')) {
       try {
-        if (fs.existsSync(oldAvatarPath)) {
-          fs.unlinkSync(oldAvatarPath);
-          console.log(`Deleted old avatar: ${oldAvatarPath}`);
-        }
+        const urlParts = user.avatar.split('/');
+        const filename = urlParts[urlParts.length - 1];
+        const folder = urlParts[urlParts.length - 2];
+        await deleteFromGCS(`${folder}/${filename}`);
+        console.log(`Deleted old avatar from GCS: ${folder}/${filename}`);
       } catch (error) {
-        console.error('Error deleting old avatar:', error);
+        console.error('Error deleting old avatar from GCS:', error);
       }
     }
 
-    // Generate avatar URL - use relative path for serving
-    const avatarPath = `/storage/avatars/${req.file.filename}`;
-    user.avatar = avatarPath;
+    // Upload new avatar to GCS
+    const { filename, publicUrl } = await uploadToGCS(req.file, 'avatars');
+    
+    // Save new avatar URL
+    user.avatar = publicUrl;
     await user.save();
 
     const updatedUser = await User.findById(user._id).select('-password -resetOTP');
@@ -605,10 +610,18 @@ exports.deleteAvatar = async (req, res) => {
       return res.status(400).json({ message: 'No avatar to delete' });
     }
 
-    // Delete avatar file
-  const avatarPath = path.join(__dirname, '../storage/avatars', path.basename(user.avatar));
-    if (fs.existsSync(avatarPath)) {
-      fs.unlinkSync(avatarPath);
+    // Delete avatar file from GCS
+    if (user.avatar.includes('storage.googleapis.com')) {
+      try {
+        const { deleteFromGCS } = require('../middleware/upload-gcs');
+        const urlParts = user.avatar.split('/');
+        const filename = urlParts[urlParts.length - 1];
+        const folder = urlParts[urlParts.length - 2];
+        await deleteFromGCS(`${folder}/${filename}`);
+        console.log(`Deleted avatar from GCS: ${folder}/${filename}`);
+      } catch (error) {
+        console.error('Error deleting avatar from GCS:', error);
+      }
     }
 
     // Remove avatar from user record
