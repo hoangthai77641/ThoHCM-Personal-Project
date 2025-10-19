@@ -7,6 +7,8 @@ on:
   pull_request:
     branches: [ main ]
     paths: [ 'web/**' ]
+  # Temporarily disable auto trigger
+  workflow_dispatch:
 
 env:
   PROJECT_ID: thohcm-app
@@ -15,7 +17,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # Temporarily disable auto deploy until secrets are configured
+    if: false # github.ref == 'refs/heads/main' && github.event_name == 'push'
     
     steps:
     - name: Checkout code
