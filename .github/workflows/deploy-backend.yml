@@ -58,6 +58,7 @@ jobs:
         env_variables:
           NODE_ENV: "production"
           MONGODB_URI: "${{ secrets.MONGODB_URI }}"
+          MONGODB_DB: "${{ secrets.MONGODB_DB || 'thohcm' }}"
           JWT_SECRET: "${{ secrets.JWT_SECRET }}"
           JWT_EXPIRES_IN: "7d"
           ALLOWED_ORIGINS: "${{ secrets.ALLOWED_ORIGINS }}"

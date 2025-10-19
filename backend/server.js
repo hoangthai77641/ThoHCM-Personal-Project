@@ -203,7 +203,8 @@ app.get('/debug/avatars', async (req, res) => {
 });
 
 // MongoDB connection
-const PORT = process.env.PORT || 5000;
+// Cloud Run uses PORT environment variable, default to 8080 for Cloud Run, 5000 for local
+const PORT = process.env.PORT || 8080;
 const HOST = process.env.HOST || '0.0.0.0';
 
 // Ensure a database name is present; default to 'thohcm' if omitted in SRV URI
@@ -257,6 +258,18 @@ mongoose.connect(MONGODB_URI)
         };
         res.json(status);
       } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+    });
+
+    // Manual bootstrap endpoint for production (admin only)
+    app.post('/api/admin/bootstrap', async (req, res) => {
+      try {
+        const bootstrap = require('./scripts/bootstrap');
+        await bootstrap();
+        res.json({ success: true, message: 'Bootstrap completed' });
+      } catch (err) {
+        console.error('[bootstrap API] failed:', err);
         res.status(500).json({ error: err.message });
       }
     });

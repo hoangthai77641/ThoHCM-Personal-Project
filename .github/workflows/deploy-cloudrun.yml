@@ -1,0 +1,55 @@
+name: Deploy Backend to Cloud Run
+
+on:
+  push:
+    branches: [ main ]
+    paths: 
+      - 'backend/**'
+      - 'cloudbuild.yaml'
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: thohcm-application-475603
+  SERVICE_NAME: thohcm-backend
+  REGION: asia-southeast1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Google Cloud CLI
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        project_id: ${{ env.PROJECT_ID }}
+
+    - name: Configure Docker to use gcloud
+      run: gcloud auth configure-docker
+
+    - name: Build and Deploy to Cloud Run
+      run: |
+        gcloud builds submit --config=cloudbuild.yaml
+        
+    - name: Get Service URL
+      id: get-url
+      run: |
+        URL=$(gcloud run services describe $SERVICE_NAME --region=$REGION --format="value(status.url)")
+        echo "url=$URL" >> $GITHUB_OUTPUT
+        echo "Backend deployed to: $URL"
+
+    - name: Update Environment Variables
+      run: |
+        gcloud run services update $SERVICE_NAME --region=$REGION \
+          --set-env-vars MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+          --set-env-vars JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+          --set-env-vars ALLOWED_ORIGINS="${{ secrets.ALLOWED_ORIGINS }}"
+
+    - name: Verify Deployment
+      run: |
+        echo "Testing health endpoint..."
+        curl -f ${{ steps.get-url.outputs.url }}/api/health || exit 1
+        echo "✅ Backend is healthy!"
