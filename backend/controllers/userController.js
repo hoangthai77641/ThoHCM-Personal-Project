@@ -896,6 +896,63 @@ exports.findNearbyWorkers = async (req, res) => {
   }
 };
 
+// Admin: Create admin account (super admin only)
+exports.createAdmin = async (req, res) => {
+  try {
+    const { name, phone, password, email } = req.body;
+    
+    // Validate required fields
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: 'Name is required' });
+    }
+    if (!phone || !phone.trim()) {
+      return res.status(400).json({ message: 'Phone is required' });
+    }
+    if (!password || password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+
+    // Check if phone already exists
+    const existingUser = await User.findOne({ phone: phone.trim() });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Số điện thoại này đã được sử dụng' });
+    }
+
+    // Check if email already exists (if provided)
+    if (email && email.trim()) {
+      const existingEmail = await User.findOne({ email: email.trim().toLowerCase() });
+      if (existingEmail) {
+        return res.status(400).json({ message: 'Email này đã được sử dụng' });
+      }
+    }
+
+    // Create admin user
+    const admin = new User({
+      name: name.trim(),
+      phone: phone.trim(),
+      password: await bcrypt.hash(password, 10),
+      email: email ? email.trim().toLowerCase() : undefined,
+      role: 'admin',
+      status: 'active'
+    });
+
+    await admin.save();
+    
+    // Return admin info without password
+    const sanitized = admin.toObject({ versionKey: false });
+    delete sanitized.password;
+    delete sanitized.resetOTP;
+    
+    res.status(201).json({
+      message: 'Admin account created successfully',
+      admin: sanitized
+    });
+  } catch (error) {
+    console.error('Create admin error:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 // Helper function to calculate distance between two coordinates
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // Earth radius in km

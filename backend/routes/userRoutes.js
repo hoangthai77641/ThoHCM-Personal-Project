@@ -62,6 +62,26 @@ router.get('/', auth(['worker','admin']), validatePagination, userController.get
 // Get administrators (admin only)
 router.get('/administrators', auth(['admin']), validatePagination, userController.getAdministrators);
 
+// Admin: Create admin account (admin only, or no auth for first admin)
+router.post('/administrators', async (req, res) => {
+  try {
+    const User = require('../models/User');
+    
+    // Check if any admin exists
+    const adminCount = await User.countDocuments({ role: 'admin' });
+    
+    if (adminCount === 0) {
+      // No admin exists, allow creation without authentication
+      return userController.createAdmin(req, res);
+    } else {
+      // Admin exists, require admin authentication
+      return auth(['admin'])(req, res, () => userController.createAdmin(req, res));
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 router.put('/:id/status', auth(['admin']), validateObjectIdParam('id'), userController.updateUserStatus);
 router.post('/workers', auth(['admin']), userController.adminCreateWorker);
 router.put('/workers/:id', auth(['admin']), validateObjectIdParam('id'), userController.adminUpdateWorker);
