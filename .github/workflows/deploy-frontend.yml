@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_ID: thohcm-app
+  PROJECT_ID: thohcm-application
 
 jobs:
   deploy:

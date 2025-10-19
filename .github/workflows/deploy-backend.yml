@@ -9,7 +9,7 @@ on:
     paths: [ 'backend/**' ]
 
 env:
-  PROJECT_ID: thohcm-app
+  PROJECT_ID: thohcm-application-475603
   GAE_SERVICE: default
 
 jobs:

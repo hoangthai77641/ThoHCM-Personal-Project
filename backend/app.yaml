@@ -11,8 +11,8 @@ env_variables:
   # Generate a strong JWT secret (use: openssl rand -base64 64)
   JWT_SECRET: "your-strong-jwt-secret-key-here"
   JWT_EXPIRES_IN: "7d"
-  # Add your production frontend URL here
-  ALLOWED_ORIGINS: "https://your-frontend-domain.com"
+  # Add your production frontend URL here  
+  ALLOWED_ORIGINS: "https://thohcm-application.web.app"
 
 # Automatic scaling configuration
 automatic_scaling:

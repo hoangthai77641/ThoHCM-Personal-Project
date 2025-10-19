@@ -1,0 +1,1 @@
+mongodb+srv://thohcm_admin:thohcmadmin@thohcm-cluster.bxqkpw6.mongodb.net/?retryWrites=true&w=majority&appName=ThoHCM-Cluster
