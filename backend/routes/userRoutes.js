@@ -50,12 +50,19 @@ router.put('/toggle-online', auth(['worker']), userController.toggleOnlineStatus
 router.get('/customers', auth(['worker','admin']), userController.getCustomers);
 router.get('/customers/:id/bookings', auth(['worker','admin']), userController.getCustomerBookings);
 
+// Find nearby workers (for customers)
+router.get('/nearby-workers', auth(['customer', 'worker', 'admin']), userController.findNearbyWorkers);
+
 // (Theo yêu cầu: không cho create user thủ công) -> vô hiệu hóa route create
 // router.post('/', auth(['worker','admin']), userController.createUser);
-// Get list of user (worker hoặc admin)
+
+// Get list of user (worker hoặc admin) - excludes admin by default
 router.get('/', auth(['worker','admin']), validatePagination, userController.getUsers);
+
+// Get administrators (admin only)
+router.get('/administrators', auth(['admin']), validatePagination, userController.getAdministrators);
+
 router.put('/:id/status', auth(['admin']), validateObjectIdParam('id'), userController.updateUserStatus);
-router.put('/:id/role', auth(['admin']), validateObjectIdParam('id'), userController.updateUserRole);
 router.post('/workers', auth(['admin']), userController.adminCreateWorker);
 router.put('/workers/:id', auth(['admin']), validateObjectIdParam('id'), userController.adminUpdateWorker);
 router.delete('/workers/:id', auth(['admin']), validateObjectIdParam('id'), userController.adminDeleteWorker);

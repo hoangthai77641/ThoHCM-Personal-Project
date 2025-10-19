@@ -8,11 +8,13 @@ import MyBookings from './pages/MyBookings'
 import Profile from './pages/Profile'
 import AdminDashboard from './pages/AdminDashboard'
 import Users from './pages/Users'
+import AdministratorManagement from './pages/AdministratorManagement'
 import ServiceDetail from './pages/ServiceDetail'
 import BannerManagement from './pages/BannerManagement'
 import ForgotPassword from "./pages/ForgotPassword";
 import OTPVerification from "./pages/OTPVerification";
 import ResetPassword from "./pages/ResetPassword";
+import NearbyWorkers from "./pages/NearbyWorkers";
 
 import SearchBox from './components/SearchBox'
 import NotificationSystem from './components/NotificationSystem'
@@ -123,6 +125,7 @@ function AppContent() {
           {isAdmin && <>
             <Link to="/admin">Bảng điều khiển</Link>
             {user?.role === 'admin' && <Link to="/users">Người dùng</Link>}
+            {user?.role === 'admin' && <Link to="/administrators">Quản trị viên</Link>}
             {user?.role === 'admin' && <Link to="/banners">Banner & Thông báo</Link>}
           </>}
           <SearchBox />
@@ -182,9 +185,14 @@ function AppContent() {
               </button>
               <div className="user-dropdown-menu">
                 {user.role === 'customer' && (
-                  <Link to="/my-bookings" onClick={() => {
-                    document.querySelector('.user-dropdown-menu').classList.remove('show');
-                  }}>Đơn của tôi</Link>
+                  <>
+                    <Link to="/nearby-workers" onClick={() => {
+                      document.querySelector('.user-dropdown-menu').classList.remove('show');
+                    }}>🔍 Tìm thợ gần đây</Link>
+                    <Link to="/my-bookings" onClick={() => {
+                      document.querySelector('.user-dropdown-menu').classList.remove('show');
+                    }}>Đơn của tôi</Link>
+                  </>
                 )}
                 <Link to="/profile" onClick={() => {
                   document.querySelector('.user-dropdown-menu').classList.remove('show');
@@ -219,6 +227,7 @@ function AppContent() {
           {isAdmin && <>
             <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>Bảng điều khiển</Link>
             {user?.role === 'admin' && <Link to="/users" onClick={() => setMobileMenuOpen(false)}>Người dùng</Link>}
+            {user?.role === 'admin' && <Link to="/administrators" onClick={() => setMobileMenuOpen(false)}>Quản trị viên</Link>}
             {user?.role === 'admin' && <Link to="/banners" onClick={() => setMobileMenuOpen(false)}>Banner & Thông báo</Link>}
           </>}
           <button 
@@ -271,7 +280,10 @@ function AppContent() {
                 <span>{user.name}</span>
               </div>
               {user.role === 'customer' && (
-                <Link to="/my-bookings" onClick={() => setMobileMenuOpen(false)}>Đơn của tôi</Link>
+                <>
+                  <Link to="/nearby-workers" onClick={() => setMobileMenuOpen(false)}>🔍 Tìm thợ gần đây</Link>
+                  <Link to="/my-bookings" onClick={() => setMobileMenuOpen(false)}>Đơn của tôi</Link>
+                </>
               )}
               <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>Thông tin cá nhân</Link>
               <button className="btn" onClick={() => {logout(); setMobileMenuOpen(false);}}>Đăng xuất</button>
@@ -290,9 +302,11 @@ function AppContent() {
           <Route path="/reset-password" element={<ResetPassword/>} />
           <Route path="/booking" element={<Booking/>} />
           <Route path="/my-bookings" element={<MyBookings/>} />
+          <Route path="/nearby-workers" element={<NearbyWorkers/>} />
           <Route path="/profile" element={<Profile/>} />
           <Route path="/admin" element={<AdminDashboard/>} />
           <Route path="/users" element={<Users/>} />
+          <Route path="/administrators" element={<AdministratorManagement/>} />
           <Route path="/banners" element={<BannerManagement/>} />
 
         </Routes>

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  phone: { type: String, required: true, unique: true, trim: true },
+  phone: { type: String, required: true, trim: true },
   password: { type: String, required: true },
   role: { type: String, enum: ['customer', 'worker', 'admin'], default: 'customer' }
 }, { timestamps: true });
@@ -26,6 +26,19 @@ userSchema.add({
   isOnline: { type: Boolean, default: false },
   // Wallet status for workers (to hide services when negative)
   walletStatus: { type: String, enum: ['positive', 'negative'], default: 'positive' }
+});
+
+// Compound unique indexes for flexible validation
+// 1 phone can have 1 customer + 1 worker
+userSchema.index({ phone: 1, role: 1 }, { unique: true });
+
+// CCCD must be unique across all workers only (customers don't have CCCD)
+userSchema.index({ citizenId: 1 }, { 
+  unique: true, 
+  partialFilterExpression: { 
+    citizenId: { $exists: true },
+    role: 'worker' 
+  }
 });
 
 module.exports = mongoose.model('User', userSchema);

@@ -6,8 +6,13 @@ instance_class: F2
 # Environment variables
 env_variables:
   NODE_ENV: "production"
-  # Add other non-sensitive environment variables here
-  # Sensitive variables should be set via Google Cloud Secret Manager
+  # Replace with your MongoDB Atlas connection string
+  MONGODB_URI: "mongodb+srv://username:password@cluster.mongodb.net/thohcm"
+  # Generate a strong JWT secret (use: openssl rand -base64 64)
+  JWT_SECRET: "your-strong-jwt-secret-key-here"
+  JWT_EXPIRES_IN: "7d"
+  # Add your production frontend URL here
+  ALLOWED_ORIGINS: "https://your-frontend-domain.com"
 
 # Automatic scaling configuration
 automatic_scaling:

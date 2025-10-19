@@ -19,9 +19,7 @@ exports.register = async (req, res) => {
     if (!name) return res.status(400).json({ message: 'Name is required' });
     if (!phone) return res.status(400).json({ message: 'Phone is required' });
     if (!password || password.length < 6) return res.status(400).json({ message: 'Password must be at least 6 characters' });
-    const existing = await User.findOne({ phone });
-    if (existing) return res.status(400).json({ message: 'Phone already exists' });
-    const hashedPassword = await bcrypt.hash(password, 10);
+    
     // prevent arbitrary elevation; block admin self-register
     let userRole = 'customer';
     if (role === 'worker') {
@@ -29,15 +27,37 @@ exports.register = async (req, res) => {
     } else if (role === 'admin') {
       return res.status(403).json({ message: 'Not allowed' });
     }
+    
+    // Flexible validation: 1 phone can have 1 customer + 1 worker
+    const existingWithSameRole = await User.findOne({ phone, role: userRole });
+    if (existingWithSameRole) {
+      const roleText = userRole === 'customer' ? 'khách hàng' : 'thợ';
+      return res.status(400).json({ message: `Số điện thoại này đã được đăng ký tài khoản ${roleText}` });
+    }
+    
+    // CCCD validation: only for workers, must be unique across all workers
+    if (userRole === 'worker' && citizenId) {
+      const existingCitizenId = await User.findOne({ citizenId: citizenId.trim(), role: 'worker' });
+      if (existingCitizenId) {
+        return res.status(400).json({ message: 'CCCD này đã được đăng ký bởi thợ khác' });
+      }
+    }
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
     // default status: workers start as pending, others active
     const status = userRole === 'worker' ? 'pending' : 'active';
-    const user = new User({ name, phone, password: hashedPassword, role: userRole, address, status });
+    const user = new User({ name, phone, password: hashedPassword, role: userRole, address, status, citizenId });
     await user.save();
     res.status(201).json({ message: 'Register success' });
   } catch (err) {
-    // handle duplicate key
-    if (err && err.code === 11000 && err.keyPattern && err.keyPattern.phone) {
-      return res.status(400).json({ message: 'Phone already exists' });
+    // handle duplicate key errors
+    if (err && err.code === 11000) {
+      if (err.keyPattern && err.keyPattern.phone) {
+        return res.status(400).json({ message: 'Số điện thoại này đã được sử dụng cho role này' });
+      }
+      if (err.keyPattern && err.keyPattern.citizenId) {
+        return res.status(400).json({ message: 'CCCD này đã được đăng ký' });
+      }
     }
     res.status(400).json({ message: err.message || 'Registration failed' });
   }
@@ -79,9 +99,23 @@ exports.login = async (req, res) => {
 
 exports.getUsers = async (req, res) => {
   try {
-    const { q, role, status, page = 1, limit = 20 } = req.query;
+    const { q, role, status, page = 1, limit = 20, includeAdmins } = req.query;
     const filter = {};
-    if (role) filter.role = role;
+    
+    // Default: Không hiển thị admin trong danh sách user
+    // Chỉ super-admin mới có thể xem admin bằng cách set includeAdmins=true
+    if (includeAdmins !== 'true' || req.user.role !== 'admin') {
+      filter.role = { $ne: 'admin' }; // Loại trừ admin
+    }
+    
+    // Override role filter nếu có
+    if (role && role !== 'admin') {
+      filter.role = role;
+    } else if (role === 'admin' && (req.user.role !== 'admin' || includeAdmins !== 'true')) {
+      // Không cho phép filter admin nếu không có quyền
+      return res.status(403).json({ message: 'Access denied to admin users' });
+    }
+    
     if (status) filter.status = status;
     if (q) {
       filter.$or = [
@@ -96,6 +130,42 @@ exports.getUsers = async (req, res) => {
       User.find(filter).sort({ createdAt: -1 }).skip((pageNum - 1) * lim).limit(lim),
       User.countDocuments(filter),
     ]);
+    res.json({ items, total, page: pageNum, pages: Math.ceil(total / lim) });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get administrators (only accessible by super admin)
+exports.getAdministrators = async (req, res) => {
+  try {
+    // Only admin can access this endpoint
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied. Admin role required.' });
+    }
+
+    const { q, page = 1, limit = 20 } = req.query;
+    const filter = { role: 'admin' }; // Only get admin users
+    
+    if (q) {
+      filter.$or = [
+        { name: { $regex: q, $options: 'i' } },
+        { phone: { $regex: q, $options: 'i' } },
+      ];
+    }
+
+    const pageNum = Math.max(parseInt(page) || 1, 1);
+    const lim = Math.min(Math.max(parseInt(limit) || 20, 1), 100);
+    
+    const [items, total] = await Promise.all([
+      User.find(filter)
+        .select('-password -resetOTP') // Don't send sensitive data
+        .sort({ createdAt: -1 })
+        .skip((pageNum - 1) * lim)
+        .limit(lim),
+      User.countDocuments(filter),
+    ]);
+
     res.json({ items, total, page: pageNum, pages: Math.ceil(total / lim) });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -118,20 +188,6 @@ exports.updateUserStatus = async (req, res) => {
 };
 
 // Admin: update user role
-exports.updateUserRole = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { role } = req.body;
-    const allowed = ['customer', 'worker', 'admin'];
-    if (!allowed.includes(role)) return res.status(400).json({ message: 'Invalid role' });
-    const user = await User.findById(id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
-    user.role = role;
-    await user.save();
-    res.json({ message: 'Updated', user: await User.findById(id).select('-password -resetOTP') });
-  } catch (e) { res.status(400).json({ error: e.message }); }
-};
-
 exports.adminCreateWorker = async (req, res) => {
   try {
     const { name, phone, password, address, citizenId, status } = req.body;
@@ -139,8 +195,15 @@ exports.adminCreateWorker = async (req, res) => {
     if (!phone || !phone.trim()) return res.status(400).json({ message: 'Phone is required' });
     if (!password || password.length < 6) return res.status(400).json({ message: 'Password must be at least 6 characters' });
 
-    const existing = await User.findOne({ phone: phone.trim() });
-    if (existing) return res.status(400).json({ message: 'Phone already exists' });
+    // Check if phone already used for worker role
+    const existingWorker = await User.findOne({ phone: phone.trim(), role: 'worker' });
+    if (existingWorker) return res.status(400).json({ message: 'Số điện thoại này đã được đăng ký tài khoản thợ' });
+
+    // Check if CCCD already used for worker
+    if (citizenId && citizenId.trim()) {
+      const existingCitizenId = await User.findOne({ citizenId: citizenId.trim(), role: 'worker' });
+      if (existingCitizenId) return res.status(400).json({ message: 'CCCD này đã được đăng ký bởi thợ khác' });
+    }
 
     const worker = new User({
       name: name.trim(),
@@ -177,9 +240,19 @@ exports.adminUpdateWorker = async (req, res) => {
     if (citizenId !== undefined) worker.citizenId = citizenId;
 
     if (phone !== undefined && phone !== worker.phone) {
-      const exists = await User.findOne({ phone, _id: { $ne: worker._id } });
-      if (exists) return res.status(400).json({ message: 'Phone already in use' });
+      // Check if phone already used by another worker
+      const existsWorker = await User.findOne({ phone, role: 'worker', _id: { $ne: worker._id } });
+      if (existsWorker) return res.status(400).json({ message: 'Số điện thoại này đã được sử dụng bởi thợ khác' });
       worker.phone = phone;
+    }
+
+    if (citizenId !== undefined && citizenId !== worker.citizenId) {
+      // Check if CCCD already used by another worker
+      if (citizenId && citizenId.trim()) {
+        const existsCitizenId = await User.findOne({ citizenId: citizenId.trim(), role: 'worker', _id: { $ne: worker._id } });
+        if (existsCitizenId) return res.status(400).json({ message: 'CCCD này đã được sử dụng bởi thợ khác' });
+      }
+      worker.citizenId = citizenId;
     }
 
     if (status && ['pending', 'active', 'suspended'].includes(status)) {
@@ -712,3 +785,90 @@ exports.resetPassword = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// Find nearby workers
+exports.findNearbyWorkers = async (req, res) => {
+  try {
+    const { latitude, longitude, maxDistance = 10000, serviceType, limit = 20 } = req.query;
+    
+    if (!latitude || !longitude) {
+      return res.status(400).json({ message: 'Vị trí (latitude, longitude) là bắt buộc' });
+    }
+
+    const UserEnhanced = require('../models/UserEnhanced');
+    
+    // Build query
+    const query = {
+      role: 'worker',
+      status: 'active',
+      'performance.isOnline': true,
+      'location.coordinates': {
+        $near: {
+          $geometry: { 
+            type: 'Point', 
+            coordinates: [parseFloat(longitude), parseFloat(latitude)] 
+          },
+          $maxDistance: parseInt(maxDistance) // meters
+        }
+      }
+    };
+
+    // Filter by service type if provided
+    if (serviceType && serviceType !== 'all') {
+      query.specializations = serviceType;
+    }
+
+    const workers = await UserEnhanced.find(query)
+      .select('name phone location specializations performance.averageRating performance.totalJobs performance.responseTime')
+      .limit(parseInt(limit));
+
+    // Calculate distance for each worker
+    const workersWithDistance = workers.map(worker => {
+      let distance = null;
+      if (worker.location && worker.location.coordinates) {
+        distance = calculateDistance(
+          parseFloat(latitude), 
+          parseFloat(longitude),
+          worker.location.coordinates[1], // lat
+          worker.location.coordinates[0]  // lng
+        );
+      }
+      
+      return {
+        _id: worker._id,
+        name: worker.name,
+        phone: worker.phone,
+        location: worker.location,
+        specializations: worker.specializations,
+        rating: worker.performance?.averageRating || 0,
+        totalJobs: worker.performance?.totalJobs || 0,
+        responseTime: worker.performance?.responseTime || 0,
+        distance: distance ? Math.round(distance * 100) / 100 : null // round to 2 decimals
+      };
+    });
+
+    res.json({
+      workers: workersWithDistance,
+      total: workersWithDistance.length,
+      searchLocation: { latitude: parseFloat(latitude), longitude: parseFloat(longitude) },
+      maxDistance: parseInt(maxDistance)
+    });
+
+  } catch (error) {
+    console.error('Find nearby workers error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Helper function to calculate distance between two coordinates
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c; // Distance in km
+}

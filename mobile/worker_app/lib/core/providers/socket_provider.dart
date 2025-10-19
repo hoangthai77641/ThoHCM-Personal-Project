@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../services/socket_service.dart';
 
-
 typedef BookingListener = void Function(Map<String, dynamic> bookingJson);
 
 class SocketProvider with ChangeNotifier, WidgetsBindingObserver {
@@ -15,17 +14,19 @@ class SocketProvider with ChangeNotifier, WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
   }
 
-  void connect({
+  Future<void> connect({
+    String? userId,
     BookingListener? onCreated,
     BookingListener? onUpdated,
     BookingListener? onLoyalty,
-  }) {
-    _socketService.connect(
-      onCreated: onCreated,
-      onUpdated: onUpdated,
-      onLoyalty: onLoyalty,
-    );
-    _updateConnectionStatus();
+  }) async {
+    // If userId is provided, use new API
+    if (userId != null) {
+      await _socketService.connect(userId: userId);
+      _updateConnectionStatus();
+    } else {
+      print('⚠️ SocketProvider.connect(): userId is required');
+    }
   }
 
   void disconnect() {
@@ -52,7 +53,7 @@ class SocketProvider with ChangeNotifier, WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    
+
     switch (state) {
       case AppLifecycleState.resumed:
         // App came to foreground, check and reconnect if needed

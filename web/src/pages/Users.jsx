@@ -182,6 +182,14 @@ export default function Users(){
             <span className="stat-number">{data.total}</span>
             <span className="stat-label">Tổng người dùng</span>
           </div>
+          <div className="info-note">
+            <span className="info-icon">ℹ️</span>
+            <span>Vai trò được xác định khi đăng ký và không thể thay đổi</span>
+          </div>
+          <div className="info-note">
+            <span className="info-icon">ℹ️</span>
+            <span>Tài khoản quản trị viên được quản lý riêng</span>
+          </div>
         </div>
       </div>
 
@@ -199,12 +207,11 @@ export default function Users(){
               className="search-input"
             />
           </div>
-          <div className="filter-group">
+          <div className="filter-group" style={{display: 'flex', flexDirection: 'row', gap: '8px', flexWrap: 'nowrap'}}>
             <select value={role} onChange={e=>{ setRole(e.target.value); setPage(1) }} className="filter-select">
               <option value="">Tất cả vai trò</option>
               <option value="customer">Khách hàng</option>
               <option value="worker">Thợ</option>
-              <option value="admin">Admin</option>
             </select>
             <select value={status} onChange={e=>{ setStatus(e.target.value); setPage(1) }} className="filter-select">
               <option value="">Tất cả trạng thái</option>
@@ -250,21 +257,9 @@ export default function Users(){
                     <td className="col-phone">{u.phone}</td>
                     <td className="col-citizen">{u.citizenId || '—'}</td>
                     <td className="col-role">
-                      <select
-                        className="role-select"
-                        value={u.role}
-                        onChange={async (e)=>{
-                          const val = e.target.value
-                          try{
-                            await api.put(`/api/users/${u._id}/role`, { role: val })
-                            setData(prev=>({ ...prev, items: prev.items.map(x=> x._id===u._id ? { ...x, role: val } : x) }))
-                          }catch(err){ alert(err.response?.data?.message || err.message) }
-                        }}
-                      >
-                        <option value="customer">customer</option>
-                        <option value="worker">worker</option>
-                        <option value="admin">admin</option>
-                      </select>
+                      <span className={`role-badge role-${u.role}`}>
+                        {u.role === 'customer' ? 'Khách hàng' : 'Thợ'}
+                      </span>
                     </td>
                     <td className="col-status">
                       <select

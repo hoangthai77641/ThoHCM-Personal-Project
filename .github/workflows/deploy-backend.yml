@@ -1,0 +1,114 @@
+name: Deploy Backend to GCP App Engine
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'backend/**' ]
+  pull_request:
+    branches: [ main ]
+    paths: [ 'backend/**' ]
+
+env:
+  PROJECT_ID: thohcm-app
+  GAE_SERVICE: default
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    # Only deploy on push to main (not PR)
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+        
+    - name: Install dependencies
+      working-directory: ./backend
+      run: npm ci
+      
+    - name: Run tests (if any)
+      working-directory: ./backend
+      run: npm test --if-present
+      
+    - name: Setup Google Cloud Auth
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+        
+    - name: Setup Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ env.PROJECT_ID }}
+        
+    - name: Configure app.yaml with secrets
+      working-directory: ./backend
+      run: |
+        cat > app.yaml << EOF
+        runtime: nodejs20
+        instance_class: F2
+        
+        env_variables:
+          NODE_ENV: "production"
+          MONGODB_URI: "${{ secrets.MONGODB_URI }}"
+          JWT_SECRET: "${{ secrets.JWT_SECRET }}"
+          JWT_EXPIRES_IN: "7d"
+          ALLOWED_ORIGINS: "${{ secrets.ALLOWED_ORIGINS }}"
+          
+        automatic_scaling:
+          min_instances: 1
+          max_instances: 5
+          target_cpu_utilization: 0.65
+          
+        handlers:
+          - url: /storage
+            static_dir: storage
+            secure: always
+          - url: /.*
+            script: auto
+            secure: always
+        EOF
+        
+    - name: Deploy to App Engine
+      working-directory: ./backend
+      run: |
+        gcloud app deploy app.yaml --quiet --promote
+        
+    - name: Send notification
+      if: success()
+      run: |
+        echo "🚀 Backend deployed successfully to: https://${{ env.PROJECT_ID }}.uc.r.appspot.com"
+        
+  test:
+    runs-on: ubuntu-latest
+    
+    # Run tests on all PRs and pushes
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+        
+    - name: Install dependencies
+      working-directory: ./backend
+      run: npm ci
+      
+    - name: Run linting
+      working-directory: ./backend
+      run: npm run lint --if-present
+      
+    - name: Run tests
+      working-directory: ./backend
+      run: npm test --if-present
