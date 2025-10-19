@@ -257,13 +257,13 @@ export default function Profile() {
               />
             ) : profile.avatar ? (
               <img 
-                src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${profile.avatar}`}
+                src={`${import.meta.env.VITE_API_URL || 'https://thohcm-application-475603.as.r.appspot.com'}${profile.avatar}`}
                 alt="Avatar" 
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 onLoad={() => console.log('Avatar loaded successfully')}
                 onError={(e) => {
                   console.error('Avatar load error:', e)
-                  console.error('Avatar URL:', `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${profile.avatar}`)
+                  console.error('Avatar URL:', `${import.meta.env.VITE_API_URL || 'https://thohcm-application-475603.as.r.appspot.com'}${profile.avatar}`)
                   e.target.style.display = 'none'
                   e.target.nextSibling.style.display = 'flex'
                 }}

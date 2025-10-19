@@ -8,7 +8,7 @@ class SocketService {
 
   connect() {
     if (!this.socket) {
-      const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
+      const apiBase = import.meta.env.VITE_API_URL || 'https://thohcm-application-475603.as.r.appspot.com';
       this.socket = io(apiBase, {
         transports: ['websocket', 'polling'],
         autoConnect: true

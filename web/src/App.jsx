@@ -63,7 +63,7 @@ function AppContent() {
       console.log('User object:', user)
       console.log('Avatar path:', user.avatar)
       if (user.avatar) {
-        const avatarUrl = user.avatar.startsWith('http') ? user.avatar : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${user.avatar}`
+        const avatarUrl = user.avatar.startsWith('http') ? user.avatar : `${import.meta.env.VITE_API_URL || 'https://thohcm-application-475603.as.r.appspot.com'}${user.avatar}`
         console.log('Full avatar URL:', avatarUrl)
       }
     }
@@ -99,7 +99,7 @@ function AppContent() {
     // optional: call backend logout if you implement one
     try {
       const token = localStorage.getItem('token')
-      if (token) fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/logout`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } })
+      if (token) fetch(`${import.meta.env.VITE_API_URL || 'https://thohcm-application-475603.as.r.appspot.com'}/api/auth/logout`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } })
     } catch (e) {
       // ignore
     }
@@ -165,7 +165,7 @@ function AppContent() {
               }}>
                 {user.avatar ? (
                   <img 
-                    src={user.avatar.startsWith('http') ? user.avatar : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${user.avatar}`} 
+                    src={user.avatar.startsWith('http') ? user.avatar : `${import.meta.env.VITE_API_URL || 'https://thohcm-application-475603.as.r.appspot.com'}${user.avatar}`} 
                     alt={user.name}
                     className="user-avatar-small"
                     onError={(e) => { 
@@ -262,7 +262,7 @@ function AppContent() {
               <div className="mobile-user-info">
                 {user.avatar ? (
                   <img 
-                    src={user.avatar.startsWith('http') ? user.avatar : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${user.avatar}`} 
+                    src={user.avatar.startsWith('http') ? user.avatar : `${import.meta.env.VITE_API_URL || 'https://thohcm-application-475603.as.r.appspot.com'}${user.avatar}`} 
                     alt={user.name}
                     className="user-avatar-small"
                     onError={(e) => { 

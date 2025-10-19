@@ -34,7 +34,7 @@ export default function BannerSlider() {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return 'https://via.placeholder.com/800x300/E5E7EB/6B7280?text=Thợ+HCM'
     if (imagePath.startsWith('http')) return imagePath
-    return `http://localhost:5000${imagePath}`
+    return `${import.meta.env.VITE_API_URL || 'https://thohcm-application-475603.as.r.appspot.com'}${imagePath}`
   }
 
   if (loading) {

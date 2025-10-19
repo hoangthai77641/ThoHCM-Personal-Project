@@ -286,7 +286,7 @@ export default function BannerManagement() {
                   <div className="current-image">
                     <p>Hình ảnh hiện tại:</p>
                     <img 
-                      src={`http://localhost:5000${editingBanner.imageUrl}`} 
+                      src={`${import.meta.env.VITE_API_URL || 'https://thohcm-application-475603.as.r.appspot.com'}${editingBanner.imageUrl}`} 
                       alt="Current banner"
                       style={{maxWidth: '200px', height: 'auto'}}
                     />
@@ -343,7 +343,7 @@ export default function BannerManagement() {
                   <div className="table-cell image-cell">
                     {banner.imageUrl ? (
                       <img 
-                        src={`http://localhost:5000${banner.imageUrl}`}
+                        src={`${import.meta.env.VITE_API_URL || 'https://thohcm-application-475603.as.r.appspot.com'}${banner.imageUrl}`}
                         alt={banner.title}
                         className="banner-thumbnail"
                       />
@@ -439,7 +439,7 @@ export default function BannerManagement() {
               {selectedBanner.imageUrl && (
                 <div className="detail-image">
                   <img 
-                    src={`http://localhost:5000${selectedBanner.imageUrl}`}
+                    src={`${import.meta.env.VITE_API_URL || 'https://thohcm-application-475603.as.r.appspot.com'}${selectedBanner.imageUrl}`}
                     alt={selectedBanner.title}
                   />
                 </div>
