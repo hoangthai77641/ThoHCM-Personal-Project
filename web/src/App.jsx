@@ -8,7 +8,6 @@ import MyBookings from './pages/MyBookings'
 import Profile from './pages/Profile'
 import AdminDashboard from './pages/AdminDashboard'
 import Users from './pages/Users'
-import ModernUsersPage from './components/ModernUsersPage'
 import AdministratorManagement from './pages/AdministratorManagement'
 import ServiceDetail from './pages/ServiceDetail'
 import BannerManagement from './pages/BannerManagement'
@@ -113,193 +112,183 @@ function AppContent() {
   return (
     <div className="app">
       <nav className="nav">
-        <div className="nav-content">
-          <Link to="/" className="brand">
-            <img src={logo} alt="Logo" className="brand-logo" />
-            <span>Thợ HCM</span>
-          </Link>
+        <Link to="/" className="brand">
+          <img src={logo} alt="Logo" className="brand-logo" />
+          <span>Thợ HCM</span>
+        </Link>
+        
+        {/* Desktop Navigation */}
+        <div className="nav-desktop">
+          {!user && <Link to="/register">Đăng ký</Link>}
+          {!user && <Link to="/login">Đăng nhập</Link>}
           
-          {/* Desktop Navigation */}
-          <div className="nav-desktop">
-            {!user && <Link to="/register">Đăng ký</Link>}
-            {!user && <Link to="/login">Đăng nhập</Link>}
-            
-            {isAdmin && <>
-              <Link to="/admin">Dashboard</Link>
-              {user?.role === 'admin' && <Link to="/users">Người dùng</Link>}
-              {user?.role === 'admin' && <Link to="/administrators">Quản trị viên</Link>}
-              {user?.role === 'admin' && <Link to="/banners">Banners</Link>}
-            </>}
-            
-            <SearchBox />
-            
-            <div className="spacer" />
-            
-            {user && <NotificationSystem user={user} />}
-            
-            <button 
-              className="theme-toggle-btn" 
-              onClick={()=>{
-                const current = document.documentElement.getAttribute('data-theme');
-                const next = current === 'light' ? 'dark' : 'light';
-                document.documentElement.setAttribute('data-theme', next);
-              }}
-              title="Chuyển đổi giao diện"
-              aria-label="Toggle theme"
-            >
-              <svg className="theme-icon sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="5"></circle>
-                <line x1="12" y1="1" x2="12" y2="3"></line>
-                <line x1="12" y1="21" x2="12" y2="23"></line>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                <line x1="1" y1="12" x2="3" y2="12"></line>
-                <line x1="21" y1="12" x2="23" y2="12"></line>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-              </svg>
-              <svg className="theme-icon moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-              </svg>
-            </button>
-            
-            {user && (
-              <div className="user-menu-wrapper">
-                <button className="user-menu-btn" onClick={() => {
-                  const menu = document.querySelector('.user-dropdown-menu');
-                  menu.classList.toggle('show');
-                }}>
-                  {user.avatar ? (
-                    <img 
-                      src={user.avatar.startsWith('http') ? user.avatar : `${import.meta.env.VITE_API_URL || 'https://thohcm-application-475603.as.r.appspot.com'}${user.avatar}`} 
-                      alt={user.name}
-                      className="user-avatar-small"
-                      onError={(e) => { 
-                        console.error('Avatar failed to load:', e.target.src);
-                        e.target.style.display = 'none';
-                        const placeholder = e.target.nextElementSibling;
-                        if (placeholder && placeholder.classList.contains('user-avatar-placeholder')) {
-                          placeholder.style.display = 'flex';
-                        }
-                      }}
-                    />
-                  ) : null}
-                  <div className="user-avatar-placeholder" style={{ display: user.avatar ? 'none' : 'flex' }}>
-                    {user.name.charAt(0).toUpperCase()}
-                  </div>
-                  <span className="user-name-text">{user.name}</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="6,9 12,15 18,9"></polyline>
-                  </svg>
-                </button>
-                <div className="user-dropdown-menu">
-                  {user.role === 'customer' && (
-                    <>
-                      <Link to="/nearby-workers" onClick={() => {
-                        document.querySelector('.user-dropdown-menu').classList.remove('show');
-                      }}>🔍 Tìm thợ gần đây</Link>
-                      <Link to="/my-bookings" onClick={() => {
-                        document.querySelector('.user-dropdown-menu').classList.remove('show');
-                      }}>📋 Đơn của tôi</Link>
-                    </>
-                  )}
-                  <Link to="/profile" onClick={() => {
-                    document.querySelector('.user-dropdown-menu').classList.remove('show');
-                  }}>👤 Thông tin cá nhân</Link>
-                  <button className="dropdown-item" onClick={logout}>🚪 Đăng xuất</button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Hamburger Button */}
+          {isAdmin && <>
+            <Link to="/admin">Bảng điều khiển</Link>
+            {user?.role === 'admin' && <Link to="/users">Người dùng</Link>}
+            {user?.role === 'admin' && <Link to="/administrators">Quản trị viên</Link>}
+            {user?.role === 'admin' && <Link to="/banners">Banner & Thông báo</Link>}
+          </>}
+          <SearchBox />
+          <span className="spacer" />
+          {user && <NotificationSystem user={user} />}
           <button 
-            className="mobile-menu-btn" 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
+            className="btn theme-toggle-btn" 
+            onClick={()=>{
+              const current = document.documentElement.getAttribute('data-theme');
+              const next = current === 'light' ? 'dark' : 'light';
+              document.documentElement.setAttribute('data-theme', next);
+            }}
+            title="Chuyển đổi giao diện"
+            aria-label="Toggle theme"
           >
-            <span></span>
-            <span></span>
-            <span></span>
+            <svg className="theme-icon sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg className="theme-icon moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
           </button>
-
-          {/* Mobile Navigation */}
-          <div className={`nav-mobile ${mobileMenuOpen ? 'open' : ''}`}>
-            {!user && <Link to="/register" onClick={() => setMobileMenuOpen(false)}>Đăng ký</Link>}
-            {!user && <Link to="/login" onClick={() => setMobileMenuOpen(false)}>Đăng nhập</Link>}
-            
-            {isAdmin && <>
-              <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
-              {user?.role === 'admin' && <Link to="/users" onClick={() => setMobileMenuOpen(false)}>Người dùng</Link>}
-              {user?.role === 'admin' && <Link to="/administrators" onClick={() => setMobileMenuOpen(false)}>Quản trị viên</Link>}
-              {user?.role === 'admin' && <Link to="/banners" onClick={() => setMobileMenuOpen(false)}>Banners</Link>}
-            </>}
-            
-            <div className="nav-mobile-search">
-              <SearchBox />
-            </div>
-            
-            <button 
-              className="theme-toggle-btn" 
-              onClick={()=>{
-                const current = document.documentElement.getAttribute('data-theme');
-                const next = current === 'light' ? 'dark' : 'light';
-                document.documentElement.setAttribute('data-theme', next);
-                setMobileMenuOpen(false);
-              }}
-              title="Chuyển đổi giao diện"
-            >
-              <svg className="theme-icon sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="5"></circle>
-                <line x1="12" y1="1" x2="12" y2="3"></line>
-                <line x1="12" y1="21" x2="12" y2="23"></line>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                <line x1="1" y1="12" x2="3" y2="12"></line>
-                <line x1="21" y1="12" x2="23" y2="12"></line>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-              </svg>
-              <svg className="theme-icon moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-              </svg>
-              <span className="theme-text">Giao diện</span>
-            </button>
-            
-            {user && (
-              <div className="mobile-user-section">
-                <div className="mobile-user-info">
-                  {user.avatar ? (
-                    <img 
-                      src={user.avatar.startsWith('http') ? user.avatar : `${import.meta.env.VITE_API_URL || 'https://thohcm-application-475603.as.r.appspot.com'}${user.avatar}`} 
-                      alt={user.name}
-                      className="user-avatar-small"
-                      onError={(e) => { 
-                        console.error('Mobile avatar failed to load:', e.target.src);
-                        e.target.style.display = 'none';
-                        const placeholder = e.target.nextElementSibling;
-                        if (placeholder && placeholder.classList.contains('user-avatar-placeholder')) {
-                          placeholder.style.display = 'flex';
-                        }
-                      }}
-                    />
-                  ) : null}
-                  <div className="user-avatar-placeholder" style={{ display: user.avatar ? 'none' : 'flex' }}>
-                    {user.name.charAt(0).toUpperCase()}
-                  </div>
-                  <span>{user.name}</span>
+          {user && (
+            <div className="user-menu-wrapper">
+              <button className="btn user-menu-btn" onClick={() => {
+                const menu = document.querySelector('.user-dropdown-menu');
+                menu.classList.toggle('show');
+              }}>
+                {user.avatar ? (
+                  <img 
+                    src={user.avatar.startsWith('http') ? user.avatar : `${import.meta.env.VITE_API_URL || 'https://thohcm-application-475603.as.r.appspot.com'}${user.avatar}`} 
+                    alt={user.name}
+                    className="user-avatar-small"
+                    onError={(e) => { 
+                      console.error('Avatar failed to load:', e.target.src);
+                      e.target.style.display = 'none';
+                      // Show placeholder instead
+                      const placeholder = e.target.nextElementSibling;
+                      if (placeholder && placeholder.classList.contains('user-avatar-placeholder')) {
+                        placeholder.style.display = 'flex';
+                      }
+                    }}
+                  />
+                ) : null}
+                <div className="user-avatar-placeholder" style={{ display: user.avatar ? 'none' : 'flex' }}>
+                  {user.name.charAt(0).toUpperCase()}
                 </div>
+                <span className="user-name-text">{user.name}</span>
+              </button>
+              <div className="user-dropdown-menu">
                 {user.role === 'customer' && (
                   <>
-                    <Link to="/nearby-workers" onClick={() => setMobileMenuOpen(false)}>🔍 Tìm thợ gần đây</Link>
-                    <Link to="/my-bookings" onClick={() => setMobileMenuOpen(false)}>📋 Đơn của tôi</Link>
+                    <Link to="/nearby-workers" onClick={() => {
+                      document.querySelector('.user-dropdown-menu').classList.remove('show');
+                    }}>🔍 Tìm thợ gần đây</Link>
+                    <Link to="/my-bookings" onClick={() => {
+                      document.querySelector('.user-dropdown-menu').classList.remove('show');
+                    }}>Đơn của tôi</Link>
                   </>
                 )}
-                <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>👤 Thông tin cá nhân</Link>
-                <button className="btn" onClick={() => {logout(); setMobileMenuOpen(false);}}>🚪 Đăng xuất</button>
+                <Link to="/profile" onClick={() => {
+                  document.querySelector('.user-dropdown-menu').classList.remove('show');
+                }}>Thông tin cá nhân</Link>
+                <button className="dropdown-item" onClick={logout}>Đăng xuất</button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Search */}
+        <div className="nav-mobile-search">
+          <SearchBox />
+        </div>
+
+        {/* Mobile Hamburger Button */}
+        <button 
+          className="mobile-menu-btn" 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        {/* Mobile Navigation */}
+        <div className={`nav-mobile ${mobileMenuOpen ? 'open' : ''}`}>
+          {!user && <Link to="/register" onClick={() => setMobileMenuOpen(false)}>Đăng ký</Link>}
+          {!user && <Link to="/login" onClick={() => setMobileMenuOpen(false)}>Đăng nhập</Link>}
+          
+          {isAdmin && <>
+            <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>Bảng điều khiển</Link>
+            {user?.role === 'admin' && <Link to="/users" onClick={() => setMobileMenuOpen(false)}>Người dùng</Link>}
+            {user?.role === 'admin' && <Link to="/administrators" onClick={() => setMobileMenuOpen(false)}>Quản trị viên</Link>}
+            {user?.role === 'admin' && <Link to="/banners" onClick={() => setMobileMenuOpen(false)}>Banner & Thông báo</Link>}
+          </>}
+          <button 
+            className="btn theme-toggle-btn" 
+            onClick={()=>{
+              const current = document.documentElement.getAttribute('data-theme');
+              const next = current === 'light' ? 'dark' : 'light';
+              document.documentElement.setAttribute('data-theme', next);
+              setMobileMenuOpen(false);
+            }}
+            title="Chuyển đổi giao diện"
+          >
+            <svg className="theme-icon sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg className="theme-icon moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            <span className="theme-text">Giao diện</span>
+          </button>
+          {user && (
+            <div className="mobile-user-section">
+              <div className="mobile-user-info">
+                {user.avatar ? (
+                  <img 
+                    src={user.avatar.startsWith('http') ? user.avatar : `${import.meta.env.VITE_API_URL || 'https://thohcm-application-475603.as.r.appspot.com'}${user.avatar}`} 
+                    alt={user.name}
+                    className="user-avatar-small"
+                    onError={(e) => { 
+                      console.error('Mobile avatar failed to load:', e.target.src);
+                      e.target.style.display = 'none';
+                      const placeholder = e.target.nextElementSibling;
+                      if (placeholder && placeholder.classList.contains('user-avatar-placeholder')) {
+                        placeholder.style.display = 'flex';
+                      }
+                    }}
+                  />
+                ) : null}
+                <div className="user-avatar-placeholder" style={{ display: user.avatar ? 'none' : 'flex' }}>
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <span>{user.name}</span>
+              </div>
+              {user.role === 'customer' && (
+                <>
+                  <Link to="/nearby-workers" onClick={() => setMobileMenuOpen(false)}>🔍 Tìm thợ gần đây</Link>
+                  <Link to="/my-bookings" onClick={() => setMobileMenuOpen(false)}>Đơn của tôi</Link>
+                </>
+              )}
+              <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>Thông tin cá nhân</Link>
+              <button className="btn" onClick={() => {logout(); setMobileMenuOpen(false);}}>Đăng xuất</button>
+            </div>
+          )}
         </div>
       </nav>
       <main className="main">
@@ -316,7 +305,7 @@ function AppContent() {
           <Route path="/nearby-workers" element={<NearbyWorkers/>} />
           <Route path="/profile" element={<Profile/>} />
           <Route path="/admin" element={<AdminDashboard/>} />
-          <Route path="/users" element={<ModernUsersPage/>} />
+          <Route path="/users" element={<Users/>} />
           <Route path="/administrators" element={<AdministratorManagement/>} />
           <Route path="/banners" element={<BannerManagement/>} />
 

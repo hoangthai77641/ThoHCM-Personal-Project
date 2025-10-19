@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import './styles.css'
-import './styles/responsive.css'
 import 'react-datepicker/dist/react-datepicker.css'
 
 createRoot(document.getElementById('root')).render(
