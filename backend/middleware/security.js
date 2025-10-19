@@ -41,10 +41,13 @@ const setupSecurity = (app, options = {}) => {
   } = options;
 
   const environment = process.env.NODE_ENV || 'development';
+  // Allow explicit bypass via env var for testing (e.g., on emulator)
+  const rateLimitBypassEnv = (process.env.RATE_LIMIT_BYPASS || '').toLowerCase() === 'true';
+
   const shouldEnableRateLimit =
     typeof enableRateLimit === 'boolean'
       ? enableRateLimit
-      : environment !== 'development';
+      : (!rateLimitBypassEnv && environment !== 'development');
 
   // Normalize origins for CSP (strip trailing slashes)
   const normalizedOrigins = allowedOrigins.map((origin) => origin.replace(/\/$/, ''));
@@ -128,9 +131,17 @@ const setupSecurity = (app, options = {}) => {
 
   // Apply general rate limiting to all API routes
   if (shouldEnableRateLimit) {
-    app.use('/api', apiLimiter);
+    // Wrap apiLimiter to allow bypass via header on a per-request basis
+    app.use('/api', (req, res, next) => {
+      // Allow bypass by header (useful for emulator/testing): X-Bypass-Rate-Limit: true
+      try {
+        const bypassHeader = (req.headers['x-bypass-rate-limit'] || '').toString().toLowerCase();
+        if (bypassHeader === 'true') return next();
+      } catch (e) { /* ignore */ }
+      return apiLimiter(req, res, next);
+    });
   } else {
-    console.log('[security] API rate limiting disabled for environment:', environment);
+    console.log('[security] API rate limiting disabled (RATE_LIMIT_BYPASS or development):', environment);
   }
 };
 

@@ -35,11 +35,10 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: `Số điện thoại này đã được đăng ký tài khoản ${roleText}` });
     }
     
-    // CCCD validation: only required for workers, must be unique across all workers
-    if (userRole === 'worker') {
-      if (!citizenId || !citizenId.trim()) {
-        return res.status(400).json({ message: 'CCCD là bắt buộc đối với thợ' });
-      }
+    // CCCD validation: NOT required for worker registration - admin will add later
+    // Skip CCCD validation during registration
+    if (userRole === 'worker' && citizenId && citizenId.trim()) {
+      // Optional: if user provides CCCD during registration, check for duplicates
       const existingCitizenId = await User.findOne({ citizenId: citizenId.trim(), role: 'worker' });
       if (existingCitizenId) {
         return res.status(400).json({ message: 'CCCD này đã được đăng ký bởi thợ khác' });

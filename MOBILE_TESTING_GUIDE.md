@@ -193,6 +193,31 @@ adb logcat | grep -i flutter
 # Use app with Charles Proxy or similar
 ```
 
+### Rate limiter during emulator testing
+
+If you see "Too many requests from this IP" on the emulator (same IP for many requests), you can bypass the server rate limiter for testing in two ways:
+
+1) Use the environment variable on the backend dev/staging instance before starting the server:
+
+```bash
+export RATE_LIMIT_BYPASS=true
+# or on Windows PowerShell
+$env:RATE_LIMIT_BYPASS = 'true'
+```
+
+2) Add a header from the mobile app HTTP client for emulator-only runs. The server will allow requests carrying this header:
+
+Header: `X-Bypass-Rate-Limit: true`
+
+Example (in Dart / Dio):
+
+```dart
+// set this only for emulator/local testing
+dio.options.headers['X-Bypass-Rate-Limit'] = 'true';
+```
+
+Note: Do NOT enable `RATE_LIMIT_BYPASS` in production. Use it only for local emulator testing or behind a protected staging environment.
+
 ## 📊 Performance Testing
 
 ### Key Metrics:
