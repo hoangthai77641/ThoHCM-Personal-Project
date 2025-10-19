@@ -37,6 +37,8 @@ steps:
       - '2'
       - '--max-instances'
       - '10'
+      - '--service-account'
+      - 'thohcm-storage@thohcm-application-475603.iam.gserviceaccount.com'
       - '--set-env-vars'
       - 'NODE_ENV=production'
       - '--set-env-vars'

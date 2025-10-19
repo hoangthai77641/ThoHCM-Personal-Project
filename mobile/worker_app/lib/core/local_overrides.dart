@@ -1,3 +1,3 @@
-// Update this single constant with your LAN API base when debugging on a real device.
-// Example: const String? kLanApiBase = 'http://192.168.6.102:5000';
-const String? kLanApiBase = 'http://10.0.2.2:5000';
+// Updated to use production backend API
+// For testing with real backend deployed on App Engine/Cloud Run
+const String? kLanApiBase = 'https://thohcm-application-475603.as.r.appspot.com';
