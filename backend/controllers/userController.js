@@ -11,7 +11,7 @@ const path = require('path');
 // Đăng ký
 exports.register = async (req, res) => {
   try {
-    let { name, phone, password, role, address } = req.body;
+    let { name, phone, password, role, address, citizenId } = req.body;
     // basic validation
     name = (name || '').toString().trim();
     phone = (phone || '').toString().trim();
@@ -35,8 +35,11 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: `Số điện thoại này đã được đăng ký tài khoản ${roleText}` });
     }
     
-    // CCCD validation: only for workers, must be unique across all workers
-    if (userRole === 'worker' && citizenId) {
+    // CCCD validation: only required for workers, must be unique across all workers
+    if (userRole === 'worker') {
+      if (!citizenId || !citizenId.trim()) {
+        return res.status(400).json({ message: 'CCCD là bắt buộc đối với thợ' });
+      }
       const existingCitizenId = await User.findOne({ citizenId: citizenId.trim(), role: 'worker' });
       if (existingCitizenId) {
         return res.status(400).json({ message: 'CCCD này đã được đăng ký bởi thợ khác' });
@@ -46,7 +49,22 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     // default status: workers start as pending, others active
     const status = userRole === 'worker' ? 'pending' : 'active';
-    const user = new User({ name, phone, password: hashedPassword, role: userRole, address, status, citizenId });
+    
+    // Only set citizenId for workers
+    const userData = { 
+      name, 
+      phone, 
+      password: hashedPassword, 
+      role: userRole, 
+      address, 
+      status 
+    };
+    
+    if (userRole === 'worker' && citizenId) {
+      userData.citizenId = citizenId.trim();
+    }
+    
+    const user = new User(userData);
     await user.save();
     res.status(201).json({ message: 'Register success' });
   } catch (err) {
