@@ -205,11 +205,74 @@ app.get('/debug/avatars', async (req, res) => {
 // MongoDB connection
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || '0.0.0.0';
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/thohcm';
 
+// Ensure a database name is present; default to 'thohcm' if omitted in SRV URI
+function ensureDbName(uri, defaultDb = 'thohcm') {
+  if (!uri) return `mongodb://localhost:27017/${defaultDb}`;
+  // If it already contains a path segment between host/ and ? then keep as is
+  // Handle both mongodb+srv and mongodb schemes
+  const hasNet = uri.includes('.mongodb.net/');
+  const hasLocal = uri.startsWith('mongodb://');
+  if (!hasNet && !hasLocal) return uri; // unknown format
+
+  const [left, right = ''] = uri.split('?');
+  // left like: mongodb+srv://user:pass@cluster.mongodb.net/ or .../thohcm
+  const pathPart = left.split('.mongodb.net/')[1] || left.split('mongodb://')[1];
+  // If left already ends with /<dbname>
+  const hasDb = hasNet
+    ? left.match(/\.mongodb\.net\/.+$/) && !left.endsWith('/')
+    : left.replace(/^mongodb:\/\//, '').split('/').length > 1 && !left.endsWith('/');
+
+  if (hasDb) return uri; // db name present
+
+  // Insert default db after trailing slash
+  const withDb = left.endsWith('/') ? `${left}${defaultDb}` : `${left}/${defaultDb}`;
+  return right ? `${withDb}?${right}` : withDb;
+}
+
+const MONGODB_URI = ensureDbName(process.env.MONGODB_URI, 'thohcm');
+// Derive DB name from env or URI (fallback to 'thohcm').
+let DB_NAME = process.env.MONGODB_DB;
+if (!DB_NAME) {
+  try {
+    const m = MONGODB_URI.match(/mongodb(?:\+srv)?:\/\/[^/]+\/(.*?)(?:\?|$)/);
+    DB_NAME = (m && m[1]) ? m[1] : undefined;
+  } catch (_) {}
+}
+DB_NAME = DB_NAME || 'thohcm';
+
+mongoose.connect(MONGODB_URI, { dbName: DB_NAME })
 mongoose.connect(MONGODB_URI)
   .then(() => {
-    console.log('MongoDB connected');
+    const conn = mongoose.connection;
+    console.log('MongoDB connected', { db: conn.name, host: conn.host });
+    // Health endpoint to verify DB connection at runtime
+    app.get('/api/health/db', async (req, res) => {
+      try {
+        const status = {
+          db: conn.name,
+          host: conn.host,
+          readyState: conn.readyState,
+          collections: Object.keys(conn.collections || {})
+        };
+        res.json(status);
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+    });
+    // Run lightweight bootstrap/migrations on start unless disabled
+    const runBootstrap = (process.env.RUN_MIGRATIONS_ON_START || 'true').toLowerCase() !== 'false';
+    if (runBootstrap) {
+      try {
+        const bootstrap = require('./scripts/bootstrap');
+        bootstrap().catch(err => console.warn('[bootstrap] warning:', err.message));
+      } catch (e) {
+        console.warn('[bootstrap] not executed:', e.message);
+      }
+    } else {
+      console.log('[bootstrap] disabled by RUN_MIGRATIONS_ON_START=false');
+    }
+
     server.listen(PORT, HOST, () => {
       console.log(`Server listening at http://${HOST === '0.0.0.0' ? '0.0.0.0' : HOST}:${PORT}`);
     });
