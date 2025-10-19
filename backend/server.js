@@ -16,12 +16,16 @@ const additionalOrigins = (process.env.ALLOWED_ORIGINS || '')
   .filter(Boolean);
 
 const allowedOrigins = Array.from(new Set([
+  // Local development
   'http://localhost:3000', // Web frontend
   'http://localhost:3001', // Web dev server  
   'http://localhost:5173', // Vite dev server
   'http://127.0.0.1:3000',
   'http://127.0.0.1:3001',
   'http://127.0.0.1:5173',
+  // Production frontends (Firebase Hosting)
+  'https://thohcm-application.web.app',
+  'https://thohcm-frontend.web.app',
   ...additionalOrigins,
 ]));
 
@@ -50,6 +54,20 @@ app.use(cors({
   },
   credentials: true
 }));
+
+// Ensure CORS headers are present for all responses (including errors)
+app.use((req, res, next) => {
+  const requestOrigin = req.headers.origin;
+  if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
+    res.header('Access-Control-Allow-Origin', requestOrigin);
+    res.header('Vary', 'Origin');
+  }
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
 
 // Body parsing with size limits
 app.use(express.json({ limit: '10mb' }));

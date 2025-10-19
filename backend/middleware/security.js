@@ -48,6 +48,9 @@ const setupSecurity = (app, options = {}) => {
 
   // Normalize origins for CSP (strip trailing slashes)
   const normalizedOrigins = allowedOrigins.map((origin) => origin.replace(/\/$/, ''));
+  const wsOrigins = normalizedOrigins.map((origin) =>
+    origin.startsWith('http') ? origin.replace(/^http/, 'ws') : origin
+  );
 
   // Helmet for security headers
   app.use(helmet({
@@ -64,7 +67,7 @@ const setupSecurity = (app, options = {}) => {
           "ws:",
           "wss:",
           ...normalizedOrigins,
-          ...normalizedOrigins.map((origin) => origin.replace(/^http/, 'ws'))
+          ...wsOrigins
         ]
       }
     }
