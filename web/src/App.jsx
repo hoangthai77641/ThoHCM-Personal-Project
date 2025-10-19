@@ -18,6 +18,7 @@ import NearbyWorkers from "./pages/NearbyWorkers";
 
 import SearchBox from './components/SearchBox'
 import NotificationSystem from './components/NotificationSystem'
+import DebugInfo from './components/DebugInfo'
 import logo from './assets/logo.png'
 import api from './api'
 
@@ -316,6 +317,7 @@ function AppContent() {
           <p>&copy; 2025 Thợ HCM. All rights reserved.</p>
         </div>
       </footer>
+      <DebugInfo />
     </div>
   )
 }
