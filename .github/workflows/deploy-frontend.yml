@@ -1,14 +1,14 @@
 name: Deploy Frontend to Firebase Hosting
 
 on:
-  push:
-    branches: [ main ]
-    paths: [ 'web/**' ]
-  pull_request:
-    branches: [ main ]
-    paths: [ 'web/**' ]
-  # Temporarily disable auto trigger
+  # Temporarily disabled - using Firebase auto-generated workflow instead
   workflow_dispatch:
+  # push:
+  #   branches: [ main ]
+  #   paths: [ 'web/**' ]
+  # pull_request:
+  #   branches: [ main ]
+  #   paths: [ 'web/**' ]
 
 env:
   PROJECT_ID: thohcm-application
