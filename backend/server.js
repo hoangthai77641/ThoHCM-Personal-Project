@@ -115,7 +115,7 @@ app.use('/storage', staticLimiter, (req, res, next) => {
   res.setHeader('X-Frame-Options', 'DENY');
 
   next();
-}, express.static(path.join(__dirname, 'storage'), {
+}, express.static(process.env.NODE_ENV === 'production' ? '/tmp' : path.join(__dirname, 'storage'), {
   dotfiles: 'deny', // Deny access to dotfiles
   index: false, // Disable directory indexing 
   setHeaders: (res, filePath) => {

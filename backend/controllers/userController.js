@@ -551,15 +551,21 @@ exports.uploadAvatar = async (req, res) => {
     }
 
     // Delete old avatar file if exists
-    if (user.avatar) {
-  const oldAvatarPath = path.join(__dirname, '../storage/avatars', path.basename(user.avatar));
-      if (fs.existsSync(oldAvatarPath)) {
-        fs.unlinkSync(oldAvatarPath);
+    if (user.avatar && !user.avatar.startsWith('http')) {
+      const oldAvatarPath = path.join(__dirname, '..', user.avatar);
+      try {
+        if (fs.existsSync(oldAvatarPath)) {
+          fs.unlinkSync(oldAvatarPath);
+          console.log(`Deleted old avatar: ${oldAvatarPath}`);
+        }
+      } catch (error) {
+        console.error('Error deleting old avatar:', error);
       }
     }
 
-    // Save new avatar path
-  user.avatar = `/storage/avatars/${req.file.filename}`;
+    // Generate avatar URL - use relative path for serving
+    const avatarPath = `/storage/avatars/${req.file.filename}`;
+    user.avatar = avatarPath;
     await user.save();
 
     const updatedUser = await User.findById(user._id).select('-password -resetOTP');

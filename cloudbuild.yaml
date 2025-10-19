@@ -41,6 +41,8 @@ steps:
       - 'NODE_ENV=production'
       - '--set-env-vars'
       - 'PORT=8080'
+      - '--set-env-vars'
+      - 'GCS_BUCKET_NAME=thohcm-storage'
     id: 'deploy-backend'
 
 # Store images in Container Registry
