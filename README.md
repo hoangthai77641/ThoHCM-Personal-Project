@@ -27,6 +27,32 @@ Thợ HCM is a comprehensive digital platform that connects customers with skill
 - **🗺️ Location Services**: GPS-based worker matching
 - **⭐ Review System**: Customer feedback and ratings
 
+## 📁 Project Structure
+
+```
+thohcm/
+├── 📚 docs/                    # Documentation
+│   ├── DEPLOYMENT.md           # Deployment guide
+│   ├── DEPLOYMENT_STATUS.md    # Current deployment status
+│   ├── CLOUDRUN_MIGRATION.md   # Migration guide
+│   └── MOBILE_TESTING_GUIDE.md # Mobile testing instructions
+├── 🔧 scripts/                 # Automation scripts
+│   ├── deploy-cloudrun.ps1     # Windows deployment
+│   ├── deploy-cloudrun.sh      # Linux/macOS deployment
+│   ├── run-worker-app.bat      # Windows mobile runner
+│   ├── run-worker-app.ps1      # PowerShell mobile runner
+│   └── set-env-vars.sh         # Environment setup
+├── ⚙️ config/                  # Configuration files
+│   ├── cloudbuild.yaml         # Cloud Build config
+│   ├── connection-string-mongodb.txt # Database config
+│   ├── FirebaseConfigObject.txt # Firebase config
+│   └── thohcm-application-*.json # GCP service account
+├── 🖥️ backend/                 # Node.js API server
+├── 🌐 web/                     # React web application
+├── 📱 mobile/                  # Flutter mobile app
+└── 📄 README.md                # This file
+```
+
 ## 🏗️ Architecture
 
 ```

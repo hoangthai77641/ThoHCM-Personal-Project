@@ -7,6 +7,19 @@ import ReviewSection from '../components/ReviewSection'
 import StarDisplay from '../components/StarDisplay'
 import BannerSlider from '../components/BannerSlider'
 import SocketService from '../services/SocketService'
+import { 
+  Box, 
+  Grid, 
+  Card, 
+  CardContent, 
+  CardActions, 
+  Typography, 
+  Button, 
+  Skeleton, 
+  Chip,
+  Container 
+} from '@mui/material'
+import { Search as SearchIcon } from '@mui/icons-material'
 
 export default function Home(){
   const [services, setServices] = useState([])
@@ -46,139 +59,177 @@ export default function Home(){
   }
 
   if (loading) return (
-    <div>
-      {/* <h1 style={{marginBottom:12}}>Dịch vụ nổi bật</h1> */}
-      <div className="services">
+    <Box>
+      <Grid container spacing={3}>
         {Array.from({length:6}).map((_,i)=> (
-          <div key={i} className="card">
-            <div className="skeleton" style={{height:20, width:'60%', borderRadius:8, marginBottom:10}} />
-            <div className="skeleton" style={{height:14, width:'90%', borderRadius:8, marginBottom:6}} />
-            <div className="skeleton" style={{height:14, width:'70%', borderRadius:8, marginBottom:16}} />
-            <div className="skeleton" style={{height:36, width:'40%', borderRadius:10}} />
-          </div>
+          <Grid item xs={12} sm={6} md={4} key={i}>
+            <Card>
+              <Skeleton variant="rectangular" height={200} />
+              <CardContent>
+                <Skeleton variant="text" height={32} width="60%" />
+                <Skeleton variant="text" height={20} width="90%" />
+                <Skeleton variant="text" height={20} width="70%" />
+              </CardContent>
+              <CardActions>
+                <Skeleton variant="rectangular" height={36} width={100} />
+                <Skeleton variant="rectangular" height={36} width={100} />
+              </CardActions>
+            </Card>
+          </Grid>
         ))}
-      </div>
-    </div>
+      </Grid>
+    </Box>
   )
   return (
-    <div>
+    <Box>
       {/* Banner Slider - only show when not searching */}
-      {!searchQuery && <BannerSlider />}
+      {!searchQuery && <Box sx={{ mb: 4 }}><BannerSlider /></Box>}
       
-      {searchQuery ? (
-        <h1 style={{marginBottom: 20}}>
+      {searchQuery && (
+        <Typography variant="h4" component="h1" sx={{ mb: 3, fontWeight: 600 }}>
           Kết quả tìm kiếm cho "{searchQuery}" ({services.length} dịch vụ)
-        </h1>
-      ) : (
-        <h1 style={{marginBottom: 20, display: 'none'}}>Dịch vụ nổi bật</h1>
+        </Typography>
       )}
       
       {searchQuery && services.length === 0 ? (
-        <div style={{
-          textAlign: 'center', 
-          padding: '60px 20px',
-          background: 'var(--card-bg)',
-          borderRadius: '12px',
-          border: '1px solid var(--border)',
-          margin: '20px 0'
-        }}>
-          <div style={{fontSize: '48px', marginBottom: '16px', opacity: 0.5}}>🔍</div>
-          <h3 style={{marginBottom: '12px', color: 'var(--text)'}}>
+        <Card sx={{ textAlign: 'center', py: 8, px: 3 }}>
+          <SearchIcon sx={{ fontSize: 64, color: 'action.disabled', mb: 2 }} />
+          <Typography variant="h5" component="h3" gutterBottom>
             Không tìm thấy dịch vụ nào
-          </h3>
-          <p style={{color: 'var(--text-secondary)', marginBottom: '24px'}}>
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
             Không có dịch vụ nào phù hợp với từ khóa "{searchQuery}"
-          </p>
-          <div style={{marginBottom: '20px'}}>
-            <p style={{color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '8px'}}>
+          </Typography>
+          
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
               Gợi ý tìm kiếm:
-            </p>
-            <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center'}}>
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
               {['sửa máy lạnh', 'sửa máy giặt', 'sửa tủ lạnh', 'điện gia dụng', 'sửa xe máy'].map(suggestion => (
-                <button 
+                <Chip
                   key={suggestion}
-                  onClick={() => {
-                    setSearchParams({ search: suggestion });
-                  }}
-                  style={{
-                    padding: '6px 12px',
-                    border: '1px solid var(--border)',
-                    borderRadius: '20px',
-                    background: 'var(--bg)',
-                    color: 'var(--text-secondary)',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseOver={(e) => {
-                    e.target.style.background = 'var(--primary)';
-                    e.target.style.color = 'white';
-                  }}
-                  onMouseOut={(e) => {
-                    e.target.style.background = 'var(--bg)';
-                    e.target.style.color = 'var(--text-secondary)';
-                  }}
-                >
-                  {suggestion}
-                </button>
+                  label={suggestion}
+                  onClick={() => setSearchParams({ search: suggestion })}
+                  variant="outlined"
+                  clickable
+                />
               ))}
-            </div>
-          </div>
-          <button 
-            onClick={() => {
-              setSearchParams({});
-            }}
-            className="btn primary"
-            style={{margin: '0 auto'}}
+            </Box>
+          </Box>
+          
+          <Button 
+            variant="contained"
+            onClick={() => setSearchParams({})}
           >
             Xem tất cả dịch vụ
-          </button>
-        </div>
+          </Button>
+        </Card>
       ) : (
-        <div className="services">
+        <Grid container spacing={3}>
           {services.map(s=> (
-            <div key={s._id} className="card service-card">
-              <ServiceMediaGallery 
-                images={s.images || []} 
-                videos={s.videos || []} 
-              />
-              <h3>
-                <Link to={`/service/${s._id}`} style={{textDecoration: 'none', color: 'inherit'}}>
-                  {s.name}
-                </Link>
-              </h3>
-              {s.worker && (
-                <div className="service-worker">
-                  Thợ: {s.worker.name}
-                  {s.worker.isOnline === false && (
-                    <span className="worker-offline"> (Tạm nghỉ)</span>
+            <Grid item xs={12} sm={6} md={4} key={s._id}>
+              <Card 
+                sx={{ 
+                  height: '100%', 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  transition: 'transform 0.2s, box-shadow 0.2s',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: 6
+                  }
+                }}
+              >
+                <ServiceMediaGallery 
+                  images={s.images || []} 
+                  videos={s.videos || []} 
+                />
+                
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Typography 
+                    variant="h6" 
+                    component={Link}
+                    to={`/service/${s._id}`}
+                    sx={{ 
+                      textDecoration: 'none', 
+                      color: 'inherit',
+                      display: 'block',
+                      mb: 1,
+                      '&:hover': { color: 'primary.main' }
+                    }}
+                  >
+                    {s.name}
+                  </Typography>
+                  
+                  {s.worker && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      Thợ: {s.worker.name}
+                      {s.worker.isOnline === false && (
+                        <Typography component="span" color="error" sx={{ ml: 0.5 }}>
+                          (Tạm nghỉ)
+                        </Typography>
+                      )}
+                    </Typography>
                   )}
-                </div>
-              )}
-              <StarDisplay 
-                rating={s.averageRating} 
-                reviewCount={s.reviewCount}
-                showCount={true}
-              />
-              {/* <p style={{minHeight:40, color:'#475569'}}>{s.description}</p> */}
-              <p className="price">
-                { (s.effectivePrice ?? s.basePrice)?.toLocaleString('vi-VN') } VNĐ
-                { s.vipPrice && <span className="vip">(VIP: {s.vipPrice.toLocaleString('vi-VN')} VNĐ)</span> }
-              </p>
-              <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
-                <Link className="btn outline" to={`/service/${s._id}`}>Xem chi tiết</Link>
-                {!isAdmin && (
-                  s.worker?.isOnline === false ? (
-                    <button className="btn disabled" disabled>Thợ tạm nghỉ</button>
-                  ) : (
-                    <Link className="btn primary" to="/booking" state={{ service: s }}>Đặt lịch</Link>
-                  )
-                )}
-              </div>
-            </div>
+                  
+                  <Box sx={{ mb: 1 }}>
+                    <StarDisplay 
+                      rating={s.averageRating} 
+                      reviewCount={s.reviewCount}
+                      showCount={true}
+                    />
+                  </Box>
+                  
+                  <Typography variant="h6" color="primary" sx={{ fontWeight: 600 }}>
+                    {(s.effectivePrice ?? s.basePrice)?.toLocaleString('vi-VN')} VNĐ
+                    {s.vipPrice && (
+                      <Typography component="span" variant="body2" color="secondary" sx={{ ml: 1 }}>
+                        (VIP: {s.vipPrice.toLocaleString('vi-VN')} VNĐ)
+                      </Typography>
+                    )}
+                  </Typography>
+                </CardContent>
+                
+                <CardActions sx={{ px: 2, pb: 2 }}>
+                  <Button 
+                    component={Link} 
+                    to={`/service/${s._id}`}
+                    variant="outlined"
+                    size="small"
+                    fullWidth
+                  >
+                    Xem chi tiết
+                  </Button>
+                  {!isAdmin && (
+                    s.worker?.isOnline === false ? (
+                      <Button 
+                        variant="contained"
+                        disabled
+                        size="small"
+                        fullWidth
+                      >
+                        Thợ tạm nghỉ
+                      </Button>
+                    ) : (
+                      <Button 
+                        component={Link} 
+                        to="/booking" 
+                        state={{ service: s }}
+                        variant="contained"
+                        size="small"
+                        fullWidth
+                      >
+                        Đặt lịch
+                      </Button>
+                    )
+                  )}
+                </CardActions>
+              </Card>
+            </Grid>
           ))}
-        </div>
+        </Grid>
       )}
-    </div>
+    </Box>
   )
 }

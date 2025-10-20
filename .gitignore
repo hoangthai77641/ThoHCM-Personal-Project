@@ -50,6 +50,11 @@ Thumbs.db
 *.json
 !package*.json
 !tsconfig*.json
+
+# Sensitive configuration files  
+config/thohcm-application-*.json
+config/connection-string-mongodb.txt
+config/FirebaseConfigObject.txt
 thohcm-application-*.json
 service-account-*.json
 

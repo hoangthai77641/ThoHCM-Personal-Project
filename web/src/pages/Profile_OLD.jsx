@@ -301,10 +301,9 @@ export default function Profile() {
                 sx={{
                   position: 'absolute',
                   top: 0,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: 120,
-                  height: 120,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
                   bgcolor: 'rgba(0,0,0,0.5)',
                   borderRadius: '50%',
                   display: 'flex',
@@ -313,55 +312,63 @@ export default function Profile() {
                 }}
               >
                 <CircularProgress size={40} sx={{ color: 'white' }} />
-              </Box>
-            )}
-          </Box>
-          
-          <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center', flexWrap: 'wrap', mt: 2 }}>
-            <Button
-              variant="contained"
-              component="label"
-              startIcon={<PhotoCamera />}
+            </div>
+          )}
+        </div>
+        
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <label style={{
+            backgroundColor: 'var(--primary)',
+            color: 'white',
+            padding: '8px 16px',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            border: 'none'
+          }}>
+            {profile.avatar ? 'Đổi ảnh' : 'Thêm ảnh'}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              style={{ display: 'none' }}
               disabled={uploadingAvatar}
-            >
-              {profile.avatar ? 'Đổi ảnh' : 'Thêm ảnh'}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarChange}
-                style={{ display: 'none' }}
-              />
-            </Button>
-            
-            {profile.avatar && (
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={deleteAvatar}
-                disabled={uploadingAvatar}
-                startIcon={<DeleteIcon />}
-              >
-                Xóa ảnh
-              </Button>
-            )}
-          </Box>
+            />
+          </label>
           
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-            Định dạng: JPEG, PNG, WebP. Tối đa 2MB
-          </Typography>
-        </CardContent>
-      </Card>
+          {profile.avatar && (
+            <button
+              onClick={deleteAvatar}
+              disabled={uploadingAvatar}
+              style={{
+                backgroundColor: '#dc3545',
+                color: 'white',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                border: 'none'
+              }}
+            >
+              Xóa ảnh
+            </button>
+          )}
+        </div>
+        
+        <p style={{ marginTop: '10px', fontSize: '12px', color: 'var(--muted)' }}>
+          Định dạng: JPEG, PNG, WebP. Tối đa 2MB
+        </p>
+      </div>
       
-      <Grid container spacing={3}>
+      <div className="profile-layout">
         {/* Left Column - Statistics */}
-        <Grid item xs={12} md={4}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div className="profile-stats">
           {profile.stats && (
             <>
               {/* Loyalty Level Display */}
-              <Card>
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <Typography variant="h6" gutterBottom>Hạng khách hàng</Typography>
+              <div className="card" style={{ marginBottom: '20px', textAlign: 'center' }}>
+                <h3>Hạng khách hàng</h3>
+                <div style={{ padding: '20px' }}>
                   {(() => {
                     const badges = {
                       'normal': { color: '#6c757d', text: 'Khách hàng thường', icon: '👤' },
@@ -370,229 +377,211 @@ export default function Profile() {
                     const badge = badges[profile.stats?.loyaltyLevel || 'normal'] || badges.normal
                     
                     return (
-                      <Box>
-                        <Box sx={{ fontSize: '48px', mb: 1 }}>
+                      <div>
+                        <div style={{ fontSize: '48px', marginBottom: '10px' }}>
                           {badge.icon}
-                        </Box>
-                        <Chip 
-                          label={badge.text}
-                          sx={{ 
-                            bgcolor: badge.color, 
-                            color: 'white',
-                            fontWeight: 600,
-                            px: 2,
-                            py: 0.5
-                          }}
-                        />
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                        </div>
+                        <span style={{
+                          backgroundColor: badge.color,
+                          color: 'white',
+                          padding: '8px 20px',
+                          borderRadius: '20px',
+                          fontSize: '16px',
+                          fontWeight: 'bold'
+                        }}>
+                          {badge.text}
+                        </span>
+                        <p style={{ 
+                          marginTop: '16px', 
+                          fontSize: '14px', 
+                          color: 'var(--muted)' 
+                        }}>
                           Sử dụng {profile.stats?.totalBookings || 0} dịch vụ
-                        </Typography>
+                        </p>
                         {(profile.stats?.loyaltyLevel || 'normal') === 'normal' && (
-                          <Typography variant="caption" color="warning.main" sx={{ mt: 1, display: 'block', fontStyle: 'italic' }}>
+                          <p style={{ 
+                            marginTop: '8px', 
+                            fontSize: '12px', 
+                            color: '#ffd700',
+                            fontStyle: 'italic'
+                          }}>
                             💡 Sử dụng từ 3 dịch vụ để trở thành VIP và nhận ưu đãi 10%
-                          </Typography>
+                          </p>
                         )}
-                      </Box>
+                      </div>
                     )
                   })()}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Stats Summary Cards */}
-              <Grid container spacing={1}>
-                <Grid item xs={6}>
-                  <Card>
-                    <CardContent sx={{ textAlign: 'center', py: 2 }}>
-                      <ReceiptIcon sx={{ fontSize: 32, color: 'primary.main', mb: 1 }} />
-                      <Typography variant="h5" fontWeight={600}>
-                        {profile.stats?.totalBookings || 0}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Tổng đơn
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-                <Grid item xs={6}>
-                  <Card>
-                    <CardContent sx={{ textAlign: 'center', py: 2 }}>
-                      <CheckCircleIcon sx={{ fontSize: 32, color: 'success.main', mb: 1 }} />
-                      <Typography variant="h5" fontWeight={600} color="success.main">
-                        {profile.stats?.completedBookings || 0}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        Hoàn thành
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              </Grid>
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: '1fr 1fr', 
+                gap: '12px', 
+                marginBottom: '20px' 
+              }}>
+                <div className="card" style={{ textAlign: 'center', padding: '16px' }}>
+                  <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--primary)' }}>
+                    {profile.stats?.totalBookings || 0}
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--muted)' }}>Tổng đơn</div>
+                </div>
+                
+                <div className="card" style={{ textAlign: 'center', padding: '16px' }}>
+                  <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#10b981' }}>
+                    {profile.stats?.completedBookings || 0}
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--muted)' }}>Hoàn thành</div>
+                </div>
+              </div>
 
               {/* Total Spent */}
-              <Card>
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <TrendingUpIcon sx={{ fontSize: 32, color: 'primary.main', mb: 1 }} />
-                  <Typography variant="h5" fontWeight={600} color="primary">
-                    {(profile.stats?.totalSpent || 0).toLocaleString('vi-VN')} ₫
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Tổng chi tiêu
-                  </Typography>
-                </CardContent>
-              </Card>
+              <div className="card" style={{ textAlign: 'center', padding: '20px', marginBottom: '20px' }}>
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--primary)' }}>
+                  {(profile.stats?.totalSpent || 0).toLocaleString('vi-VN')} ₫
+                </div>
+                <div style={{ fontSize: '14px', color: 'var(--muted)' }}>Tổng chi tiêu</div>
+              </div>
 
               {/* Top Services */}
               {profile.stats?.serviceStats && Object.keys(profile.stats.serviceStats).length > 0 && (
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>Dịch vụ thường dùng</Typography>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                      {Object.entries(profile.stats?.serviceStats || {})
-                        .sort(([,a], [,b]) => b.count - a.count)
-                        .slice(0, 3)
-                        .map(([serviceName, stats], index, arr) => (
-                          <Box 
-                            key={serviceName} 
-                            sx={{ 
-                              display: 'flex', 
-                              justifyContent: 'space-between', 
-                              alignItems: 'center',
-                              py: 1,
-                              borderBottom: index < arr.length - 1 ? 1 : 0,
-                              borderColor: 'divider'
-                            }}
-                          >
-                            <Box>
-                              <Typography variant="body2" fontWeight={500}>{serviceName}</Typography>
-                              <Typography variant="caption" color="text.secondary">
-                                {(stats?.totalSpent || 0).toLocaleString('vi-VN')} ₫
-                              </Typography>
-                            </Box>
-                            <Chip 
-                              label={stats.count} 
-                              size="small" 
-                              color="primary"
-                            />
-                          </Box>
-                        ))}
-                    </Box>
-                  </CardContent>
-                </Card>
+                <div className="card" style={{ marginBottom: '20px' }}>
+                  <h4>Dịch vụ thường dùng</h4>
+                  <div style={{ marginTop: '12px' }}>
+                    {Object.entries(profile.stats?.serviceStats || {})
+                      .sort(([,a], [,b]) => b.count - a.count)
+                      .slice(0, 3)
+                      .map(([serviceName, stats]) => (
+                        <div key={serviceName} style={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'center',
+                          padding: '8px 0',
+                          borderBottom: '1px solid var(--border)'
+                        }}>
+                          <div>
+                            <div style={{ fontWeight: '500', fontSize: '14px' }}>{serviceName}</div>
+                            <div style={{ fontSize: '12px', color: 'var(--muted)' }}>
+                              {(stats?.totalSpent || 0).toLocaleString('vi-VN')} ₫
+                            </div>
+                          </div>
+                          <div style={{ 
+                            padding: '2px 8px', 
+                            backgroundColor: 'var(--primary)', 
+                            color: 'white', 
+                            borderRadius: '8px',
+                            fontSize: '12px',
+                            fontWeight: '500'
+                          }}>
+                            {stats.count}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
               )}
             </>
           )}
-          </Box>
-        </Grid>
+        </div>
         
         {/* Right Column - Profile Form */}
-        <Grid item xs={12} md={8}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <div className="profile-form">
           {/* Profile Information Form */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <EditIcon /> Thông tin cơ bản
-              </Typography>
-              <Box component="form" onSubmit={handleProfileSubmit} sx={{ mt: 2 }}>
-                <TextField
-                  fullWidth
-                  label="Họ tên"
-                  value={profile.name}
-                  onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
-                  margin="normal"
-                  required
-                />
-                <TextField
-                  fullWidth
-                  label="Số điện thoại"
-                  value={profile.phone}
-                  onChange={(e) => setProfile(prev => ({ ...prev, phone: e.target.value }))}
-                  margin="normal"
-                  required
-                />
-                <TextField
-                  fullWidth
-                  label="Địa chỉ"
-                  value={profile.address}
-                  onChange={(e) => setProfile(prev => ({ ...prev, address: e.target.value }))}
-                  margin="normal"
-                  placeholder="Nhập địa chỉ của bạn"
-                />
-                <Button
-                  type="submit"
-                  variant="contained"
-                  fullWidth
-                  disabled={updating}
-                  sx={{ mt: 2 }}
-                >
-                  {updating ? 'Đang cập nhật...' : 'Cập nhật thông tin'}
-                </Button>
-              </Box>
-            </CardContent>
-          </Card>
+          <div className="profile-form-card">
+            <form onSubmit={handleProfileSubmit} className="form">
+            <h3>Thông tin cơ bản</h3>
+            
+            <label>Họ tên *</label>
+            <input
+              type="text"
+              value={profile.name}
+              onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
+              required
+            />
+            
+            <label>Số điện thoại *</label>
+            <input
+              type="tel"
+              value={profile.phone}
+              onChange={(e) => setProfile(prev => ({ ...prev, phone: e.target.value }))}
+              required
+            />
+            
+            <label>Địa chỉ</label>
+            <input
+              type="text"
+              value={profile.address}
+              onChange={(e) => setProfile(prev => ({ ...prev, address: e.target.value }))}
+              placeholder="Nhập địa chỉ của bạn"
+            />
+            
+            <button type="submit" disabled={updating}>
+              {updating ? 'Đang cập nhật...' : 'Cập nhật thông tin'}
+            </button>
+          </form>
+          </div>
 
           {/* Password Change Section */}
-          <Card>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <LockIcon /> Đổi mật khẩu
-                </Typography>
-                <Button
-                  variant="outlined"
-                  onClick={() => setShowPasswordChange(!showPasswordChange)}
-                  size="small"
-                >
-                  {showPasswordChange ? 'Hủy' : 'Đổi mật khẩu'}
-                </Button>
-              </Box>
-              
-              {showPasswordChange && (
-                <Box component="form" onSubmit={handlePasswordSubmit}>
-                  <TextField
-                    fullWidth
-                    type="password"
-                    label="Mật khẩu hiện tại"
-                    value={passwords.currentPassword}
-                    onChange={(e) => setPasswords(prev => ({ ...prev, currentPassword: e.target.value }))}
-                    margin="normal"
-                    required
-                  />
-                  <TextField
-                    fullWidth
-                    type="password"
-                    label="Mật khẩu mới"
-                    value={passwords.newPassword}
-                    onChange={(e) => setPasswords(prev => ({ ...prev, newPassword: e.target.value }))}
-                    margin="normal"
-                    required
-                    inputProps={{ minLength: 6 }}
-                  />
-                  <TextField
-                    fullWidth
-                    type="password"
-                    label="Xác nhận mật khẩu mới"
-                    value={passwords.confirmPassword}
-                    onChange={(e) => setPasswords(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                    margin="normal"
-                    required
-                  />
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    fullWidth
-                    disabled={updating}
-                    sx={{ mt: 2 }}
-                  >
-                    {updating ? 'Đang đổi...' : 'Đổi mật khẩu'}
-                  </Button>
-                </Box>
-              )}
-            </CardContent>
-          </Card>
-          </Box>
-        </Grid>
-      </Grid>
-    </Container>
+          <div style={{ marginTop: '24px' }}>
+            <button 
+              className="btn" 
+              onClick={() => setShowPasswordChange(!showPasswordChange)}
+              style={{ marginBottom: '16px' }}
+            >
+              {showPasswordChange ? 'Hủy đổi mật khẩu' : 'Đổi mật khẩu'}
+            </button>
+            
+            {showPasswordChange && (
+              <div className="profile-form-card">
+                <form onSubmit={handlePasswordSubmit} className="form">
+                <h3>Đổi mật khẩu</h3>
+                
+                <label>Mật khẩu hiện tại *</label>
+                <input
+                  type="password"
+                  value={passwords.currentPassword}
+                  onChange={(e) => setPasswords(prev => ({ ...prev, currentPassword: e.target.value }))}
+                  required
+                />
+                
+                <label>Mật khẩu mới *</label>
+                <input
+                  type="password"
+                  value={passwords.newPassword}
+                  onChange={(e) => setPasswords(prev => ({ ...prev, newPassword: e.target.value }))}
+                  required
+                  minLength={6}
+                />
+                
+                <label>Xác nhận mật khẩu mới *</label>
+                <input
+                  type="password"
+                  value={passwords.confirmPassword}
+                  onChange={(e) => setPasswords(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  required
+                />
+                
+                <button type="submit" disabled={updating}>
+                  {updating ? 'Đang đổi...' : 'Đổi mật khẩu'}
+                </button>
+              </form>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {msg && <p style={{ 
+        padding: '12px 16px', 
+        borderRadius: '8px', 
+        backgroundColor: msg.includes('thành công') ? '#d1fae5' : '#fee2e2',
+        color: msg.includes('thành công') ? '#065f46' : '#dc2626',
+        marginTop: '20px',
+        border: `1px solid ${msg.includes('thành công') ? '#10b981' : '#ef4444'}`,
+        fontSize: '14px',
+        fontWeight: '500'
+      }}>{msg}</p>}
+    </div>
   )
 }

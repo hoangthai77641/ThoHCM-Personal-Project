@@ -1,5 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { 
+  TextField, 
+  InputAdornment, 
+  IconButton, 
+  Paper, 
+  List, 
+  ListItem, 
+  ListItemAvatar,
+  ListItemText,
+  Avatar,
+  CircularProgress,
+  Typography,
+  Box,
+  Chip
+} from '@mui/material'
+import SearchIcon from '@mui/icons-material/Search'
 import api from '../api'
 import { UI_MESSAGES, SUCCESS_TEMPLATES, ERROR_TEMPLATES, formatMessage } from '../config/messages'
 
@@ -74,95 +90,161 @@ export default function SearchBox({ onResultSelect }) {
   }
 
   return (
-    <div className="search-box" ref={searchRef}>
-      <form onSubmit={handleSubmit} className="search-form">
-        <div className="search-input-container">
-          <input
-            type="text"
-            placeholder="Tìm kiếm dịch vụ..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="search-input"
-            onFocus={() => query && setIsOpen(true)}
-          />
-          <button type="submit" className="search-button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M21 21L16.514 16.506L21 21ZM19 10.5C19 15.194 15.194 19 10.5 19C5.806 19 2 15.194 2 10.5C2 5.806 5.806 2 10.5 2C15.194 2 19 5.806 19 10.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-        </div>
+    <Box ref={searchRef} sx={{ position: 'relative', width: '100%', maxWidth: 400 }}>
+      <form onSubmit={handleSubmit}>
+        <TextField
+          size="small"
+          fullWidth
+          placeholder="Tìm kiếm dịch vụ..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => query && setIsOpen(true)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon color="action" />
+              </InputAdornment>
+            ),
+            endAdornment: loading && (
+              <InputAdornment position="end">
+                <CircularProgress size={20} />
+              </InputAdornment>
+            ),
+          }}
+          sx={{
+            bgcolor: 'background.paper',
+            borderRadius: 1,
+            '& .MuiOutlinedInput-root': {
+              '& fieldset': {
+                borderColor: 'divider',
+              },
+              '&:hover fieldset': {
+                borderColor: 'primary.main',
+              },
+            },
+          }}
+        />
       </form>
 
       {isOpen && (
-        <div className="search-dropdown">
+        <Paper
+          elevation={8}
+          sx={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            mt: 1,
+            maxHeight: 400,
+            overflowY: 'auto',
+            zIndex: 1300,
+          }}
+        >
           {loading ? (
-            <div className="search-loading">
-              <div className="search-spinner"></div>
-              Đang tìm kiếm...
-            </div>
+            <Box sx={{ p: 3, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+              <CircularProgress size={24} />
+              <Typography color="text.secondary">Đang tìm kiếm...</Typography>
+            </Box>
           ) : results.length > 0 ? (
-            <div className="search-results">
-              {results.map((service) => (
-                <div
-                  key={service._id}
-                  className="search-result-item"
-                  onClick={() => handleSelectResult(service)}
-                >
-                  <div className="search-result-content">
+            <>
+              <List sx={{ p: 0 }}>
+                {results.map((service) => (
+                  <ListItem
+                    key={service._id}
+                    button
+                    onClick={() => handleSelectResult(service)}
+                    sx={{
+                      '&:hover': {
+                        bgcolor: 'action.hover',
+                      },
+                    }}
+                  >
                     {service.images && service.images[0] && (
-                      <img 
-                        src={service.images[0]} 
-                        alt={service.name}
-                        className="search-result-image"
-                      />
+                      <ListItemAvatar>
+                        <Avatar 
+                          src={service.images[0]} 
+                          alt={service.name}
+                          variant="rounded"
+                        />
+                      </ListItemAvatar>
                     )}
-                    <div className="search-result-info">
-                      <div className="search-result-name">{service.name}</div>
-                      {service.worker && (
-                        <div className="search-result-worker">Thợ: {service.worker.name}</div>
-                      )}
-                      <div className="search-result-price">
-                        {(service.effectivePrice ?? service.basePrice)?.toLocaleString('vi-VN')} VNĐ
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                    <ListItemText
+                      primary={
+                        <Typography variant="body1" fontWeight={500}>
+                          {service.name}
+                        </Typography>
+                      }
+                      secondary={
+                        <>
+                          {service.worker && (
+                            <Typography variant="body2" color="text.secondary" component="div">
+                              Thợ: {service.worker.name}
+                            </Typography>
+                          )}
+                          <Typography variant="body2" color="primary" fontWeight={600} component="div" sx={{ mt: 0.5 }}>
+                            {(service.effectivePrice ?? service.basePrice)?.toLocaleString('vi-VN')} VNĐ
+                          </Typography>
+                        </>
+                      }
+                    />
+                  </ListItem>
+                ))}
+              </List>
               {query && (
-                <div className="search-view-all" onClick={() => navigate(`/?search=${encodeURIComponent(query)}`)}>
-                  Xem tất cả kết quả cho "{query}"
-                </div>
+                <ListItem
+                  button
+                  onClick={() => navigate(`/?search=${encodeURIComponent(query)}`)}
+                  sx={{
+                    borderTop: 1,
+                    borderColor: 'divider',
+                    bgcolor: 'action.hover',
+                    justifyContent: 'center',
+                    '&:hover': {
+                      bgcolor: 'action.selected',
+                    },
+                  }}
+                >
+                  <Typography variant="body2" color="primary" fontWeight={500}>
+                    Xem tất cả kết quả cho "{query}"
+                  </Typography>
+                </ListItem>
               )}
-            </div>
+            </>
           ) : query && !loading ? (
-            <div className="search-no-results">
-              <div style={{ padding: '12px 16px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+            <Box>
+              <Typography variant="body2" color="text.secondary" sx={{ p: 2, textAlign: 'center' }}>
                 Không tìm thấy dịch vụ nào cho "{query}"
-              </div>
-              <div style={{ padding: '0 16px 16px', borderTop: '1px solid var(--border)' }}>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', padding: '8px 0 0' }}>
+              </Typography>
+              <Box sx={{ p: 2, pt: 1, borderTop: 1, borderColor: 'divider' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
                   Gợi ý tìm kiếm:
-                </div>
-                <div className="search-suggestions">
+                </Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                   {['sửa máy lạnh', 'sửa máy giặt', 'sửa tủ lạnh', 'điện gia dụng', 'sửa xe máy'].map(suggestion => (
-                    <div
+                    <Chip
                       key={suggestion}
-                      className="search-suggestion-item"
+                      label={suggestion}
+                      size="small"
                       onClick={() => {
                         setQuery(suggestion)
                         setIsOpen(false)
                         navigate(`/?search=${encodeURIComponent(suggestion)}`)
                       }}
-                    >
-                      {suggestion}
-                    </div>
+                      sx={{
+                        cursor: 'pointer',
+                        '&:hover': {
+                          bgcolor: 'primary.main',
+                          color: 'primary.contrastText',
+                        },
+                      }}
+                    />
                   ))}
-                </div>
-              </div>
-            </div>
+                </Box>
+              </Box>
+            </Box>
           ) : null}
-        </div>
+        </Paper>
       )}
-    </div>
+    </Box>
   )
 }

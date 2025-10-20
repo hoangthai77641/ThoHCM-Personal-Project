@@ -5,7 +5,7 @@ on:
     branches: [ main ]
     paths: 
       - 'backend/**'
-      - 'cloudbuild.yaml'
+      - 'config/cloudbuild.yaml'
   workflow_dispatch:
 
 env:
@@ -32,7 +32,7 @@ jobs:
 
     - name: Build and Deploy to Cloud Run
       run: |
-        gcloud builds submit --config=cloudbuild.yaml
+        gcloud builds submit --config=config/cloudbuild.yaml
         
     - name: Get Service URL
       id: get-url
