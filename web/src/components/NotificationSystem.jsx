@@ -159,7 +159,7 @@ const NotificationSystem = ({ user }) => {
       case 'success': return '#22c55e';
       case 'warning': return '#f59e0b';
       case 'error': return '#ef4444';
-      case 'promotion': return '#a855f7';
+      case 'promotion': return '#60a5fa';
       case 'system': return '#64748b';
       case 'booking': return '#3b82f6';
       case 'payment': return '#10b981';

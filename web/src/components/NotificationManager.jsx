@@ -133,7 +133,7 @@ const NotificationManager = () => {
     { value: 'success', label: 'Thành công', color: '#2ecc71' },
     { value: 'warning', label: 'Cảnh báo', color: '#f39c12' },
     { value: 'error', label: 'Lỗi', color: '#e74c3c' },
-    { value: 'promotion', label: 'Khuyến mãi', color: '#9b59b6' },
+    { value: 'promotion', label: 'Khuyến mãi', color: '#60a5fa' },
     { value: 'system', label: 'Hệ thống', color: '#34495e' }
   ];
 

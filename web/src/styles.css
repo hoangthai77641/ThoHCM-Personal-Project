@@ -1109,11 +1109,11 @@ img {
 }
 
 .stat-card.customers .stat-icon {
-  color: #8b5cf6;
+  color: #60a5fa;
 }
 
 .stat-card.customers .stat-value {
-  color: #8b5cf6;
+  color: #60a5fa;
 }
 
 .stat-card.workers {
@@ -2077,7 +2077,7 @@ img {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--primary), #06b6d4, #8b5cf6);
+  background: linear-gradient(90deg, var(--primary), #06b6d4, #60a5fa);
 }
 
 .page-header h1 {
@@ -2349,7 +2349,7 @@ img {
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--primary), #06b6d4, #8b5cf6);
+  background: linear-gradient(90deg, var(--primary), #06b6d4, #60a5fa);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -5703,11 +5703,11 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); box-sha
 }
 
 .wallet-stat-card.total-wallets .wallet-stat-icon {
-  color: #8b5cf6;
+  color: #60a5fa;
 }
 
 .wallet-stat-card.total-wallets .wallet-stat-value {
-  color: #8b5cf6;
+  color: #60a5fa;
 }
 
 .wallet-stat-icon {
@@ -5831,7 +5831,7 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); box-sha
 
 :root[data-theme='dark'] .stat-card.customers .stat-icon,
 :root[data-theme='dark'] .stat-card.customers .stat-value {
-  color: #a78bfa !important; /* brighter purple */
+  color: #93c5fd !important; /* brighter blue */
 }
 
 :root[data-theme='dark'] .stat-card.workers .stat-icon,
@@ -5867,7 +5867,7 @@ input:focus, select:focus, textarea:focus { border-color:var(--primary); box-sha
 
 :root[data-theme='dark'] .wallet-stat-card.total-wallets .wallet-stat-icon,
 :root[data-theme='dark'] .wallet-stat-card.total-wallets .wallet-stat-value {
-  color: #a78bfa !important; /* brighter purple */
+  color: #93c5fd !important; /* brighter blue */
 }
 
 /* Dark mode transaction stat colors */
