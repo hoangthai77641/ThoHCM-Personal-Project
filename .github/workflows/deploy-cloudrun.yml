@@ -21,33 +21,18 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Google Cloud Auth
-      uses: google-github-actions/auth@v2
-      with:
-        credentials_json: ${{ secrets.GCP_SA_KEY }}
-
     - name: Setup Google Cloud CLI
       uses: google-github-actions/setup-gcloud@v2
       with:
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
         project_id: ${{ env.PROJECT_ID }}
 
-    - name: Verify Authentication and Set Project
-      run: |
-        gcloud auth list
-        gcloud config set project ${{ env.PROJECT_ID }}
-        gcloud config list project
-
     - name: Configure Docker to use gcloud
-      run: gcloud auth configure-docker asia-southeast1-docker.pkg.dev
+      run: gcloud auth configure-docker
 
     - name: Build and Deploy to Cloud Run
       run: |
-        # Verify config file exists
-        ls -la config/
-        cat config/cloudbuild.yaml
-        
-        # Submit build
-        gcloud builds submit --config=config/cloudbuild.yaml
+        gcloud builds submit --config=cloudbuild.yaml
         
     - name: Get Service URL
       id: get-url
