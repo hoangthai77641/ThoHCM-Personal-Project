@@ -40,9 +40,7 @@ steps:
       - '--service-account'
       - 'thohcm-storage@thohcm-application-475603.iam.gserviceaccount.com'
       - '--set-env-vars'
-      - 'NODE_ENV=production'
-      - '--set-env-vars'
-      - 'GCS_BUCKET_NAME=thohcm-storage'
+      - 'NODE_ENV=production,GCS_BUCKET_NAME=thohcm-storage'
     id: 'deploy-backend'
 
 # Store images in Container Registry
