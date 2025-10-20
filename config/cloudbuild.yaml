@@ -41,6 +41,8 @@ steps:
       - '0'
       - '--timeout'
       - '900'
+      - '--service-account'
+      - '181755246333-compute@developer.gserviceaccount.com'
       - '--set-env-vars'
       - 'NODE_ENV=production,GCS_BUCKET_NAME=thohcm-storage,MONGODB_URI=${_MONGODB_URI},JWT_SECRET=${_JWT_SECRET},PORT=8080,HOST=0.0.0.0'
     id: 'deploy-backend'
