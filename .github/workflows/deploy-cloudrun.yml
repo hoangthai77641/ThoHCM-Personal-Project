@@ -44,7 +44,7 @@ jobs:
       run: |
         echo "Starting Cloud Build..."
         gcloud builds submit --config=config/cloudbuild.yaml --timeout=20m \
-          --substitutions _MONGODB_URI="${{ secrets.MONGODB_URI }}",_JWT_SECRET="${{ secrets.JWT_SECRET }}",_ALLOWED_ORIGINS="${{ vars.ALLOWED_ORIGINS }}"
+          --substitutions _MONGODB_URI="${{ secrets.MONGODB_URI }}",_JWT_SECRET="${{ secrets.JWT_SECRET }}"
         
     - name: Get Service URL
       id: get-url

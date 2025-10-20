@@ -48,7 +48,7 @@ steps:
       - '--set-env-vars'
       - 'JWT_SECRET=${_JWT_SECRET}'
       - '--set-env-vars'
-      - 'ALLOWED_ORIGINS=${_ALLOWED_ORIGINS}'
+      - 'ALLOWED_ORIGINS=https://thohcm.web.app,http://localhost:3000'
     id: 'deploy-backend'
 
 # Store images in Container Registry
