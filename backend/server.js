@@ -26,6 +26,7 @@ const allowedOrigins = Array.from(new Set([
   // Production frontends (Firebase Hosting)
   'https://thohcm-application.web.app',
   'https://thohcm-frontend.web.app',
+  'https://thohcm.web.app',
   ...additionalOrigins,
 ]));
 

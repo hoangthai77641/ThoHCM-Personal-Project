@@ -53,11 +53,6 @@ jobs:
         echo "url=$URL" >> $GITHUB_OUTPUT
         echo "Backend deployed to: $URL"
 
-    - name: Update ALLOWED_ORIGINS
-      run: |
-        gcloud run services update $SERVICE_NAME --region=$REGION \
-          --update-env-vars ALLOWED_ORIGINS="https://thohcm.web.app,http://localhost:3000"
-
     - name: Verify Deployment
       run: |
         echo "Testing health endpoint..."
