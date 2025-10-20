@@ -25,11 +25,25 @@ jobs:
       uses: google-github-actions/auth@v2
       with:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
+        project_id: ${{ env.PROJECT_ID }}
 
     - name: Setup Google Cloud CLI
       uses: google-github-actions/setup-gcloud@v2
       with:
         project_id: ${{ env.PROJECT_ID }}
+
+    - name: Verify Authentication
+      run: |
+        echo "Current authenticated account:"
+        gcloud auth list
+        echo "Current project:"
+        gcloud config get-value project
+
+    - name: Enable required APIs
+      run: |
+        gcloud services enable cloudbuild.googleapis.com
+        gcloud services enable run.googleapis.com
+        gcloud services enable containerregistry.googleapis.com
 
     - name: Configure Docker to use gcloud
       run: gcloud auth configure-docker
