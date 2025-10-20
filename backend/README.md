@@ -2,3 +2,4 @@
 
 - Node.js (Express), MongoDB, Socket.IO
 - Quản lý lịch, dịch vụ, tài khoản, realtime
+- Auto deploy to Google Cloud Run

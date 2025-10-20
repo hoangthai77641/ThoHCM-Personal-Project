@@ -6,6 +6,7 @@ on:
     paths: 
       - 'backend/**'
       - 'config/cloudbuild.yaml'
+      - '.github/workflows/deploy-cloudrun.yml'
   workflow_dispatch:
 
 env:
@@ -25,12 +26,9 @@ jobs:
       uses: google-github-actions/auth@v2
       with:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
-        project_id: ${{ env.PROJECT_ID }}
 
     - name: Setup Google Cloud CLI
       uses: google-github-actions/setup-gcloud@v2
-      with:
-        project_id: ${{ env.PROJECT_ID }}
 
     - name: Verify Authentication
       run: |
