@@ -29,11 +29,19 @@ class SocketService {
     _currentUserId = userId;
 
     try {
+      final socketUrl = Env.socketBase;
+      log('Connecting to socket URL: $socketUrl');
+      
+      // Create socket with explicit configuration to avoid port issues
       _socket = IO.io(
-        Env.socketBase,
+        socketUrl,
         IO.OptionBuilder()
             .setTransports(['websocket'])
             .enableAutoConnect()
+            .enableReconnection()
+            .setReconnectionDelay(2000)
+            .setReconnectionAttempts(5)
+            .setExtraHeaders({'User-Agent': 'ThoHCM-Worker-App'}) // Add identifier
             .build(),
       );
 

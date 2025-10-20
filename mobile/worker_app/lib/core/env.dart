@@ -41,6 +41,9 @@ class Env {
     if (socketBaseEnv.isNotEmpty) {
       return socketBaseEnv;
     }
+    if (kLanSocketBase != null && kLanSocketBase!.isNotEmpty) {
+      return kLanSocketBase!;
+    }
     if (kLanApiBase != null && kLanApiBase!.isNotEmpty) {
       return kLanApiBase!;
     }
