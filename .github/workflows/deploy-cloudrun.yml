@@ -53,8 +53,19 @@ jobs:
         echo "url=$URL" >> $GITHUB_OUTPUT
         echo "Backend deployed to: $URL"
 
+    - name: Check Service Status
+      run: |
+        echo "Checking service status..."
+        gcloud run services describe $SERVICE_NAME --region=$REGION --format="table(status.conditions[].type,status.conditions[].status,status.conditions[].reason)"
+        
+    - name: Get Recent Logs
+      run: |
+        echo "Getting recent logs..."
+        gcloud logs read "resource.type=cloud_run_revision AND resource.labels.service_name=$SERVICE_NAME" --limit=50 --format="table(timestamp,severity,textPayload)" --region=$REGION || true
+
     - name: Verify Deployment
       run: |
         echo "Testing health endpoint..."
+        sleep 30  # Wait for service to be ready
         curl -f ${{ steps.get-url.outputs.url }}/api/health || exit 1
         echo "✅ Backend is healthy!"

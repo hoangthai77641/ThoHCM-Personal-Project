@@ -37,6 +37,8 @@ steps:
       - '2'
       - '--max-instances'
       - '10'
+      - '--min-instances'
+      - '1'
       - '--service-account'
       - 'thohcm-storage@thohcm-application-475603.iam.gserviceaccount.com'
       - '--set-env-vars'
@@ -47,6 +49,12 @@ steps:
       - 'MONGODB_URI=${_MONGODB_URI}'
       - '--set-env-vars'
       - 'JWT_SECRET=${_JWT_SECRET}'
+      - '--set-env-vars'
+      - 'PORT=8080'
+      - '--set-env-vars'
+      - 'HOST=0.0.0.0'
+      - '--timeout'
+      - '900'
     id: 'deploy-backend'
 
 # Store images in Container Registry
