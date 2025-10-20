@@ -57,7 +57,7 @@ jobs:
         gcloud run services update $SERVICE_NAME --region=$REGION \
           --set-env-vars MONGODB_URI="${{ secrets.MONGODB_URI }}" \
           --set-env-vars JWT_SECRET="${{ secrets.JWT_SECRET }}" \
-          --set-env-vars ALLOWED_ORIGINS="${{ vars.ALLOWED_ORIGINS || 'https://thohcm.web.app' }}"
+          --set-env-vars ALLOWED_ORIGINS="${{ vars.ALLOWED_ORIGINS }}"
 
     - name: Verify Deployment
       run: |

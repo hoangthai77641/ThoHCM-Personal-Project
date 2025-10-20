@@ -247,6 +247,12 @@ mongoose.connect(MONGODB_URI)
   .then(() => {
     const conn = mongoose.connection;
     console.log('MongoDB connected', { db: conn.name, host: conn.host });
+    
+    // Basic health endpoint
+    app.get('/api/health', (req, res) => {
+      res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+    });
+    
     // Health endpoint to verify DB connection at runtime
     app.get('/api/health/db', async (req, res) => {
       try {
