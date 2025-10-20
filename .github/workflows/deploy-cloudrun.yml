@@ -37,12 +37,6 @@ jobs:
         echo "Current project:"
         gcloud config get-value project
 
-    - name: Enable required APIs
-      run: |
-        gcloud services enable cloudbuild.googleapis.com
-        gcloud services enable run.googleapis.com
-        gcloud services enable containerregistry.googleapis.com
-
     - name: Configure Docker to use gcloud
       run: gcloud auth configure-docker
 
