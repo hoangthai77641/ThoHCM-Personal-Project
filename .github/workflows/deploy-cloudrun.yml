@@ -43,7 +43,8 @@ jobs:
     - name: Build and Deploy to Cloud Run
       run: |
         echo "Starting Cloud Build..."
-        gcloud builds submit --config=config/cloudbuild.yaml --timeout=20m
+        gcloud builds submit --config=config/cloudbuild.yaml --timeout=20m \
+          --substitutions _MONGODB_URI="${{ secrets.MONGODB_URI }}",_JWT_SECRET="${{ secrets.JWT_SECRET }}",_ALLOWED_ORIGINS="${{ vars.ALLOWED_ORIGINS }}"
         
     - name: Get Service URL
       id: get-url
@@ -51,13 +52,6 @@ jobs:
         URL=$(gcloud run services describe $SERVICE_NAME --region=$REGION --format="value(status.url)")
         echo "url=$URL" >> $GITHUB_OUTPUT
         echo "Backend deployed to: $URL"
-
-    - name: Update Environment Variables
-      run: |
-        gcloud run services update $SERVICE_NAME --region=$REGION \
-          --update-env-vars MONGODB_URI="${{ secrets.MONGODB_URI }}" \
-          --update-env-vars JWT_SECRET="${{ secrets.JWT_SECRET }}" \
-          --update-env-vars ALLOWED_ORIGINS="${{ vars.ALLOWED_ORIGINS }}"
 
     - name: Verify Deployment
       run: |
