@@ -45,11 +45,6 @@ jobs:
         echo "Starting Cloud Build..."
         gcloud builds submit --config=config/cloudbuild.yaml --timeout=20m
         
-    - name: Wait for deployment to be ready
-      run: |
-        echo "Waiting for service to be ready..."
-        gcloud run services wait $SERVICE_NAME --region=$REGION --timeout=300
-        
     - name: Get Service URL
       id: get-url
       run: |
