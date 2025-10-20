@@ -545,12 +545,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: ClipOval(
                             child: user?['avatar'] != null
                                 ? Image.network(
-                                    _getAvatarUrl(user!['avatar']),
+                                    '${Env.apiBase}${user!['avatar']}',
                                     fit: BoxFit.cover,
                                     loadingBuilder: (context, child, loadingProgress) {
                                       if (loadingProgress == null) {
                                         print(
-                                          '✅ Avatar loaded successfully: ${_getAvatarUrl(user['avatar'])}',
+                                          '✅ Avatar loaded successfully: ${Env.apiBase}${user['avatar']}',
                                         );
                                         return child;
                                       }
@@ -682,20 +682,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
-  }
-
-  /// Get the correct avatar URL, handling both relative and absolute paths
-  String _getAvatarUrl(String? avatarPath) {
-    if (avatarPath == null || avatarPath.isEmpty) {
-      return '';
-    }
-    
-    // If it's already a full URL, return as is
-    if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
-      return avatarPath;
-    }
-    
-    // If it's a relative path, prepend the API base URL
-    return '${Env.apiBase}$avatarPath';
   }
 }

@@ -53,11 +53,8 @@ jobs:
         echo "url=$URL" >> $GITHUB_OUTPUT
         echo "Backend deployed to: $URL"
 
-    - name: Simple Health Check
+    - name: Verify Deployment
       run: |
-        echo "Waiting for service to be ready..."
-        sleep 60
-        echo "Testing basic connectivity..."
-        curl -v ${{ steps.get-url.outputs.url }} || echo "Service not responding"
         echo "Testing health endpoint..."
-        curl -v ${{ steps.get-url.outputs.url }}/api/health || echo "Health endpoint not responding"
+        curl -f ${{ steps.get-url.outputs.url }}/api/health || exit 1
+        echo "✅ Backend is healthy!"

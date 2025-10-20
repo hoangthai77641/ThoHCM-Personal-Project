@@ -26,16 +26,7 @@ class NotificationApiService {
       final response = await _apiClient.get(path);
 
       if (response['success'] == true) {
-        final dynamic notificationsData = response['data'] ?? response['notifications'] ?? [];
-        
-        List<dynamic> notificationsList;
-        if (notificationsData is List) {
-          notificationsList = notificationsData;
-        } else if (notificationsData is Map && notificationsData['notifications'] is List) {
-          notificationsList = notificationsData['notifications'];
-        } else {
-          throw Exception('Invalid notifications data format: ${notificationsData.runtimeType}');
-        }
+        final List<dynamic> notificationsList = response['notifications'] ?? [];
 
         final notifications = notificationsList
             .map(
