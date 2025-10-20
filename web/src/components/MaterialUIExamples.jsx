@@ -32,8 +32,6 @@ import {
   Build as BuildIcon,
   CalendarToday as CalendarIcon,
   Person as PersonIcon,
-  Brightness4 as DarkModeIcon,
-  Brightness7 as LightModeIcon,
   Star as StarIcon,
 } from '@mui/icons-material';
 import { useThemeMode } from '../ThemeProvider';
@@ -105,7 +103,7 @@ export function ServiceCard({ title, description, image, price, rating }) {
 // Responsive Navigation Bar
 export function ResponsiveNavbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { mode, toggleTheme } = useThemeMode();
+  const { mode } = useThemeMode();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -164,10 +162,6 @@ export function ResponsiveNavbar() {
               ))}
             </Stack>
           )}
-
-          <IconButton color="inherit" onClick={toggleTheme} sx={{ ml: 2 }}>
-            {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
-          </IconButton>
         </Toolbar>
       </AppBar>
 

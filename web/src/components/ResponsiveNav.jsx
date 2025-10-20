@@ -31,8 +31,6 @@ import {
   Logout as LogoutIcon,
   Receipt as ReceiptIcon,
   PersonSearch as PersonSearchIcon,
-  Brightness4 as DarkModeIcon,
-  Brightness7 as LightModeIcon,
 } from '@mui/icons-material';
 import { useThemeMode } from '../ThemeProvider';
 import SearchBox from './SearchBox';
@@ -47,7 +45,7 @@ export default function ResponsiveNav({ user, onLogout }) {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const { mode, toggleTheme } = useThemeMode();
+  const { mode } = useThemeMode();
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -310,11 +308,6 @@ export default function ResponsiveNav({ user, onLogout }) {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {/* Notification */}
               {user && <NotificationSystem user={user} />}
-
-              {/* Theme toggle */}
-              <IconButton color="inherit" onClick={toggleTheme}>
-                {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
-              </IconButton>
 
               {/* User menu */}
               {user && !isMobile && (

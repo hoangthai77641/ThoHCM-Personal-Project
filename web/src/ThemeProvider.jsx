@@ -1,49 +1,29 @@
-import React, { createContext, useState, useMemo, useContext } from 'react';
+import React, { createContext, useMemo, useContext } from 'react';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { lightTheme, darkTheme } from './theme';
+import { darkTheme } from './theme';
 
-// Context để quản lý theme mode
+// Context để quản lý theme mode (chỉ sử dụng dark theme)
 const ThemeContext = createContext({
-  mode: 'light',
-  toggleTheme: () => {},
+  mode: 'dark',
 });
 
 export const useThemeMode = () => useContext(ThemeContext);
 
 /**
  * Theme Provider cho Material UI
- * Bọc toàn bộ app để áp dụng theme
+ * Bọc toàn bộ app để áp dụng theme (chỉ sử dụng dark theme)
  */
 export function ThemeProvider({ children }) {
-  const [mode, setMode] = useState(() => {
-    // Lấy theme từ localStorage hoặc system preference
-    const savedMode = localStorage.getItem('themeMode');
-    if (savedMode) {
-      return savedMode;
-    }
-    // Check system preference
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
-    return 'light';
-  });
-
-  const toggleTheme = () => {
-    setMode((prevMode) => {
-      const newMode = prevMode === 'light' ? 'dark' : 'light';
-      localStorage.setItem('themeMode', newMode);
-      return newMode;
-    });
-  };
+  // Cố định sử dụng dark theme
+  const mode = 'dark';
 
   const theme = useMemo(() => {
-    return mode === 'light' ? lightTheme : darkTheme;
-  }, [mode]);
+    return darkTheme;
+  }, []);
 
   const contextValue = useMemo(() => ({
     mode,
-    toggleTheme,
   }), [mode]);
 
   return (
