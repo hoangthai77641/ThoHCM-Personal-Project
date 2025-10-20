@@ -129,10 +129,15 @@ const setupSecurity = (app, options = {}) => {
     next();
   });
 
-  // Apply general rate limiting to all API routes
+  // Apply general rate limiting to all API routes except health endpoints
   if (shouldEnableRateLimit) {
     // Wrap apiLimiter to allow bypass via header on a per-request basis
     app.use('/api', (req, res, next) => {
+      // Skip rate limiting for health endpoints
+      if (req.path === '/api/health' || req.path === '/api/health/db') {
+        return next();
+      }
+      
       // Allow bypass by header (useful for emulator/testing): X-Bypass-Rate-Limit: true
       try {
         const bypassHeader = (req.headers['x-bypass-rate-limit'] || '').toString().toLowerCase();

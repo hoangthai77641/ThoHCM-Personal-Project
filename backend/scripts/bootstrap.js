@@ -36,7 +36,7 @@ async function ensureCollections() {
     BookingEnhanced.exists({}).catch(()=>null),
     Review.exists({}).catch(()=>null),
     Notification.exists({}).catch(()=>null),
-    Wallet.exists({}).catch(()=>null),
+    Wallet.findOne({}).catch(()=>null),
     WorkerSchedule.exists({}).catch(()=>null),
     Banner.exists({}).catch(()=>null),
   ]);
