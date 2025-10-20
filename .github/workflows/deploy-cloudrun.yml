@@ -21,10 +21,14 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
     - name: Setup Google Cloud CLI
       uses: google-github-actions/setup-gcloud@v2
       with:
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
         project_id: ${{ env.PROJECT_ID }}
 
     - name: Configure Docker to use gcloud
@@ -32,7 +36,13 @@ jobs:
 
     - name: Build and Deploy to Cloud Run
       run: |
-        gcloud builds submit --config=cloudbuild.yaml
+        echo "Starting Cloud Build..."
+        gcloud builds submit --config=config/cloudbuild.yaml --timeout=20m
+        
+    - name: Wait for deployment to be ready
+      run: |
+        echo "Waiting for service to be ready..."
+        gcloud run services wait $SERVICE_NAME --region=$REGION --timeout=300
         
     - name: Get Service URL
       id: get-url
@@ -46,7 +56,7 @@ jobs:
         gcloud run services update $SERVICE_NAME --region=$REGION \
           --set-env-vars MONGODB_URI="${{ secrets.MONGODB_URI }}" \
           --set-env-vars JWT_SECRET="${{ secrets.JWT_SECRET }}" \
-          --set-env-vars ALLOWED_ORIGINS="${{ secrets.ALLOWED_ORIGINS }}"
+          --set-env-vars ALLOWED_ORIGINS="${{ vars.ALLOWED_ORIGINS || 'https://thohcm.web.app' }}"
 
     - name: Verify Deployment
       run: |
