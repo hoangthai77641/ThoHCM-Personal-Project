@@ -10,9 +10,11 @@ const NotificationSystem = ({ user }) => {
   useEffect(() => {
     if (!user) return;
 
-    // Connect to socket - now works with Cloud Run!
-    const newSocket = io(import.meta.env.VITE_API_URL || 'https://thohcm-application-475603.as.r.appspot.com', {
-      withCredentials: true
+    // Connect to socket - Use Cloud Run for WebSocket support!
+    const SOCKET_URL = 'https://thohcm-backend-181755246333.asia-southeast1.run.app';
+    const newSocket = io(SOCKET_URL, {
+      withCredentials: true,
+      transports: ['websocket', 'polling'] // Fallback support
     });
 
     newSocket.on('connect', () => {

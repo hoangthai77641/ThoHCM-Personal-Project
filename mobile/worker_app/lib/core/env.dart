@@ -41,6 +41,13 @@ class Env {
     if (socketBaseEnv.isNotEmpty) {
       return socketBaseEnv;
     }
+
+    // Check for dedicated socket base first
+    if (kLanSocketBase != null && kLanSocketBase!.isNotEmpty) {
+      return kLanSocketBase!;
+    }
+
+    // Fallback to API base
     if (kLanApiBase != null && kLanApiBase!.isNotEmpty) {
       return kLanApiBase!;
     }

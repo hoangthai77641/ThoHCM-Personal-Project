@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ThoHCM Feature Graphic Generator</title>
+    <style>
+        body {
+            background: #f0f0f0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .feature-graphic {
+            width: 1024px; 
+            height: 500px;
+            background: linear-gradient(135deg, #1976D2, #42A5F5);
+            position: relative; 
+            font-family: Arial, sans-serif;
+            overflow: hidden; 
+            margin: 20px auto;
+            border-radius: 12px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .left-content {
+            position: absolute; 
+            left: 60px; 
+            top: 50%;
+            transform: translateY(-50%); 
+            color: white; 
+            z-index: 2;
+        }
+        .logo { 
+            font-size: 48px; 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+        }
+        .tagline { 
+            font-size: 24px; 
+            margin-bottom: 25px; 
+            opacity: 0.95; 
+        }
+        .features { 
+            font-size: 18px; 
+            opacity: 0.9; 
+            line-height: 1.4; 
+        }
+        .phones {
+            position: absolute; 
+            right: 80px; 
+            top: 50%;
+            transform: translateY(-50%) rotate(-5deg);
+        }
+        .phone {
+            width: 140px; 
+            height: 280px; 
+            background: #333;
+            border-radius: 18px; 
+            margin: 0 15px; 
+            display: inline-block;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4); 
+            transform: rotate(10deg);
+        }
+        .phone:nth-child(2) { 
+            transform: rotate(-5deg) translateY(-20px); 
+        }
+        .phone-screen {
+            width: 120px; 
+            height: 240px; 
+            background: linear-gradient(to bottom, #E3F2FD, #BBDEFB);
+            border-radius: 12px; 
+            margin: 20px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1976D2;
+            font-size: 12px;
+            text-align: center;
+        }
+        .instructions {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>🖼️ ThoHCM Feature Graphic Generator</h1>
+    
+    <div class="feature-graphic">
+        <div class="left-content">
+            <div class="logo">🔧 ThoHCM</div>
+            <div class="tagline">Skilled Workers On Demand</div>
+            <div class="features">
+                ✓ Fast & Reliable Service<br>
+                ✓ Verified Professionals<br>
+                ✓ Transparent Pricing
+            </div>
+        </div>
+        <div class="phones">
+            <div class="phone">
+                <div class="phone-screen">
+                    App Screen 1
+                </div>
+            </div>
+            <div class="phone">
+                <div class="phone-screen">
+                    App Screen 2
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <h3>🎨 How to create your feature graphic:</h3>
+        <ol>
+            <li><strong>Right-click</strong> on the graphic above</li>
+            <li>Select <strong>"Save image as..."</strong></li>
+            <li>Save as <strong>"feature-graphic-1024x500.png"</strong></li>
+            <li>Upload to Google Play Store as main banner</li>
+        </ol>
+        
+        <h4>📱 To add real app screenshots:</h4>
+        <ol>
+            <li>Take screenshots of your Flutter app (1080x1920)</li>
+            <li>Use image editing software (Canva, Figma, Photoshop)</li>
+            <li>Replace the placeholder phone screens with real screenshots</li>
+            <li>Keep the overall 1024x500 dimensions</li>
+        </ol>
+        
+        <p><strong>Requirements:</strong> 1024x500 pixels, JPG or PNG format</p>
+    </div>
+</body>
+</html>

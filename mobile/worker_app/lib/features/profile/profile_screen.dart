@@ -28,6 +28,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   List<Map<String, dynamic>> _servicesPreview = const [];
   bool _showServices = false; // Ẩn dịch vụ default
 
+  // Helper method to get correct avatar URL
+  String _getAvatarUrl(String? avatarPath) {
+    if (avatarPath == null || avatarPath.isEmpty) {
+      return '';
+    }
+
+    // If already absolute URL, return as is
+    if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) {
+      return avatarPath;
+    }
+
+    // Otherwise, prepend API base
+    return '${Env.apiBase}$avatarPath';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -545,12 +560,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: ClipOval(
                             child: user?['avatar'] != null
                                 ? Image.network(
-                                    '${Env.apiBase}${user!['avatar']}',
+                                    _getAvatarUrl(user!['avatar']),
                                     fit: BoxFit.cover,
                                     loadingBuilder: (context, child, loadingProgress) {
                                       if (loadingProgress == null) {
                                         print(
-                                          '✅ Avatar loaded successfully: ${Env.apiBase}${user['avatar']}',
+                                          '✅ Avatar loaded successfully: ${_getAvatarUrl(user['avatar'])}',
                                         );
                                         return child;
                                       }
