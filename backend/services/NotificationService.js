@@ -5,15 +5,25 @@ try {
   
   // Initialize Firebase Admin SDK if not already initialized
   if (!admin.apps.length) {
-    const serviceAccountPath = process.env.FIREBASE_ADMIN_SDK_PATH || './config/firebase-admin-sdk.json';
-    const serviceAccount = require(serviceAccountPath);
-    
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-      projectId: process.env.FIREBASE_PROJECT_ID || 'thohcm-frontend'
-    });
-    
-    console.log('Firebase Admin SDK initialized successfully');
+    // In App Engine, use default service account (no file needed)
+    if (process.env.NODE_ENV === 'production') {
+      admin.initializeApp({
+        credential: admin.credential.applicationDefault(),
+        projectId: process.env.FIREBASE_PROJECT_ID || 'thohcm-frontend'
+      });
+      console.log('Firebase Admin SDK initialized with default credentials');
+    } else {
+      // For local development, use service account file
+      const serviceAccountPath = process.env.FIREBASE_ADMIN_SDK_PATH || './config/firebase-admin-sdk.json';
+      const serviceAccount = require(serviceAccountPath);
+      
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        projectId: process.env.FIREBASE_PROJECT_ID || 'thohcm-frontend'
+      });
+      
+      console.log('Firebase Admin SDK initialized with service account file');
+    }
   }
 } catch (error) {
   console.warn('Firebase Admin SDK not available:', error.message);

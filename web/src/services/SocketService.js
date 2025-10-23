@@ -8,8 +8,9 @@ class SocketService {
 
   connect() {
     if (!this.socket) {
-      const apiBase = import.meta.env.VITE_API_URL || 'https://thohcm-application-475603.as.r.appspot.com';
-      this.socket = io(apiBase, {
+      // Socket.IO server runs on Cloud Run, not App Engine
+      const socketUrl = import.meta.env.VITE_SOCKET_URL || 'https://thohcm-backend-181755246333.asia-southeast1.run.app';
+      this.socket = io(socketUrl, {
         transports: ['websocket', 'polling'],
         autoConnect: true
       });
