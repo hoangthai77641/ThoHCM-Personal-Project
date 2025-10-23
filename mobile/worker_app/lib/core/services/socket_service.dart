@@ -3,21 +3,46 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../env.dart';
 import 'notification_service.dart';
 import '../../features/notifications/notifications_provider.dart';
+import '../../features/bookings/booking_event_bus.dart';
+import '../../features/bookings/booking_model.dart';
 
 class SocketService {
   static final SocketService _instance = SocketService._internal();
   factory SocketService() => _instance;
   SocketService._internal();
 
+  // Backwards-compatible static callback used by legacy facade
+  static Function()? onNewOrderCallback;
+
   IO.Socket? _socket;
   bool _isConnected = false;
   String? _currentUserId;
   NotificationsProvider? _notificationsProvider;
+  // Booking listeners registered by other modules (providers)
+  final List<void Function(Map<String, dynamic>)> _bookingCreatedListeners = [];
+  final List<void Function(Map<String, dynamic>)> _bookingUpdatedListeners = [];
 
   bool get isConnected => _isConnected;
 
   void setNotificationsProvider(NotificationsProvider provider) {
     _notificationsProvider = provider;
+  }
+
+  // Allow other parts of the app to register booking callbacks
+  void addBookingCreatedListener(void Function(Map<String, dynamic>) cb) {
+    _bookingCreatedListeners.add(cb);
+  }
+
+  void removeBookingCreatedListener(void Function(Map<String, dynamic>) cb) {
+    _bookingCreatedListeners.remove(cb);
+  }
+
+  void addBookingUpdatedListener(void Function(Map<String, dynamic>) cb) {
+    _bookingUpdatedListeners.add(cb);
+  }
+
+  void removeBookingUpdatedListener(void Function(Map<String, dynamic>) cb) {
+    _bookingUpdatedListeners.remove(cb);
   }
 
   Future<void> connect({required String userId}) async {
@@ -69,6 +94,67 @@ class SocketService {
         log('Received notification: $data');
         _handleNotification(data);
       });
+
+      // Listen for booking events so UI providers can react
+      _socket!.on('bookingCreated', (data) {
+        try {
+          log('Received bookingCreated: $data');
+          if (data is Map) {
+            final map = Map<String, dynamic>.from(data);
+            // Notify registered listeners
+            for (final cb in _bookingCreatedListeners) {
+              try {
+                cb(map);
+              } catch (e) {
+                log('Error calling bookingCreated listener: $e');
+              }
+            }
+
+            // Also emit to global event bus for providers using it
+            try {
+              final booking = Booking.fromJson(map);
+              BookingEventBus().emitBookingCreated(booking);
+            } catch (e) {
+              log('Error emitting bookingCreated to event bus: $e');
+            }
+            // preserve legacy onNewOrderCallback behavior
+            try {
+              if (SocketService.onNewOrderCallback != null) {
+                SocketService.onNewOrderCallback!();
+              }
+            } catch (e) {
+              log('Error running onNewOrderCallback: $e');
+            }
+          }
+        } catch (e) {
+          log('Error handling bookingCreated: $e');
+        }
+      });
+
+      _socket!.on('bookingUpdated', (data) {
+        try {
+          log('Received bookingUpdated: $data');
+          if (data is Map) {
+            final map = Map<String, dynamic>.from(data);
+            for (final cb in _bookingUpdatedListeners) {
+              try {
+                cb(map);
+              } catch (e) {
+                log('Error calling bookingUpdated listener: $e');
+              }
+            }
+            try {
+              final booking = Booking.fromJson(map);
+              BookingEventBus().emitBookingUpdated(booking);
+            } catch (e) {
+              log('Error emitting bookingUpdated to event bus: $e');
+            }
+          }
+        } catch (e) {
+          log('Error handling bookingUpdated: $e');
+        }
+      });
+
 
       // Listen for job assignments (for workers)
       _socket!.on('new_job_assignment', (data) {

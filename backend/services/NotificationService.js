@@ -1,3 +1,25 @@
+// Firebase Admin SDK for push notifications
+let admin;
+try {
+  admin = require('firebase-admin');
+  
+  // Initialize Firebase Admin SDK if not already initialized
+  if (!admin.apps.length) {
+    const serviceAccountPath = process.env.FIREBASE_ADMIN_SDK_PATH || './config/firebase-admin-sdk.json';
+    const serviceAccount = require(serviceAccountPath);
+    
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      projectId: process.env.FIREBASE_PROJECT_ID || 'thohcm-frontend'
+    });
+    
+    console.log('Firebase Admin SDK initialized successfully');
+  }
+} catch (error) {
+  console.warn('Firebase Admin SDK not available:', error.message);
+  admin = null;
+}
+
 class NotificationService {
   constructor(io) {
     this.io = io;
@@ -189,16 +211,15 @@ class NotificationService {
   // Integration with push notification services
   async sendPushNotification(userId, notificationData) {
     try {
-      // Skip Firebase push notifications for now - not configured
-      console.log(`[PUSH] Would send push notification to user ${userId}:`, notificationData.title);
-      return true;
-      
-      // TODO: Enable when Firebase is configured
-      // const admin = require('firebase-admin');
+      // Check if Firebase Admin SDK is available
+      if (!admin) {
+        console.log(`[PUSH] Firebase not configured, skipping push notification to user ${userId}:`, notificationData.title);
+        return false;
+      }
       
       // Get user's FCM token from database
-      // const User = require('../models/User');
-      // const user = await User.findById(userId);
+      const User = require('../models/User');
+      const user = await User.findById(userId);
       
       if (user && user.fcmToken) {
         const message = {

@@ -105,22 +105,27 @@ class BookingsProvider with ChangeNotifier {
   }
 
   void initSocket() {
-    _socket.connect(
-      onCreated: (json) {
+    _socket.addBookingCreatedListener((json) {
+      try {
         final b = Booking.fromJson(json);
         if (_statusMatchesFilters(b.status)) {
           items = [b, ...items];
           notifyListeners();
         }
-        // Emit to event bus for other providers
         _eventBus.emitBookingCreated(b);
-      },
-      onUpdated: (json) {
+      } catch (e) {
+        print('Error handling bookingCreated in BookingsProvider: $e');
+      }
+    });
+
+    _socket.addBookingUpdatedListener((json) {
+      try {
         final b = Booking.fromJson(json);
-        // Emit to event bus first so ALL providers get notified
         _eventBus.emitBookingUpdated(b);
-      },
-    );
+      } catch (e) {
+        print('Error handling bookingUpdated in BookingsProvider: $e');
+      }
+    });
   }
 
   Future<Booking> updateStatus(String id, String status) async {
@@ -153,6 +158,7 @@ class BookingsProvider with ChangeNotifier {
   void dispose() {
     _bookingUpdatedSubscription?.cancel();
     _globalRefreshSubscription?.cancel();
+    // TODO: remove registered listeners if we held references
     super.dispose();
   }
 }

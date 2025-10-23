@@ -25,7 +25,9 @@ userSchema.add({
   // Online status for workers to receive new bookings
   isOnline: { type: Boolean, default: false },
   // Wallet status for workers (to hide services when negative)
-  walletStatus: { type: String, enum: ['positive', 'negative'], default: 'positive' }
+  walletStatus: { type: String, enum: ['positive', 'negative'], default: 'positive' },
+  // FCM token for push notifications
+  fcmToken: { type: String }
 });
 
 // Compound unique indexes for flexible validation

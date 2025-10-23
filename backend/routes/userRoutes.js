@@ -46,6 +46,9 @@ router.delete('/avatar', auth(['customer','worker','admin']), userController.del
 // toggle online status for workers
 router.put('/toggle-online', auth(['worker']), userController.toggleOnlineStatus);
 
+// Update FCM token for push notifications
+router.put('/fcm-token', auth(['customer', 'worker', 'admin']), userController.updateFcmToken);
+
 // customers (worker or admin)
 router.get('/customers', auth(['worker','admin']), userController.getCustomers);
 router.get('/customers/:id/bookings', auth(['worker','admin']), userController.getCustomerBookings);

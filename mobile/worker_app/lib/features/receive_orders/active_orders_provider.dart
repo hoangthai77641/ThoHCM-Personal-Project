@@ -61,29 +61,20 @@ class ActiveOrdersProvider with ChangeNotifier {
   }
 
   void _initSocket() {
-    _socket.connect(
-      onCreated: (bookingData) {
-        // When new booking is created, it won't be active immediately
-        // Only add when status becomes 'confirmed'
-      },
-      onUpdated: (bookingData) {
-        // When booking is updated, add or remove from active orders
-        final booking = Booking.fromJson(bookingData);
-        if (booking.status == 'confirmed') {
-          // Add to active orders if not already present
-          final existingIndex = _orders.indexWhere(
-            (order) => order.id == booking.id,
-          );
-          if (existingIndex == -1) {
-            _orders.insert(0, booking);
-            notifyListeners();
-          }
-        } else {
-          // Remove from active orders if status changed away from confirmed
-          removeOrder(booking.id);
-        }
-      },
-    );
+    _socket.addBookingUpdatedListener(_onSocketBookingUpdated);
+  }
+
+  void _onSocketBookingUpdated(Map<String, dynamic> bookingData) {
+    final booking = Booking.fromJson(bookingData);
+    if (booking.status == 'confirmed') {
+      final existingIndex = _orders.indexWhere((order) => order.id == booking.id);
+      if (existingIndex == -1) {
+        _orders.insert(0, booking);
+        notifyListeners();
+      }
+    } else {
+      removeOrder(booking.id);
+    }
   }
 
   Future<void> loadActiveOrders() async {
@@ -123,7 +114,7 @@ class ActiveOrdersProvider with ChangeNotifier {
 
   @override
   void dispose() {
-    _socket.disconnect();
+    _socket.removeBookingUpdatedListener(_onSocketBookingUpdated);
     _bookingUpdatedSubscription?.cancel();
     _globalRefreshSubscription?.cancel();
     super.dispose();

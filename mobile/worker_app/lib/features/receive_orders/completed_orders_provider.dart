@@ -24,29 +24,21 @@ class CompletedOrdersProvider with ChangeNotifier {
   }
 
   void _initSocket() {
-    _socket.connect(
-      onCreated: (bookingData) {
-        // New bookings won't be completed immediately
-      },
-      onUpdated: (bookingData) {
-        // When booking is updated to done, add to completed orders
-        final booking = Booking.fromJson(bookingData);
-        if (booking.status == 'done') {
-          // Add to completed orders if not already present
-          final existingIndex = _orders.indexWhere(
-            (order) => order.id == booking.id,
-          );
-          if (existingIndex == -1) {
-            _orders.insert(0, booking); // Add to beginning
-            notifyListeners();
-          } else {
-            // Update existing booking
-            _orders[existingIndex] = booking;
-            notifyListeners();
-          }
-        }
-      },
-    );
+    _socket.addBookingUpdatedListener(_onSocketBookingUpdated);
+  }
+
+  void _onSocketBookingUpdated(Map<String, dynamic> bookingData) {
+    final booking = Booking.fromJson(bookingData);
+    if (booking.status == 'done') {
+      final existingIndex = _orders.indexWhere((order) => order.id == booking.id);
+      if (existingIndex == -1) {
+        _orders.insert(0, booking);
+        notifyListeners();
+      } else {
+        _orders[existingIndex] = booking;
+        notifyListeners();
+      }
+    }
   }
 
   Future<void> loadCompletedOrders() async {
@@ -67,7 +59,7 @@ class CompletedOrdersProvider with ChangeNotifier {
 
   @override
   void dispose() {
-    _socket.disconnect();
+    _socket.removeBookingUpdatedListener(_onSocketBookingUpdated);
     super.dispose();
   }
 }

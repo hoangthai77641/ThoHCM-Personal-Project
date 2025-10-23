@@ -51,23 +51,24 @@ class PendingOrdersProvider with ChangeNotifier {
   }
 
   void _initSocket() {
-    _socket.connect(
-      onCreated: (bookingData) {
-        // When new booking is created, add it to pending orders if it's pending
-        final booking = Booking.fromJson(bookingData);
-        if (booking.status == 'pending') {
-          _orders.insert(0, booking); // Add to beginning of list
-          notifyListeners();
-        }
-      },
-      onUpdated: (bookingData) {
-        // When booking is updated, remove it from pending if no longer pending
-        final booking = Booking.fromJson(bookingData);
-        if (booking.status != 'pending') {
-          removeOrder(booking.id);
-        }
-      },
-    );
+    // Register listeners on the shared SocketService singleton
+    _socket.addBookingCreatedListener(_onSocketBookingCreated);
+    _socket.addBookingUpdatedListener(_onSocketBookingUpdated);
+  }
+
+  void _onSocketBookingCreated(Map<String, dynamic> bookingData) {
+    final booking = Booking.fromJson(bookingData);
+    if (booking.status == 'pending') {
+      _orders.insert(0, booking);
+      notifyListeners();
+    }
+  }
+
+  void _onSocketBookingUpdated(Map<String, dynamic> bookingData) {
+    final booking = Booking.fromJson(bookingData);
+    if (booking.status != 'pending') {
+      removeOrder(booking.id);
+    }
   }
 
   Future<void> loadPendingOrders() async {
@@ -106,7 +107,9 @@ class PendingOrdersProvider with ChangeNotifier {
 
   @override
   void dispose() {
-    _socket.disconnect();
+    // Remove listeners but do not disconnect shared socket (used by other providers)
+    _socket.removeBookingCreatedListener(_onSocketBookingCreated);
+    _socket.removeBookingUpdatedListener(_onSocketBookingUpdated);
     _bookingUpdatedSubscription?.cancel();
     _globalRefreshSubscription?.cancel();
     super.dispose();

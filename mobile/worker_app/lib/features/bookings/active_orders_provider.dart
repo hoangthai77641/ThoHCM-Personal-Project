@@ -24,28 +24,31 @@ class ActiveOrdersProvider with ChangeNotifier {
   }
 
   void _initSocket() {
-    _socket.connect(
-      onCreated: (bookingData) {
-        // When new booking is created, it won't be confirmed yet so no need to add
-        // But we reload anyway to be safe
+    _socket.addBookingCreatedListener((bookingData) {
+      try {
+        // new bookings may become active later; reload list to be safe
         loadActiveOrders();
-      },
-      onUpdated: (bookingData) {
-        // When booking is updated, check if it's now confirmed or no longer confirmed
+      } catch (e) {
+        print('Error handling bookingCreated in Bookings.activeOrdersProvider: $e');
+      }
+    });
+
+    _socket.addBookingUpdatedListener((bookingData) {
+      try {
         final booking = Booking.fromJson(bookingData);
         if (booking.status == 'confirmed') {
-          // Add to active orders if not already there
           if (!_orders.any((order) => order.id == booking.id)) {
             _orders.insert(0, booking);
             notifyListeners();
           }
         } else {
-          // Remove from active orders if status changed
           _orders.removeWhere((order) => order.id == booking.id);
           notifyListeners();
         }
-      },
-    );
+      } catch (e) {
+        print('Error handling bookingUpdated in Bookings.activeOrdersProvider: $e');
+      }
+    });
   }
 
   Future<void> loadActiveOrders() async {
@@ -78,7 +81,7 @@ class ActiveOrdersProvider with ChangeNotifier {
 
   @override
   void dispose() {
-    _socket.disconnect();
+    // TODO: remove listeners if we kept references
     super.dispose();
   }
 }

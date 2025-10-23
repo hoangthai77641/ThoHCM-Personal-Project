@@ -965,3 +965,30 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
   return R * c; // Distance in km
 }
+
+// Update FCM token for push notifications
+exports.updateFcmToken = async (req, res) => {
+  try {
+    const { fcmToken } = req.body;
+    
+    if (!fcmToken) {
+      return res.status(400).json({ message: 'FCM token is required' });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.fcmToken = fcmToken;
+    await user.save();
+
+    res.json({ 
+      message: 'FCM token updated successfully',
+      success: true 
+    });
+  } catch (error) {
+    console.error('Update FCM token error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

@@ -13,6 +13,14 @@ env_variables:
   JWT_EXPIRES_IN: "7d"
   # Add your production frontend URL here  
   ALLOWED_ORIGINS: "https://thohcm-application.web.app,https://thohcm-frontend.web.app"
+  
+  # Google Cloud Storage Configuration
+  GCS_BUCKET_NAME: "thohcm-storage-20251023215825"
+  GOOGLE_APPLICATION_CREDENTIALS: "./config/thohcm-application-475603-73975784b63a.json"
+  
+  # Firebase Cloud Messaging Configuration
+  FIREBASE_PROJECT_ID: "thohcm-frontend"
+  FIREBASE_ADMIN_SDK_PATH: "./config/firebase-admin-sdk.json"
 
 # Automatic scaling configuration
 automatic_scaling:

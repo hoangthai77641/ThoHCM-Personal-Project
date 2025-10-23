@@ -40,20 +40,17 @@ class WorkerStatsProvider extends ChangeNotifier {
 
   void initSocket() {
     print('📊 WorkerStatsProvider: Initializing socket listener');
-    _socket.connect(
-      onUpdated: (booking) {
-        print(
-          '📊 WorkerStatsProvider: Received booking update: ${booking['status']}',
-        );
-        // Refresh stats when booking status changes to 'done'
+    _socket.addBookingUpdatedListener((booking) {
+      try {
+        print('📊 WorkerStatsProvider: Received booking update: ${booking['status']}');
         if (booking['status'] == 'done') {
-          print(
-            '📊 WorkerStatsProvider: Booking completed, refreshing stats...',
-          );
+          print('📊 WorkerStatsProvider: Booking completed, refreshing stats...');
           load();
         }
-      },
-    );
+      } catch (e) {
+        print('📊 WorkerStatsProvider: Error handling socket booking update: $e');
+      }
+    });
 
     // Also listen to global booking event bus
     BookingEventBus().onBookingUpdated.listen((booking) {
@@ -71,7 +68,8 @@ class WorkerStatsProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    _socket.disconnect();
+    // Remove listeners if any (no-op if not registered)
+    // TODO: track the listener to remove if necessary
     super.dispose();
   }
 }

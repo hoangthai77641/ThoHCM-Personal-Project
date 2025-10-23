@@ -1,117 +1,47 @@
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'env.dart';
-import 'services/notification_service.dart';
+import 'services/socket_service.dart' as impl;
 
 typedef BookingListener = void Function(Map<String, dynamic> bookingJson);
 
+/// Legacy facade kept for compatibility with existing imports.
+/// Delegates to the singleton implementation in lib/core/services/socket_service.dart
 class SocketService {
-  IO.Socket? _socket;
-  static Function()? onNewOrderCallback;
+  final impl.SocketService _impl = impl.SocketService();
 
-  void connect({
-    BookingListener? onCreated,
-    BookingListener? onUpdated,
-    BookingListener? onLoyalty,
-  }) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    final userStr = prefs.getString('me');
-    if (userStr == null) return;
-    // Parse minimal fields
-    final workerId = RegExp(
-      r'"_id"\s*:\s*"([^"]+)"',
-    ).firstMatch(userStr)?.group(1);
-    if (workerId == null) return;
-
-    _socket = IO.io(
-      Env.socketBase,
-      IO.OptionBuilder()
-          .setTransports(['websocket'])
-          .disableAutoConnect()
-          .enableReconnection()
-          .setReconnectionAttempts(5)
-          .setReconnectionDelay(2000)
-          .setExtraHeaders({
-            if (token != null) 'Authorization': 'Bearer $token',
-          })
-          .build(),
-    );
-
-    _socket!.onConnect((_) {
-      print('🔗 Socket connected');
-      // Join room by workerId string to match backend server.js
-      _socket!.emit('join', workerId);
-    });
-
-    _socket!.onDisconnect((_) {
-      print('🔌 Socket disconnected');
-    });
-
-    _socket!.onConnectError((data) {
-      print('❌ Socket connect error: $data');
-    });
-
-    _socket!.onError((data) {
-      print('❌ Socket error: $data');
-    });
-
-    if (onCreated != null) {
-      _socket!.on('bookingCreated', (data) {
-        if (data is Map) {
-          final booking = Map<String, dynamic>.from(data);
-          onCreated(booking);
-
-          // Show notification for new order
-          _showNewOrderNotification(booking);
-
-          // Trigger in-app notification
-          if (onNewOrderCallback != null) {
-            onNewOrderCallback!();
-          }
-        }
-      });
-    }
-    if (onUpdated != null) {
-      _socket!.on('bookingUpdated', (data) {
-        if (data is Map) onUpdated(Map<String, dynamic>.from(data));
-      });
-    }
-    if (onLoyalty != null) {
-      _socket!.on('loyaltyUpdated', (data) {
-        if (data is Map) onLoyalty(Map<String, dynamic>.from(data));
-      });
+  /// Connects socket; if [userId] is not provided, read from SharedPreferences.
+  Future<void> connect({String? userId, BookingListener? onCreated, BookingListener? onUpdated, BookingListener? onLoyalty}) async {
+    String? uid = userId;
+    if (uid == null) {
+      final prefs = await SharedPreferences.getInstance();
+      final userStr = prefs.getString('me');
+      if (userStr != null) {
+        final match = RegExp(r'"_id"\s*:\s*"([^"]+)"').firstMatch(userStr);
+        uid = match?.group(1);
+      }
     }
 
-    _socket!.connect();
-  }
+    // Register listeners if provided
+    if (onCreated != null) _impl.addBookingCreatedListener(onCreated);
+    if (onUpdated != null) _impl.addBookingUpdatedListener(onUpdated);
 
-  void disconnect() {
-    _socket?.disconnect();
-    _socket = null;
-  }
-
-  bool get isConnected => _socket?.connected ?? false;
-
-  void reconnect() {
-    if (_socket != null && !_socket!.connected) {
-      print('🔄 Attempting to reconnect socket...');
-      _socket!.connect();
+    if (uid != null) {
+      await _impl.connect(userId: uid);
     }
   }
 
-  void _showNewOrderNotification(Map<String, dynamic> booking) {
-    final customer = booking['customer'] as Map<String, dynamic>?;
-    final service = booking['service'] as Map<String, dynamic>?;
+  void disconnect() => _impl.disconnect();
 
-    final customerName = customer?['name'] ?? 'Khách hàng';
-    final serviceName = service?['name'] ?? 'Dịch vụ';
-    final orderId = booking['_id'] ?? '';
+  bool get isConnected => _impl.isConnected;
 
-    NotificationService().showNewOrderNotification(
-      customerName: customerName,
-      serviceName: serviceName,
-      orderId: orderId,
-    );
-  }
+  void reconnect() => _impl.reconnect();
+
+  // Listener management
+  void addBookingCreatedListener(void Function(Map<String, dynamic>) cb) => _impl.addBookingCreatedListener(cb);
+  void removeBookingCreatedListener(void Function(Map<String, dynamic>) cb) => _impl.removeBookingCreatedListener(cb);
+
+  void addBookingUpdatedListener(void Function(Map<String, dynamic>) cb) => _impl.addBookingUpdatedListener(cb);
+  void removeBookingUpdatedListener(void Function(Map<String, dynamic>) cb) => _impl.removeBookingUpdatedListener(cb);
+
+  // Keep old onNewOrderCallback behavior
+  set onNewOrderCallback(Function()? cb) => impl.SocketService.onNewOrderCallback = cb;
 }
