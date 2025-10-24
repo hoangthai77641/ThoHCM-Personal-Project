@@ -32,9 +32,14 @@ const allowedOrigins = Array.from(new Set([
 
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    // Allow listed web origins and also native/mobile clients without an Origin header
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true); // allow mobile/native
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error(`Socket.IO CORS blocked: ${origin}`), false);
+    },
     methods: ['GET', 'POST'],
-    credentials: true
+    credentials: true,
   }
 });
 

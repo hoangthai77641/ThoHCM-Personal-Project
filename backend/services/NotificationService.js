@@ -2,27 +2,62 @@
 let admin;
 try {
   admin = require('firebase-admin');
-  
+
   // Initialize Firebase Admin SDK if not already initialized
   if (!admin.apps.length) {
-    // In App Engine, use default service account (no file needed)
-    if (process.env.NODE_ENV === 'production') {
-      admin.initializeApp({
-        credential: admin.credential.applicationDefault(),
-        projectId: process.env.FIREBASE_PROJECT_ID || 'thohcm-frontend'
-      });
-      console.log('Firebase Admin SDK initialized with default credentials');
-    } else {
-      // For local development, use service account file
-      const serviceAccountPath = process.env.FIREBASE_ADMIN_SDK_PATH || './config/firebase-admin-sdk.json';
-      const serviceAccount = require(serviceAccountPath);
-      
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        projectId: process.env.FIREBASE_PROJECT_ID || 'thohcm-frontend'
-      });
-      
-      console.log('Firebase Admin SDK initialized with service account file');
+    // Preferred 1: Credentials JSON provided via environment variable (base64 or plain JSON)
+    const embeddedCred = process.env.FIREBASE_CREDENTIALS_JSON;
+    if (embeddedCred) {
+      try {
+        const jsonStr = Buffer.from(embeddedCred, 'base64').toString('utf8');
+        const creds = JSON.parse(jsonStr.startsWith('{') ? jsonStr : embeddedCred);
+        admin.initializeApp({
+          credential: admin.credential.cert(creds),
+          projectId: process.env.FIREBASE_PROJECT_ID || creds.project_id || 'thohcm-frontend',
+        });
+        console.log('Firebase Admin SDK initialized with FIREBASE_CREDENTIALS_JSON');
+      } catch (e) {
+        console.warn('Failed to parse FIREBASE_CREDENTIALS_JSON, falling back. Reason:', e.message);
+      }
+    }
+
+    // Preferred 2: GOOGLE_APPLICATION_CREDENTIALS path (Cloud Run/App Engine secret mount)
+    if (!admin.apps.length && process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+      try {
+        const svcPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+        const serviceAccount = require(svcPath);
+        admin.initializeApp({
+          credential: admin.credential.cert(serviceAccount),
+          projectId: process.env.FIREBASE_PROJECT_ID || serviceAccount.project_id || 'thohcm-frontend',
+        });
+        console.log('Firebase Admin SDK initialized with GOOGLE_APPLICATION_CREDENTIALS');
+      } catch (e) {
+        console.warn('Failed to load GOOGLE_APPLICATION_CREDENTIALS, falling back. Reason:', e.message);
+      }
+    }
+
+    // Preferred 3: Explicit service account file path via env (local/dev)
+    if (!admin.apps.length) {
+      try {
+        const serviceAccountPath = process.env.FIREBASE_ADMIN_SDK_PATH || './config/firebase-admin-sdk.json';
+        const serviceAccount = require(serviceAccountPath);
+        admin.initializeApp({
+          credential: admin.credential.cert(serviceAccount),
+          projectId: process.env.FIREBASE_PROJECT_ID || serviceAccount.project_id || 'thohcm-frontend',
+        });
+        console.log('Firebase Admin SDK initialized with service account file');
+      } catch (e) {
+        // Fallback 4: Application Default Credentials (ADC)
+        try {
+          admin.initializeApp({
+            credential: admin.credential.applicationDefault(),
+            projectId: process.env.FIREBASE_PROJECT_ID || 'thohcm-frontend',
+          });
+          console.log('Firebase Admin SDK initialized with default credentials (ADC)');
+        } catch (adcErr) {
+          console.warn('Failed to initialize Firebase Admin SDK with ADC:', adcErr.message);
+        }
+      }
     }
   }
 } catch (error) {
@@ -223,7 +258,7 @@ class NotificationService {
     try {
       // Check if Firebase Admin SDK is available
       if (!admin) {
-        console.log(`[PUSH] Firebase not configured, skipping push notification to user ${userId}:`, notificationData.title);
+        console.warn(`[PUSH] Firebase not configured, skipping push notification to user ${userId}:`, notificationData.title);
         return false;
       }
       
@@ -257,10 +292,25 @@ class NotificationService {
         };
 
         const response = await admin.messaging().send(message);
-        console.log('Push notification sent:', response);
+        console.log(`[PUSH] Sent to user ${userId} (${user.role}) token suffix ${user.fcmToken.slice(-8)}:`, response);
+        return true;
+      } else {
+        const reason = !user
+          ? 'user not found'
+          : 'no fcmToken on user record';
+        console.warn(`[PUSH] Skip sending to user ${userId}: ${reason}`);
+        return false;
       }
     } catch (error) {
-      console.error('Push notification error:', error);
+      const code = error?.errorInfo?.code || error?.code || 'unknown';
+      console.error(`[PUSH] Error sending to user ${userId} (code=${code}):`, error.message || error);
+      // Common hint for mismatched Firebase project / token
+      if (String(error.message || '').toLowerCase().includes('mismatch') ||
+          String(error.message || '').toLowerCase().includes('sender') ||
+          String(error.message || '').toLowerCase().includes('invalid registration token')) {
+        console.error('[PUSH] Hint: Check that Firebase Admin credentials belong to the SAME Firebase project as the mobile app (google-services.json).');
+      }
+      return false;
     }
   }
 
