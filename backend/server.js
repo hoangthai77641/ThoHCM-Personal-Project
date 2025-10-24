@@ -157,6 +157,7 @@ app.use('/api/banners', bannerRoutes);
 app.use('/api/schedules', workerScheduleRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/wallet', walletRoutes);
+app.use('/api/banking', require('./routes/bankingRoutes'));
 
 // Initialize NotificationService
 const NotificationService = require('./services/NotificationService');

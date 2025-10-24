@@ -82,8 +82,9 @@ const platformFeeSchema = new mongoose.Schema({
   },
   bankAccount: {
     bankName: { type: String, default: 'Vietcombank' },
+    bankCode: { type: String, default: '970436' },
     accountNumber: { type: String, default: '0441000765886' },
-    accountName: { type: String, default: 'CTY TNHH THỢ HCM' }
+    accountName: { type: String, default: 'NGUYEN HOANG THAI' }
   }
 }, { timestamps: true });
 

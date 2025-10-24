@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const VNPayService = require('../services/VNPayService');
 const ZaloPayService = require('../services/ZaloPayService');
 const StripeService = require('../services/StripeService');
+const BankingQRService = require('../services/BankingQRService');
 
 // Initialize payment services
 const vnpayService = new VNPayService();
@@ -141,14 +142,46 @@ exports.createDepositRequest = async (req, res) => {
     
     try {
       if (paymentMethod === 'bank_transfer') {
+        // Generate transaction reference for tracking
+        const transactionRef = BankingQRService.generateTransactionRef(workerId);
+        const description = `NAPVI ${transactionRef}`;
+        
+        // Create QR code for banking
+        const qrResult = await BankingQRService.generateVietQR({
+          bankCode: '970436', // Vietcombank - thay theo ngân hàng thực
+          accountNumber: platformFee.bankAccount.accountNumber,
+          accountName: platformFee.bankAccount.accountName,
+          amount: amount,
+          description: description
+        });
+
+        // Generate banking app deep links
+        const bankingLinks = BankingQRService.generateBankingLinks({
+          accountNumber: platformFee.bankAccount.accountNumber,
+          amount: amount,
+          description: description
+        });
+
         paymentInfo = {
           type: 'bank_transfer',
           bankName: platformFee.bankAccount.bankName,
           accountNumber: platformFee.bankAccount.accountNumber,
           accountName: platformFee.bankAccount.accountName,
           amount: amount,
-          description: `NAPVI ${paymentReference}`,
-          qrCode: `https://img.vietqr.io/image/${platformFee.bankAccount.bankName}-${platformFee.bankAccount.accountNumber}-compact2.png?amount=${amount}&addInfo=NAPVI%20${paymentReference}&accountName=${encodeURIComponent(platformFee.bankAccount.accountName)}`
+          description: description,
+          transactionRef: transactionRef,
+          // QR Code options
+          qrCode: qrResult.qrCode, // Base64 QR image
+          vietQRUrl: `https://img.vietqr.io/image/970436-${platformFee.bankAccount.accountNumber}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(description)}&accountName=${encodeURIComponent(platformFee.bankAccount.accountName)}`,
+          // Banking app deep links  
+          bankingLinks: bankingLinks,
+          // Instructions
+          instructions: [
+            '1. Quét mã QR bằng app ngân hàng',
+            '2. Hoặc chuyển khoản thủ công với nội dung chính xác',
+            `3. Nội dung CK: ${description}`,
+            '4. Chờ xác nhận tự động (1-5 phút)'
+          ]
         };
       } else if (paymentMethod === 'momo') {
         paymentInfo = {
