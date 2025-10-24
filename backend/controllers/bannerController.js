@@ -77,7 +77,8 @@ exports.createBanner = async (req, res) => {
       return res.status(400).json({ message: 'Banner image is required' });
     }
     
-  const imageUrl = `/storage/banners/${req.file.filename}`;
+    // Use Google Cloud Storage URL from upload-gcs middleware
+    const imageUrl = req.file.gcsUrl || req.file.cloudStoragePublicUrl;
     
     const banner = new Banner({
       title,
@@ -142,7 +143,7 @@ exports.updateBanner = async (req, res) => {
           fs.unlinkSync(oldImagePath);
         }
       }
-  banner.imageUrl = `/storage/banners/${req.file.filename}`;
+  banner.imageUrl = req.file.gcsUrl || req.file.cloudStoragePublicUrl;
     }
     
     await banner.save();

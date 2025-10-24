@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bannerController = require('../controllers/bannerController');
 const auth = require('../middleware/auth');
-const { uploadBanner } = require('../middleware/upload');
+const { uploadBanner } = require('../middleware/upload-gcs');
 const { validateObjectIdParam } = require('../middleware/validation');
 
 // Public routes (for mobile app)
