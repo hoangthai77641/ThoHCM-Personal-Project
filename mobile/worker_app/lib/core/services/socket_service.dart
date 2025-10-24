@@ -155,7 +155,6 @@ class SocketService {
         }
       });
 
-
       // Listen for job assignments (for workers)
       _socket!.on('new_job_assignment', (data) {
         log('Received new job assignment: $data');

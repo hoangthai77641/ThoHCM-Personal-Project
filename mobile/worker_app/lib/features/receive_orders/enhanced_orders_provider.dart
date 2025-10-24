@@ -59,7 +59,8 @@ class EnhancedOrdersProvider with ChangeNotifier {
             NotificationType.newOrder,
           );
 
-          _lastNotification = 'Nhận đơn hàng mới từ ${booking.customer?['name'] ?? 'khách hàng'}';
+          _lastNotification =
+              'Nhận đơn hàng mới từ ${booking.customer?['name'] ?? 'khách hàng'}';
           notifyListeners();
         }
       } catch (e) {

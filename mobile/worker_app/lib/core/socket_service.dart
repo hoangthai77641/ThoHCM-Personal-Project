@@ -9,7 +9,12 @@ class SocketService {
   final impl.SocketService _impl = impl.SocketService();
 
   /// Connects socket; if [userId] is not provided, read from SharedPreferences.
-  Future<void> connect({String? userId, BookingListener? onCreated, BookingListener? onUpdated, BookingListener? onLoyalty}) async {
+  Future<void> connect({
+    String? userId,
+    BookingListener? onCreated,
+    BookingListener? onUpdated,
+    BookingListener? onLoyalty,
+  }) async {
     String? uid = userId;
     if (uid == null) {
       final prefs = await SharedPreferences.getInstance();
@@ -36,12 +41,17 @@ class SocketService {
   void reconnect() => _impl.reconnect();
 
   // Listener management
-  void addBookingCreatedListener(void Function(Map<String, dynamic>) cb) => _impl.addBookingCreatedListener(cb);
-  void removeBookingCreatedListener(void Function(Map<String, dynamic>) cb) => _impl.removeBookingCreatedListener(cb);
+  void addBookingCreatedListener(void Function(Map<String, dynamic>) cb) =>
+      _impl.addBookingCreatedListener(cb);
+  void removeBookingCreatedListener(void Function(Map<String, dynamic>) cb) =>
+      _impl.removeBookingCreatedListener(cb);
 
-  void addBookingUpdatedListener(void Function(Map<String, dynamic>) cb) => _impl.addBookingUpdatedListener(cb);
-  void removeBookingUpdatedListener(void Function(Map<String, dynamic>) cb) => _impl.removeBookingUpdatedListener(cb);
+  void addBookingUpdatedListener(void Function(Map<String, dynamic>) cb) =>
+      _impl.addBookingUpdatedListener(cb);
+  void removeBookingUpdatedListener(void Function(Map<String, dynamic>) cb) =>
+      _impl.removeBookingUpdatedListener(cb);
 
   // Keep old onNewOrderCallback behavior
-  set onNewOrderCallback(Function()? cb) => impl.SocketService.onNewOrderCallback = cb;
+  set onNewOrderCallback(Function()? cb) =>
+      impl.SocketService.onNewOrderCallback = cb;
 }

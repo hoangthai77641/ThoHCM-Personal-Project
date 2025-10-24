@@ -1,0 +1,27 @@
+runtime: nodejs20
+
+instance_class: F2
+
+env_variables:
+  NODE_ENV: "production"
+  MONGODB_URI: "mongodb+srv://username:password@cluster.mongodb.net/thohcm"
+  JWT_SECRET: "your-strong-jwt-secret-key-here"
+  JWT_EXPIRES_IN: "7d"
+  ALLOWED_ORIGINS: "https://thohcm-application.web.app,https://thohcm-frontend.web.app"
+  GCS_BUCKET_NAME: "thohcm-storage-20251023215825"
+  FIREBASE_PROJECT_ID: "thohcm-frontend"
+
+automatic_scaling:
+  min_instances: 1
+  max_instances: 5
+  target_cpu_utilization: 0.65
+  target_throughput_utilization: 0.7
+
+handlers:
+  - url: /uploads
+    static_dir: uploads
+    secure: always
+    
+  - url: /.*
+    script: auto
+    secure: always

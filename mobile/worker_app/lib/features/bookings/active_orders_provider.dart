@@ -29,7 +29,9 @@ class ActiveOrdersProvider with ChangeNotifier {
         // new bookings may become active later; reload list to be safe
         loadActiveOrders();
       } catch (e) {
-        print('Error handling bookingCreated in Bookings.activeOrdersProvider: $e');
+        print(
+          'Error handling bookingCreated in Bookings.activeOrdersProvider: $e',
+        );
       }
     });
 
@@ -46,7 +48,9 @@ class ActiveOrdersProvider with ChangeNotifier {
           notifyListeners();
         }
       } catch (e) {
-        print('Error handling bookingUpdated in Bookings.activeOrdersProvider: $e');
+        print(
+          'Error handling bookingUpdated in Bookings.activeOrdersProvider: $e',
+        );
       }
     });
   }

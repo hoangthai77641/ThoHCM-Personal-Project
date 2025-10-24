@@ -67,7 +67,9 @@ class ActiveOrdersProvider with ChangeNotifier {
   void _onSocketBookingUpdated(Map<String, dynamic> bookingData) {
     final booking = Booking.fromJson(bookingData);
     if (booking.status == 'confirmed') {
-      final existingIndex = _orders.indexWhere((order) => order.id == booking.id);
+      final existingIndex = _orders.indexWhere(
+        (order) => order.id == booking.id,
+      );
       if (existingIndex == -1) {
         _orders.insert(0, booking);
         notifyListeners();

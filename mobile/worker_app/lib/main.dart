@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'core/app_theme.dart';
 import 'core/api_client.dart';
 import 'features/auth/auth_provider.dart';
@@ -16,17 +18,27 @@ import 'features/notifications/notifications_provider.dart';
 import 'core/providers/review_provider.dart';
 import 'core/repositories/review_repository.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/firebase_messaging_service.dart';
 import 'core/providers/work_mode_provider.dart';
 import 'core/providers/socket_provider.dart';
 import 'features/wallet/wallet_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
   await initializeDateFormatting('vi_VN');
 
   // Initialize notification service and request permissions
   await NotificationService().initialize();
   await NotificationService().requestPermissions();
+  
+  // Initialize Firebase Messaging Service
+  await FirebaseMessagingService().initialize();
 
   runApp(const MyApp());
 }

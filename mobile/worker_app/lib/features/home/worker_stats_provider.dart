@@ -42,13 +42,19 @@ class WorkerStatsProvider extends ChangeNotifier {
     print('📊 WorkerStatsProvider: Initializing socket listener');
     _socket.addBookingUpdatedListener((booking) {
       try {
-        print('📊 WorkerStatsProvider: Received booking update: ${booking['status']}');
+        print(
+          '📊 WorkerStatsProvider: Received booking update: ${booking['status']}',
+        );
         if (booking['status'] == 'done') {
-          print('📊 WorkerStatsProvider: Booking completed, refreshing stats...');
+          print(
+            '📊 WorkerStatsProvider: Booking completed, refreshing stats...',
+          );
           load();
         }
       } catch (e) {
-        print('📊 WorkerStatsProvider: Error handling socket booking update: $e');
+        print(
+          '📊 WorkerStatsProvider: Error handling socket booking update: $e',
+        );
       }
     });
 

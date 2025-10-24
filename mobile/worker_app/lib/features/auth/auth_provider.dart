@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'auth_repository.dart';
 import '../../core/services/socket_service.dart';
+import '../../core/services/firebase_messaging_service.dart';
 import '../notifications/notifications_provider.dart';
 
 class AuthProvider with ChangeNotifier {
@@ -19,8 +20,12 @@ class AuthProvider with ChangeNotifier {
   Future<bool> tryRestoreSession() async {
     user = await _repo.getMe();
     if (user != null) {
-      // Connect to socket for real-time notifications
-      await SocketService().connect(userId: user!['_id'] ?? user!['id']);
+      // Connect to socket for real-time notifications and update FCM token
+      final userId = user!['_id'] ?? user!['id'];
+      await SocketService().connect(userId: userId);
+      
+      // Update FCM token on server for push notifications
+      await FirebaseMessagingService().onUserLogin(userId);
     }
     notifyListeners();
     return user != null;
@@ -36,9 +41,13 @@ class AuthProvider with ChangeNotifier {
       final data = await _repo.login(phone: phone, password: password);
       user = data['user'];
 
-      // Connect to socket for real-time notifications
+      // Connect to socket for real-time notifications and update FCM token
       if (user != null) {
-        await SocketService().connect(userId: user!['_id'] ?? user!['id']);
+        final userId = user!['_id'] ?? user!['id'];
+        await SocketService().connect(userId: userId);
+        
+        // Update FCM token on server for push notifications
+        await FirebaseMessagingService().onUserLogin(userId);
       }
 
       loading = false;
@@ -61,8 +70,14 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> logout() async {
-    // Disconnect socket
+    final userId = user?['_id'] ?? user?['id'];
+    
+    // Disconnect socket and clean up FCM subscriptions
     SocketService().disconnect();
+    
+    if (userId != null) {
+      await FirebaseMessagingService().onUserLogout(userId);
+    }
 
     await _repo.logout();
     user = null;
