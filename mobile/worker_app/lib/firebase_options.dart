@@ -50,11 +50,11 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDj6LnKLloRNBRBH_aynxPCuzk1elB6zZc',
-    appId: '1:496907434955:android:7b2889bb09b8369082662b',
-    messagingSenderId: '496907434955',
+    apiKey: 'AIzaSyBX8wUHd0eEmJMV9oiT2mKkX-X0p_PyVI8',
+    appId: '1:934121380383:android:c0b4eba8672a9e0997532a',
+    messagingSenderId: '934121380383',
     projectId: 'thohcm-frontend',
-    storageBucket: 'thohcm-frontend.appspot.com',
+    storageBucket: 'thohcm-frontend.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

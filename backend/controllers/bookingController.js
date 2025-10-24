@@ -3,6 +3,7 @@ const Service = require('../models/Service');
 const User = require('../models/User');
 const { assignOptimalWorker, getWorkerAvailability } = require('../utils/workerAssignment');
 const { deductPlatformFee } = require('./walletController');
+const NotificationService = require('../services/NotificationService');
 
 exports.createBooking = async (req, res) => {
   try {
@@ -130,9 +131,25 @@ exports.createBooking = async (req, res) => {
         io.to(String(booking.worker)).emit('bookingCreated', populated);
         // Emit to all customers for availability updates (not duplicate for worker)
         io.emit('bookingConflict', { serviceId: booking.service, date: booking.date });
+        
+        // Send FCM push notification to worker
+        const notificationService = new NotificationService(io);
+        await notificationService.sendPushNotification(booking.worker, {
+          title: 'Đơn hàng mới!',
+          body: `Khách hàng ${populated.customer.name} vừa đặt lịch ${populated.service.name}`,
+          data: {
+            type: 'new_order',
+            bookingId: booking._id.toString(),
+            customerId: populated.customer._id.toString(),
+            customerName: populated.customer.name,
+            serviceName: populated.service.name,
+            orderId: booking._id.toString()
+          }
+        });
+        console.log(`✅ FCM notification sent to worker ${booking.worker} for booking ${booking._id}`);
       }
     } catch (e) {
-      console.error('Socket emit error', e.message);
+      console.error('Socket/FCM emit error', e.message);
     }
 
     res.status(201).json(populated);
