@@ -128,6 +128,11 @@ exports.createBooking = async (req, res) => {
       const io = req.app.get('io');
       if (io && booking.worker) {
         // Emit to specific worker room
+        try {
+          const room = String(booking.worker);
+          const socketsInRoom = await io.in(room).fetchSockets();
+          console.log(`[SOCKET] Emitting bookingCreated to worker room ${room} (connections=${socketsInRoom.length}) for booking ${booking._id}`);
+        } catch (_) {}
         io.to(String(booking.worker)).emit('bookingCreated', populated);
         // Emit to all customers for availability updates (not duplicate for worker)
         io.emit('bookingConflict', { serviceId: booking.service, date: booking.date });
