@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://thohcm-application-475603.as.r.appspot.com'
+const API_URL = import.meta.env.VITE_API_URL || 'https://thohcm-backend-181755246333.asia-southeast1.run.app'
 
 const client = axios.create({
   baseURL: API_URL,
