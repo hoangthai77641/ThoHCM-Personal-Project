@@ -252,12 +252,21 @@ exports.getService = async (req, res) => {
 
 exports.updateService = async (req, res) => {
   try {
-    const service = await Service.findById(req.params.id);
-    if (!service) return res.status(404).json({ message: 'Not found' });
+    console.log('=== UPDATE SERVICE DEBUG ===');
+    console.log('Service ID:', req.params.id);
+    console.log('Request body keys:', Object.keys(req.body));
+    console.log('Files:', req.files ? Object.keys(req.files) : 'none');
     
-    // Handle simple fields
+    const service = await Service.findById(req.params.id);
+    if (!service) return res.status(404).json({ message: 'Service not found' });
+    
+    // Handle simple fields with validation
     const fields = ['name', 'description', 'basePrice','promoPercent','isActive','category'];
-    fields.forEach(f=> { if (req.body[f] !== undefined) service[f] = req.body[f]; });
+    fields.forEach(field => { 
+      if (req.body[field] !== undefined && req.body[field] !== null) {
+        service[field] = req.body[field];
+      }
+    });
     
     // Handle uploaded files
     const newImageUrls = [];
@@ -269,6 +278,7 @@ exports.updateService = async (req, res) => {
         req.files.images.forEach(file => {
           newImageUrls.push(`/storage/services/${file.filename}`);
         });
+        console.log('New images uploaded:', newImageUrls.length);
       }
       
       // Process uploaded videos
@@ -276,28 +286,57 @@ exports.updateService = async (req, res) => {
         req.files.videos.forEach(file => {
           newVideoUrls.push(`/storage/services/${file.filename}`);
         });
+        console.log('New videos uploaded:', newVideoUrls.length);
       }
     }
     
-    // Handle existing media from request body
+    // Safe JSON parsing helper
+    const safeParseJSON = (value, fallback = []) => {
+      if (Array.isArray(value)) return value;
+      if (!value || value === 'null' || value === 'undefined') return fallback;
+      
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : fallback;
+      } catch (error) {
+        console.warn('JSON parse error for value:', value, 'Error:', error.message);
+        return fallback;
+      }
+    };
+    
+    // Handle existing media from request body with safe parsing
     if (req.body.images !== undefined) {
-      const existingImages = Array.isArray(req.body.images) ? req.body.images : (req.body.images ? JSON.parse(req.body.images) : []);
+      console.log('Processing existing images:', req.body.images);
+      const existingImages = safeParseJSON(req.body.images, []);
       service.images = [...existingImages, ...newImageUrls];
     } else if (newImageUrls.length > 0) {
       service.images = [...(service.images || []), ...newImageUrls];
     }
     
     if (req.body.videos !== undefined) {
-      const existingVideos = Array.isArray(req.body.videos) ? req.body.videos : (req.body.videos ? JSON.parse(req.body.videos) : []);
+      console.log('Processing existing videos:', req.body.videos);
+      const existingVideos = safeParseJSON(req.body.videos, []);
       service.videos = [...existingVideos, ...newVideoUrls];
     } else if (newVideoUrls.length > 0) {
       service.videos = [...(service.videos || []), ...newVideoUrls];
     }
     
+    console.log('Final service data before save:', {
+      name: service.name,
+      imagesCount: service.images?.length || 0,
+      videosCount: service.videos?.length || 0
+    });
+    
     await service.save();
+    console.log('✅ Service updated successfully');
     res.json(decorate(service, req.user));
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.error('❌ Service update error:', err.message);
+    console.error('Error stack:', err.stack);
+    res.status(400).json({ 
+      error: err.message,
+      details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
   }
 };
 

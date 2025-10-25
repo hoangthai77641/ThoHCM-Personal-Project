@@ -90,11 +90,11 @@ const serviceUpload = multer({
   storage: serviceStorage,
   fileFilter: serviceFileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit (reduced from 50MB)
-    files: 8, // Maximum 8 files total (reduced from 10)
-    fieldSize: 1024 * 1024, // 1MB field size limit
+    fileSize: 15 * 1024 * 1024, // Tăng lên 15MB để handle file lớn
+    files: 8, // Maximum 8 files total
+    fieldSize: 2 * 1024 * 1024, // Tăng lên 2MB cho text fields
     fieldNameSize: 100, // 100 bytes field name limit
-    fields: 10 // Maximum 10 fields
+    fields: 20 // Tăng số fields cho JSON data
   }
 });
 
@@ -152,11 +152,67 @@ const bannerUpload = multer({
   }
 });
 
-// Middleware for handling service media uploads
-const uploadServiceMedia = serviceUpload.fields([
-  { name: 'images', maxCount: 5 },
-  { name: 'videos', maxCount: 3 }
-]);
+// Error handling wrapper for service uploads
+const handleServiceUpload = (req, res, next) => {
+  const upload = serviceUpload.fields([
+    { name: 'images', maxCount: 5 },
+    { name: 'videos', maxCount: 3 }
+  ]);
+  
+  upload(req, res, (error) => {
+    if (error) {
+      console.error('❌ Upload error:', error.message);
+      
+      if (error.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({ 
+          error: 'File too large', 
+          message: 'File size must be less than 15MB',
+          maxSize: '15MB'
+        });
+      }
+      
+      if (error.code === 'LIMIT_FILE_COUNT') {
+        return res.status(413).json({ 
+          error: 'Too many files', 
+          message: 'Maximum 8 files allowed total (5 images + 3 videos)'
+        });
+      }
+      
+      if (error.code === 'LIMIT_FIELD_VALUE') {
+        return res.status(413).json({ 
+          error: 'Field value too large', 
+          message: 'Text field size must be less than 2MB'
+        });
+      }
+      
+      if (error.code === 'LIMIT_UNEXPECTED_FILE') {
+        return res.status(400).json({ 
+          error: 'Unexpected file field', 
+          message: 'Only images and videos fields are allowed'
+        });
+      }
+      
+      return res.status(400).json({ 
+        error: 'Upload error', 
+        message: error.message 
+      });
+    }
+    
+    // Log successful upload info
+    if (req.files) {
+      console.log('📁 Files uploaded successfully:', {
+        images: req.files.images?.length || 0,
+        videos: req.files.videos?.length || 0,
+        totalSize: Object.values(req.files).flat().reduce((sum, file) => sum + (file.size || 0), 0)
+      });
+    }
+    
+    next();
+  });
+};
+
+// Keep the old export for backward compatibility
+const uploadServiceMedia = handleServiceUpload;
 
 // Middleware for handling banner uploads
 const uploadBanner = bannerUpload.single('image');
