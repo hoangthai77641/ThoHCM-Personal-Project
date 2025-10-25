@@ -51,6 +51,20 @@ exports.createService = async (req, res) => {
       return res.status(400).json({ error: 'Tên dịch vụ là bắt buộc' });
     }
     
+    // Safe JSON parsing helper
+    const safeParseJSON = (value, fallback = []) => {
+      if (Array.isArray(value)) return value;
+      if (!value || value === 'null' || value === 'undefined') return fallback;
+      
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : fallback;
+      } catch (error) {
+        console.warn('JSON parse error for value:', value, 'Error:', error.message);
+        return fallback;
+      }
+    };
+
     // Handle uploaded files
     const imageUrls = [];
     const videoUrls = [];
@@ -61,6 +75,7 @@ exports.createService = async (req, res) => {
         req.files.images.forEach(file => {
           imageUrls.push(`/storage/services/${file.filename}`);
         });
+        console.log('📁 Images uploaded:', imageUrls.length);
       }
       
       // Process uploaded videos
@@ -68,12 +83,46 @@ exports.createService = async (req, res) => {
         req.files.videos.forEach(file => {
           videoUrls.push(`/storage/services/${file.filename}`);
         });
+        console.log('📁 Videos uploaded:', videoUrls.length);
       }
     }
     
+    // URL validation helper
+    const isValidUrl = (string) => {
+      try {
+        new URL(string);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    };
+
+    // Handle URL inputs from mobile app
+    if (req.body.newImageUrls) {
+      const urlImages = safeParseJSON(req.body.newImageUrls, [])
+        .filter(url => {
+          const valid = isValidUrl(url);
+          if (!valid) console.warn('❌ Invalid image URL:', url);
+          return valid;
+        });
+      imageUrls.push(...urlImages);
+      console.log('🌐 Valid image URLs added:', urlImages.length);
+    }
+    
+    if (req.body.newVideoUrls) {
+      const urlVideos = safeParseJSON(req.body.newVideoUrls, [])
+        .filter(url => {
+          const valid = isValidUrl(url);
+          if (!valid) console.warn('❌ Invalid video URL:', url);
+          return valid;
+        });
+      videoUrls.push(...urlVideos);
+      console.log('🌐 Valid video URLs added:', urlVideos.length);
+    }
+    
     // Merge with existing images/videos from request body (for updates)
-    const existingImages = Array.isArray(images) ? images : (images ? JSON.parse(images) : []);
-    const existingVideos = Array.isArray(videos) ? videos : (videos ? JSON.parse(videos) : []);
+    const existingImages = safeParseJSON(images, []);
+    const existingVideos = safeParseJSON(videos, []);
     
     const allImages = [...existingImages, ...imageUrls];
     const allVideos = [...existingVideos, ...videoUrls];
@@ -290,6 +339,39 @@ exports.updateService = async (req, res) => {
         });
         console.log('New videos uploaded:', newVideoUrls.length, newVideoUrls);
       }
+    }
+    
+    // URL validation helper
+    const isValidUrl = (string) => {
+      try {
+        new URL(string);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    };
+
+    // Handle URL inputs from mobile app (ảnh/video từ URL)
+    if (req.body.newImageUrls) {
+      const urlImages = safeParseJSON(req.body.newImageUrls, [])
+        .filter(url => {
+          const valid = isValidUrl(url);
+          if (!valid) console.warn('❌ Invalid image URL:', url);
+          return valid;
+        });
+      newImageUrls.push(...urlImages);
+      console.log('🌐 Valid image URLs added:', urlImages.length, urlImages);
+    }
+    
+    if (req.body.newVideoUrls) {
+      const urlVideos = safeParseJSON(req.body.newVideoUrls, [])
+        .filter(url => {
+          const valid = isValidUrl(url);
+          if (!valid) console.warn('❌ Invalid video URL:', url);
+          return valid;
+        });
+      newVideoUrls.push(...urlVideos);
+      console.log('🌐 Valid video URLs added:', urlVideos.length, urlVideos);
     }
     
     // Safe JSON parsing helper
