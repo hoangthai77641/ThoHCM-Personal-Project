@@ -96,11 +96,17 @@ const staticLimiter = rateLimit({
 
 // Compatibility redirect for old mobile app URLs
 app.use('/uploads/services', (req, res) => {
-  // Handle both /uploads/services/storage/services and /uploads/services/ paths
   let newPath;
+  
   if (req.path.startsWith('/storage/services')) {
     // Case: /uploads/services/storage/services/file.jpg -> /storage/services/file.jpg
+    // Remove the duplicate /storage/services part
     newPath = req.path;
+  } else if (req.path.startsWith('//storage/services')) {
+    // Case: /uploads/services//storage/services/file.jpg -> /storage/services/file.jpg  
+    // Remove double slash and first /storage/services
+    newPath = req.path.replace('//', '/').replace('/storage/services', '');
+    newPath = `/storage/services${newPath}`;
   } else {
     // Case: /uploads/services/file.jpg -> /storage/services/file.jpg
     newPath = `/storage/services${req.path}`;

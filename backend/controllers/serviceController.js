@@ -99,25 +99,49 @@ exports.createService = async (req, res) => {
 
     // Handle URL inputs from mobile app
     if (req.body.newImageUrls) {
-      const urlImages = safeParseJSON(req.body.newImageUrls, [])
-        .filter(url => {
-          const valid = isValidUrl(url);
-          if (!valid) console.warn('❌ Invalid image URL:', url);
-          return valid;
-        });
-      imageUrls.push(...urlImages);
-      console.log('🌐 Valid image URLs added:', urlImages.length);
+      let urlImages;
+      // Handle both array and single string
+      if (typeof req.body.newImageUrls === 'string') {
+        if (isValidUrl(req.body.newImageUrls)) {
+          urlImages = [req.body.newImageUrls];
+        } else {
+          urlImages = safeParseJSON(req.body.newImageUrls, []);
+        }
+      } else {
+        urlImages = Array.isArray(req.body.newImageUrls) ? req.body.newImageUrls : [];
+      }
+      
+      const validImageUrls = urlImages.filter(url => {
+        const valid = isValidUrl(url);
+        if (!valid) console.warn('❌ Invalid image URL:', url);
+        return valid;
+      });
+      
+      imageUrls.push(...validImageUrls);
+      console.log('🌐 Valid image URLs added:', validImageUrls.length);
     }
     
     if (req.body.newVideoUrls) {
-      const urlVideos = safeParseJSON(req.body.newVideoUrls, [])
-        .filter(url => {
-          const valid = isValidUrl(url);
-          if (!valid) console.warn('❌ Invalid video URL:', url);
-          return valid;
-        });
-      videoUrls.push(...urlVideos);
-      console.log('🌐 Valid video URLs added:', urlVideos.length);
+      let urlVideos;
+      // Handle both array and single string
+      if (typeof req.body.newVideoUrls === 'string') {
+        if (isValidUrl(req.body.newVideoUrls)) {
+          urlVideos = [req.body.newVideoUrls];
+        } else {
+          urlVideos = safeParseJSON(req.body.newVideoUrls, []);
+        }
+      } else {
+        urlVideos = Array.isArray(req.body.newVideoUrls) ? req.body.newVideoUrls : [];
+      }
+      
+      const validVideoUrls = urlVideos.filter(url => {
+        const valid = isValidUrl(url);
+        if (!valid) console.warn('❌ Invalid video URL:', url);
+        return valid;
+      });
+      
+      videoUrls.push(...validVideoUrls);
+      console.log('🌐 Valid video URLs added:', validVideoUrls.length);
     }
     
     // Merge with existing images/videos from request body (for updates)
@@ -353,25 +377,49 @@ exports.updateService = async (req, res) => {
 
     // Handle URL inputs from mobile app (ảnh/video từ URL)
     if (req.body.newImageUrls) {
-      const urlImages = safeParseJSON(req.body.newImageUrls, [])
-        .filter(url => {
-          const valid = isValidUrl(url);
-          if (!valid) console.warn('❌ Invalid image URL:', url);
-          return valid;
-        });
-      newImageUrls.push(...urlImages);
-      console.log('🌐 Valid image URLs added:', urlImages.length, urlImages);
+      let urlImages;
+      // Handle both array and single string
+      if (typeof req.body.newImageUrls === 'string') {
+        if (isValidUrl(req.body.newImageUrls)) {
+          urlImages = [req.body.newImageUrls];
+        } else {
+          urlImages = safeParseJSON(req.body.newImageUrls, []);
+        }
+      } else {
+        urlImages = Array.isArray(req.body.newImageUrls) ? req.body.newImageUrls : [];
+      }
+      
+      const validImageUrls = urlImages.filter(url => {
+        const valid = isValidUrl(url);
+        if (!valid) console.warn('❌ Invalid image URL:', url);
+        return valid;
+      });
+      
+      newImageUrls.push(...validImageUrls);
+      console.log('🌐 Valid image URLs added:', validImageUrls.length, validImageUrls);
     }
     
     if (req.body.newVideoUrls) {
-      const urlVideos = safeParseJSON(req.body.newVideoUrls, [])
-        .filter(url => {
-          const valid = isValidUrl(url);
-          if (!valid) console.warn('❌ Invalid video URL:', url);
-          return valid;
-        });
-      newVideoUrls.push(...urlVideos);
-      console.log('🌐 Valid video URLs added:', urlVideos.length, urlVideos);
+      let urlVideos;
+      // Handle both array and single string
+      if (typeof req.body.newVideoUrls === 'string') {
+        if (isValidUrl(req.body.newVideoUrls)) {
+          urlVideos = [req.body.newVideoUrls];
+        } else {
+          urlVideos = safeParseJSON(req.body.newVideoUrls, []);
+        }
+      } else {
+        urlVideos = Array.isArray(req.body.newVideoUrls) ? req.body.newVideoUrls : [];
+      }
+      
+      const validVideoUrls = urlVideos.filter(url => {
+        const valid = isValidUrl(url);
+        if (!valid) console.warn('❌ Invalid video URL:', url);
+        return valid;
+      });
+      
+      newVideoUrls.push(...validVideoUrls);
+      console.log('🌐 Valid video URLs added:', validVideoUrls.length, validVideoUrls);
     }
     
     // Safe JSON parsing helper
