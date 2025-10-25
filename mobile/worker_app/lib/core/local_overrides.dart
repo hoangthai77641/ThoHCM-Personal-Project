@@ -1,8 +1,8 @@
-// Updated to use production backend API
-// API calls use App Engine (stable HTTP REST)
+// Updated to use production backend API  
+// Both API calls and Socket.IO use Cloud Run (unified backend)
 const String? kLanApiBase =
-    'https://thohcm-application-475603.as.r.appspot.com';
+    'https://thohcm-backend-181755246333.asia-southeast1.run.app';
 
-// Socket.IO base URL - Use Cloud Run (supports WebSocket)
+// Socket.IO base URL - Use same Cloud Run endpoint
 const String? kLanSocketBase =
     'https://thohcm-backend-181755246333.asia-southeast1.run.app';
