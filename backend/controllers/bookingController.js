@@ -139,19 +139,26 @@ exports.createBooking = async (req, res) => {
         
         // Send FCM push notification to worker
         const notificationService = new NotificationService(io);
-        await notificationService.sendPushNotification(booking.worker, {
+        const pushResult = await notificationService.sendPushNotification(booking.worker, {
           title: 'Đơn hàng mới!',
-          body: `Khách hàng ${populated.customer.name} vừa đặt lịch ${populated.service.name}`,
+          body: `Khách hàng ${populated.customer.name} vừa đặt lịch ${populated.service.name} lúc ${new Date(booking.date).toLocaleString('vi-VN')}`,
           data: {
             type: 'new_order',
             bookingId: booking._id.toString(),
             customerId: populated.customer._id.toString(),
             customerName: populated.customer.name,
             serviceName: populated.service.name,
-            orderId: booking._id.toString()
+            orderId: booking._id.toString(),
+            bookingDate: booking.date.toISOString(),
+            customerAddress: booking.address
           }
         });
-        console.log(`✅ FCM notification sent to worker ${booking.worker} for booking ${booking._id}`);
+        
+        if (pushResult) {
+          console.log(`✅ FCM notification sent successfully to worker ${booking.worker} for booking ${booking._id}`);
+        } else {
+          console.log(`❌ Failed to send FCM notification to worker ${booking.worker} for booking ${booking._id}`);
+        }
       }
     } catch (e) {
       console.error('Socket/FCM emit error', e.message);
