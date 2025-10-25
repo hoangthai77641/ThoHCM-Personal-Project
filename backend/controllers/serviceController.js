@@ -276,17 +276,19 @@ exports.updateService = async (req, res) => {
       // Process uploaded images
       if (req.files.images) {
         req.files.images.forEach(file => {
+          // Đường dẫn chính xác cho static file serving
           newImageUrls.push(`/storage/services/${file.filename}`);
         });
-        console.log('New images uploaded:', newImageUrls.length);
+        console.log('New images uploaded:', newImageUrls.length, newImageUrls);
       }
       
       // Process uploaded videos
       if (req.files.videos) {
         req.files.videos.forEach(file => {
+          // Đường dẫn chính xác cho static file serving  
           newVideoUrls.push(`/storage/services/${file.filename}`);
         });
-        console.log('New videos uploaded:', newVideoUrls.length);
+        console.log('New videos uploaded:', newVideoUrls.length, newVideoUrls);
       }
     }
     

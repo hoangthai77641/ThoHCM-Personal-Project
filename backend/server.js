@@ -94,6 +94,13 @@ const staticLimiter = rateLimit({
   message: 'Too many file requests, please try again later.'
 });
 
+// Compatibility redirect for old mobile app URLs
+app.use('/uploads/services/storage/services', (req, res) => {
+  const newPath = `/storage/services${req.path}`;
+  console.log(`🔄 Redirecting old URL: ${req.originalUrl} -> ${newPath}`);
+  res.redirect(301, newPath);
+});
+
 // Serve static files with security headers and rate limiting
 app.use('/storage', staticLimiter, (req, res, next) => {
   // Prevent directory traversal by rejecting suspicious paths early
