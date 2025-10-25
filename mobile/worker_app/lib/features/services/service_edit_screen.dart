@@ -76,10 +76,6 @@ class _ServiceEditScreenState extends State<ServiceEditScreen> {
           ? List<String>.from(widget.service!['videos'] ?? [])
           : <String>[];
 
-      // Combine original + new URLs (don't use _existingImages/_existingVideos as they're already combined)
-      final allImages = [...originalImages, ...newImageUrls];
-      final allVideos = [...originalVideos, ...newVideoUrls];
-
       final payload = {
         'name': _nameController.text.trim(),
         'description': _descController.text.trim(),
@@ -87,8 +83,12 @@ class _ServiceEditScreenState extends State<ServiceEditScreen> {
           'basePrice': int.tryParse(_priceController.text.trim()),
         if (_promoController.text.trim().isNotEmpty)
           'promoPercent': int.tryParse(_promoController.text.trim()),
-        'images': allImages,
-        'videos': allVideos,
+        // Send existing URLs only
+        'images': originalImages,
+        'videos': originalVideos,
+        // Send new URLs separately for backend to process
+        if (newImageUrls.isNotEmpty) 'newImageUrls': newImageUrls,
+        if (newVideoUrls.isNotEmpty) 'newVideoUrls': newVideoUrls,
       };
 
       print('💾 Save service payload:');
@@ -98,8 +98,6 @@ class _ServiceEditScreenState extends State<ServiceEditScreen> {
       print('  newVideos: ${newVideos.length}');
       print('  newImageUrls: $newImageUrls');
       print('  newVideoUrls: $newVideoUrls');
-      print('  allImages: $allImages');
-      print('  allVideos: $allVideos');
 
       if (widget.service == null) {
         await _repo.create(payload, images: newImages, videos: newVideos);

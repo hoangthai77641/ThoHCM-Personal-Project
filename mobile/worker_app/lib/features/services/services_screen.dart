@@ -121,19 +121,21 @@ class _ServicesScreenState extends State<ServicesScreen> {
                 // Debug: Print service data structure
                 print('Service data: ${service.toString()}');
 
-                // Handle image URL correctly - check if it's already a full URL or just filename
+                // Handle image URL correctly - check if it's already a full URL or path
                 String? imageUrl;
                 if (service['images'] != null &&
                     (service['images'] as List).isNotEmpty) {
                   final firstImage = (service['images'] as List)[0] as String;
                   if (firstImage.startsWith('http://') ||
                       firstImage.startsWith('https://')) {
-                    // Already a complete URL
+                    // Already a complete URL (external image)
                     imageUrl = firstImage;
+                  } else if (firstImage.startsWith('/')) {
+                    // Internal path from backend (already includes /storage/services/)
+                    imageUrl = '${AppConstants.defaultApiUrl}$firstImage';
                   } else {
-                    // Just a filename, need to construct full URL
-                    imageUrl =
-                        '${AppConstants.defaultApiUrl}/uploads/services/$firstImage';
+                    // Legacy filename only - construct with /uploads/services/ for backward compatibility
+                    imageUrl = '${AppConstants.defaultApiUrl}/uploads/services/$firstImage';
                   }
                 }
 

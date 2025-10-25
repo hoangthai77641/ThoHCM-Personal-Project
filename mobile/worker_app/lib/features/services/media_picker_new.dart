@@ -149,12 +149,14 @@ class MediaPickerWidgetState extends State<MediaPickerWidget> {
 
   void _removeImage(int index, {bool isExisting = true, bool isUrl = false}) {
     setState(() {
-      if (isExisting && !isUrl) {
+      if (isExisting) {
         _images.removeAt(index);
       } else if (isUrl) {
-        _newImageUrls.removeAt(index);
+        final adjustedIndex = index - _images.length - _newImageFiles.length;
+        _newImageUrls.removeAt(adjustedIndex);
       } else {
-        _newImageFiles.removeAt(index);
+        final adjustedIndex = index - _images.length;
+        _newImageFiles.removeAt(adjustedIndex);
       }
     });
     _notifyChange();
@@ -162,15 +164,17 @@ class MediaPickerWidgetState extends State<MediaPickerWidget> {
 
   void _removeVideo(int index, {bool isExisting = true, bool isUrl = false}) {
     setState(() {
-      if (isExisting && !isUrl) {
+      if (isExisting) {
         final videoUrl = _videos[index];
         _videoControllers[videoUrl]?.dispose();
         _videoControllers.remove(videoUrl);
         _videos.removeAt(index);
       } else if (isUrl) {
-        _newVideoUrls.removeAt(index);
+        final adjustedIndex = index - _videos.length - _newVideoFiles.length;
+        _newVideoUrls.removeAt(adjustedIndex);
       } else {
-        _newVideoFiles.removeAt(index);
+        final adjustedIndex = index - _videos.length;
+        _newVideoFiles.removeAt(adjustedIndex);
       }
     });
     _notifyChange();
@@ -324,14 +328,24 @@ class MediaPickerWidgetState extends State<MediaPickerWidget> {
   }
 
   void _notifyChange() {
-    // Combine existing and new URLs
-    final allImages = [..._images, ..._newImageUrls];
-    final allVideos = [..._videos, ..._newVideoUrls];
+    // Combine existing URLs, new file paths, and new URLs
+    final allImages = [
+      ..._images, // existing image URLs
+      ..._newImageFiles.map((file) => file.path), // new image files
+      ..._newImageUrls // new image URLs
+    ];
+    final allVideos = [
+      ..._videos, // existing video URLs
+      ..._newVideoFiles.map((file) => file.path), // new video files
+      ..._newVideoUrls // new video URLs
+    ];
 
     print('🔄 _notifyChange called:');
     print('  _images: ${_images.length}');
+    print('  _newImageFiles: ${_newImageFiles.length}');
     print('  _newImageUrls: ${_newImageUrls.length}');
     print('  _videos: ${_videos.length}');
+    print('  _newVideoFiles: ${_newVideoFiles.length}');
     print('  _newVideoUrls: ${_newVideoUrls.length}');
     print('  allImages: ${allImages.length}');
     print('  allVideos: ${allVideos.length}');
@@ -345,11 +359,14 @@ class MediaPickerWidgetState extends State<MediaPickerWidget> {
     bool isExisting = true,
     bool isUrl = false,
   }) {
+    // Check if this is a network URL or a local file path
+    final bool isNetworkUrl = imageUrl.startsWith('http://') || imageUrl.startsWith('https://');
+    
     return Stack(
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(8),
-          child: (isExisting && !isUrl) || isUrl
+          child: isNetworkUrl
               ? Image.network(
                   imageUrl,
                   width: 100,
@@ -370,7 +387,7 @@ class MediaPickerWidgetState extends State<MediaPickerWidget> {
                   height: 100,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    print('Error loading image: $imageUrl, Error: $error');
+                    print('Error loading local image: $imageUrl, Error: $error');
                     return Container(
                       width: 100,
                       height: 100,
@@ -527,24 +544,25 @@ class MediaPickerWidgetState extends State<MediaPickerWidget> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              // Existing images
+              // Existing images (URLs)
               ..._images.asMap().entries.map(
                 (entry) =>
-                    _buildImageItem(entry.value, entry.key, isExisting: true),
+                    _buildImageItem(entry.value, entry.key, isExisting: true, isUrl: true),
               ),
-              // New image files
+              // New image files (local paths)
               ..._newImageFiles.asMap().entries.map(
                 (entry) => _buildImageItem(
                   entry.value.path,
-                  entry.key,
+                  entry.key + _images.length,
                   isExisting: false,
+                  isUrl: false,
                 ),
               ),
               // New image URLs
               ..._newImageUrls.asMap().entries.map(
                 (entry) => _buildImageItem(
                   entry.value,
-                  entry.key,
+                  entry.key + _images.length + _newImageFiles.length,
                   isExisting: false,
                   isUrl: true,
                 ),
@@ -564,24 +582,25 @@ class MediaPickerWidgetState extends State<MediaPickerWidget> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              // Existing videos
+              // Existing videos (URLs)
               ..._videos.asMap().entries.map(
                 (entry) =>
-                    _buildVideoItem(entry.value, entry.key, isExisting: true),
+                    _buildVideoItem(entry.value, entry.key, isExisting: true, isUrl: true),
               ),
-              // New video files
+              // New video files (local paths)
               ..._newVideoFiles.asMap().entries.map(
                 (entry) => _buildVideoItem(
                   entry.value.path,
-                  entry.key,
+                  entry.key + _videos.length,
                   isExisting: false,
+                  isUrl: false,
                 ),
               ),
               // New video URLs
               ..._newVideoUrls.asMap().entries.map(
                 (entry) => _buildVideoItem(
                   entry.value,
-                  entry.key,
+                  entry.key + _videos.length + _newVideoFiles.length,
                   isExisting: false,
                   isUrl: true,
                 ),
