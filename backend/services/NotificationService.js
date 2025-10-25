@@ -39,13 +39,24 @@ try {
     // Preferred 3: Explicit service account file path via env (local/dev)
     if (!admin.apps.length) {
       try {
-        const serviceAccountPath = process.env.FIREBASE_ADMIN_SDK_PATH || './config/firebase-admin-sdk.json';
+        // Try thohcm-frontend service account first, then fallback to default
+        let serviceAccountPath = process.env.FIREBASE_ADMIN_SDK_PATH;
+        if (!serviceAccountPath) {
+          // Check if thohcm-frontend service account exists
+          try {
+            require('./config/thohcm-frontend-firebase-adminsdk-fbsvc-e4b62ffa37.json');
+            serviceAccountPath = './config/thohcm-frontend-firebase-adminsdk-fbsvc-e4b62ffa37.json';
+          } catch {
+            serviceAccountPath = './config/firebase-admin-sdk.json';
+          }
+        }
+        
         const serviceAccount = require(serviceAccountPath);
         admin.initializeApp({
           credential: admin.credential.cert(serviceAccount),
           projectId: process.env.FIREBASE_PROJECT_ID || serviceAccount.project_id || 'thohcm-frontend',
         });
-        console.log('Firebase Admin SDK initialized with service account file');
+        console.log(`Firebase Admin SDK initialized with service account file: ${serviceAccountPath}`);
       } catch (e) {
         // Fallback 4: Application Default Credentials (ADC)
         try {
