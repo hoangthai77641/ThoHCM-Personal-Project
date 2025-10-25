@@ -95,8 +95,17 @@ const staticLimiter = rateLimit({
 });
 
 // Compatibility redirect for old mobile app URLs
-app.use('/uploads/services/storage/services', (req, res) => {
-  const newPath = `/storage/services${req.path}`;
+app.use('/uploads/services', (req, res) => {
+  // Handle both /uploads/services/storage/services and /uploads/services/ paths
+  let newPath;
+  if (req.path.startsWith('/storage/services')) {
+    // Case: /uploads/services/storage/services/file.jpg -> /storage/services/file.jpg
+    newPath = req.path;
+  } else {
+    // Case: /uploads/services/file.jpg -> /storage/services/file.jpg
+    newPath = `/storage/services${req.path}`;
+  }
+  
   console.log(`🔄 Redirecting old URL: ${req.originalUrl} -> ${newPath}`);
   res.redirect(301, newPath);
 });
