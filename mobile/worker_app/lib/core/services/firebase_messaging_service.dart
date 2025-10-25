@@ -105,7 +105,7 @@ class FirebaseMessagingService {
     try {
       debugPrint('🔄 Updating FCM token on server for user: $userId');
 
-      final response = await _apiClient.put('/users/fcm-token', {
+      final response = await _apiClient.put('/api/users/fcm-token', {
         'fcmToken': _fcmToken,
       });
 

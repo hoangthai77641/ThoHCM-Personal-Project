@@ -55,6 +55,7 @@
 # Don't warn about missing classes
 -dontwarn com.google.firebase.**
 -dontwarn com.google.android.gms.**
+-dontwarn com.google.android.play.core.**
 
 # Keep the Application class and all classes extending it
 -keep public class * extends android.app.Application
@@ -62,6 +63,14 @@
 # Keep notification related classes
 -keep class * extends android.app.Service
 -keep class * extends android.content.BroadcastReceiver
+
+# Google Play Core - Fix missing classes
+-keep class com.google.android.play.core.** { *; }
+-dontwarn com.google.android.play.core.**
+
+# Flutter deferred components - keep related classes
+-keep class io.flutter.embedding.engine.deferredcomponents.** { *; }
+-keep class io.flutter.embedding.android.FlutterPlayStoreSplitApplication { *; }
 
 # Keep any classes that might be accessed via reflection
 -keepclassmembers class * {

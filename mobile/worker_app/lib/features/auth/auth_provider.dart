@@ -23,7 +23,7 @@ class AuthProvider with ChangeNotifier {
       // Connect to socket for real-time notifications and update FCM token
       final userId = user!['_id'] ?? user!['id'];
       await SocketService().connect(userId: userId);
-      
+
       // Update FCM token on server for push notifications
       await FirebaseMessagingService().onUserLogin(userId);
     }
@@ -45,7 +45,7 @@ class AuthProvider with ChangeNotifier {
       if (user != null) {
         final userId = user!['_id'] ?? user!['id'];
         await SocketService().connect(userId: userId);
-        
+
         // Update FCM token on server for push notifications
         await FirebaseMessagingService().onUserLogin(userId);
       }
@@ -71,10 +71,10 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> logout() async {
     final userId = user?['_id'] ?? user?['id'];
-    
+
     // Disconnect socket and clean up FCM subscriptions
     SocketService().disconnect();
-    
+
     if (userId != null) {
       await FirebaseMessagingService().onUserLogout(userId);
     }

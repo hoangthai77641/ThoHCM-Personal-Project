@@ -42,12 +42,23 @@ try {
         // Try thohcm-frontend service account first, then fallback to default
         let serviceAccountPath = process.env.FIREBASE_ADMIN_SDK_PATH;
         if (!serviceAccountPath) {
-          // Check if thohcm-frontend service account exists
-          try {
-            require('./config/thohcm-frontend-firebase-adminsdk-fbsvc-e4b62ffa37.json');
-            serviceAccountPath = './config/thohcm-frontend-firebase-adminsdk-fbsvc-e4b62ffa37.json';
-          } catch {
-            serviceAccountPath = './config/firebase-admin-sdk.json';
+          // Check if thohcm-frontend service account exists (multiple possible names)
+          const possiblePaths = [
+            './config/firebase-adminsdk-thohcm-frontend.json',
+            './config/thohcm-frontend-firebase-adminsdk-fbsvc-e4b62ffa37.json',
+            './config/firebase-admin-sdk.json'
+          ];
+          
+          for (const path of possiblePaths) {
+            try {
+              require(path);
+              serviceAccountPath = path;
+              break;
+            } catch {}
+          }
+          
+          if (!serviceAccountPath) {
+            serviceAccountPath = './config/firebase-admin-sdk.json'; // fallback
           }
         }
         

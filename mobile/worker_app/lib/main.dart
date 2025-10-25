@@ -25,18 +25,32 @@ import 'features/wallet/wallet_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  
+  // Some plugins may auto-initialize Firebase on native side which can
+  // cause a duplicate initialization exception when calling
+  // Firebase.initializeApp() from Dart. Guard against that by
+  // initializing only if no apps exist yet.
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
+  } catch (e) {
+    // If a duplicate-app error occurs, ignore it. Re-throw unexpected errors.
+    final msg = e.toString();
+    if (!msg.contains('duplicate') && !msg.contains('already exists')) {
+      rethrow;
+    }
+  }
+
   await initializeDateFormatting('vi_VN');
 
   // Initialize notification service and request permissions
   await NotificationService().initialize();
   await NotificationService().requestPermissions();
-  
+
   // Initialize Firebase Messaging Service
   await FirebaseMessagingService().initialize();
 
