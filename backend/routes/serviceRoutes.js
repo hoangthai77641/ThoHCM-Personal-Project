@@ -3,7 +3,7 @@ const router = express.Router();
 const serviceController = require('../controllers/serviceController');
 const auth = require('../middleware/auth');
 const optionalAuth = require('../middleware/optionalAuth');
-const { uploadServiceMedia } = require('../middleware/upload');
+const { uploadServiceMedia } = require('../middleware/upload-gcs');
 
 // Create service (worker or admin)
 router.post('/', auth(['worker','admin']), uploadServiceMedia, serviceController.createService);

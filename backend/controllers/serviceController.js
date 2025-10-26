@@ -70,18 +70,22 @@ exports.createService = async (req, res) => {
     const videoUrls = [];
     
     if (req.files) {
-      // Process uploaded images
+      // Process uploaded images - use GCS URLs if available, otherwise local paths
       if (req.files.images) {
         req.files.images.forEach(file => {
-          imageUrls.push(`/storage/services/${file.filename}`);
+          // Use GCS URL if available (from upload-gcs middleware), otherwise local path
+          const fileUrl = file.cloudStoragePublicUrl || file.gcsUrl || `/storage/services/${file.filename}`;
+          imageUrls.push(fileUrl);
         });
         console.log('📁 Images uploaded:', imageUrls.length);
       }
       
-      // Process uploaded videos
+      // Process uploaded videos - use GCS URLs if available, otherwise local paths
       if (req.files.videos) {
         req.files.videos.forEach(file => {
-          videoUrls.push(`/storage/services/${file.filename}`);
+          // Use GCS URL if available (from upload-gcs middleware), otherwise local path
+          const fileUrl = file.cloudStoragePublicUrl || file.gcsUrl || `/storage/services/${file.filename}`;
+          videoUrls.push(fileUrl);
         });
         console.log('📁 Videos uploaded:', videoUrls.length);
       }
@@ -346,20 +350,22 @@ exports.updateService = async (req, res) => {
     const newVideoUrls = [];
     
     if (req.files) {
-      // Process uploaded images
+      // Process uploaded images - use GCS URLs if available, otherwise local paths
       if (req.files.images) {
         req.files.images.forEach(file => {
-          // Đường dẫn chính xác cho static file serving
-          newImageUrls.push(`/storage/services/${file.filename}`);
+          // Use GCS URL if available (from upload-gcs middleware), otherwise local path
+          const fileUrl = file.cloudStoragePublicUrl || file.gcsUrl || `/storage/services/${file.filename}`;
+          newImageUrls.push(fileUrl);
         });
         console.log('New images uploaded:', newImageUrls.length, newImageUrls);
       }
       
-      // Process uploaded videos
+      // Process uploaded videos - use GCS URLs if available, otherwise local paths
       if (req.files.videos) {
         req.files.videos.forEach(file => {
-          // Đường dẫn chính xác cho static file serving  
-          newVideoUrls.push(`/storage/services/${file.filename}`);
+          // Use GCS URL if available (from upload-gcs middleware), otherwise local path
+          const fileUrl = file.cloudStoragePublicUrl || file.gcsUrl || `/storage/services/${file.filename}`;
+          newVideoUrls.push(fileUrl);
         });
         console.log('New videos uploaded:', newVideoUrls.length, newVideoUrls);
       }

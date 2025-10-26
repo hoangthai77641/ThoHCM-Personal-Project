@@ -252,12 +252,86 @@ const uploadAvatarMiddleware = (req, res, next) => {
   });
 };
 
-// Middleware wrappers
-const uploadServiceMedia = serviceUpload.fields([
-  { name: 'images', maxCount: 5 },
-  { name: 'videos', maxCount: 3 }
-]);
+// Middleware to handle service media upload to GCS
+const uploadServiceMediaMiddleware = (req, res, next) => {
+  const upload = serviceUpload.fields([
+    { name: 'images', maxCount: 5 },
+    { name: 'videos', maxCount: 3 }
+  ]);
 
+  upload(req, res, async (err) => {
+    if (err) {
+      console.error(' Multer error:', err);
+      
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({ 
+          error: 'File too large', 
+          message: 'File size must be less than 10MB',
+          maxSize: '10MB'
+        });
+      }
+      
+      if (err.code === 'LIMIT_FILE_COUNT') {
+        return res.status(413).json({ 
+          error: 'Too many files', 
+          message: 'Maximum 8 files allowed total (5 images + 3 videos)'
+        });
+      }
+      
+      return res.status(400).json({ 
+        error: 'Upload error', 
+        message: err.message 
+      });
+    }
+    
+    if (!req.files || ((!req.files.images || req.files.images.length === 0) && (!req.files.videos || req.files.videos.length === 0))) {
+      return next(); // No files uploaded, continue
+    }
+    
+    try {
+      // Upload images to GCS
+      if (req.files.images && req.files.images.length > 0) {
+        const imageUrls = [];
+        for (const file of req.files.images) {
+          const { publicUrl } = await uploadToGCS(file, 'services');
+          imageUrls.push(publicUrl);
+        }
+        // Store GCS URLs in req.files for controller to use
+        req.files.images.forEach((file, index) => {
+          file.gcsUrl = imageUrls[index];
+          file.cloudStoragePublicUrl = imageUrls[index];
+        });
+        console.log(' Uploaded images to GCS:', imageUrls.length);
+      }
+      
+      // Upload videos to GCS
+      if (req.files.videos && req.files.videos.length > 0) {
+        const videoUrls = [];
+        for (const file of req.files.videos) {
+          const { publicUrl } = await uploadToGCS(file, 'services');
+          videoUrls.push(publicUrl);
+        }
+        // Store GCS URLs in req.files for controller to use
+        req.files.videos.forEach((file, index) => {
+          file.gcsUrl = videoUrls[index];
+          file.cloudStoragePublicUrl = videoUrls[index];
+        });
+        console.log(' Uploaded videos to GCS:', videoUrls.length);
+      }
+      
+      next();
+    } catch (error) {
+      console.error(' GCS upload error:', error);
+      return res.status(500).json({ 
+        message: 'Failed to upload files to cloud storage', 
+        error: error.message 
+      });
+    }
+  });
+};
+
+// Middleware wrappers
+const uploadServiceMedia = uploadServiceMediaMiddleware;
 const uploadBanner = uploadBannerMiddleware;
 const uploadAvatar = uploadAvatarMiddleware;
 
