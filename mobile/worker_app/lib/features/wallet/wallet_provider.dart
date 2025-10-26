@@ -250,7 +250,9 @@ class WalletProvider with ChangeNotifier {
     String transactionId,
     File proofImage,
   ) async {
-    print('📤 Starting upload proof of payment for transaction: $transactionId');
+    print(
+      '📤 Starting upload proof of payment for transaction: $transactionId',
+    );
     _isLoading = true;
     _error = null;
     notifyListeners();

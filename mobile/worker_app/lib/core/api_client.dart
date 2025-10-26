@@ -109,7 +109,7 @@ class ApiClient {
       print('📤 API Client: Additional fields: $additionalFields');
 
       final formData = FormData();
-      
+
       // Add the file
       formData.files.add(
         MapEntry(
@@ -130,10 +130,10 @@ class ApiClient {
 
       print('📤 API Client: Sending POST request...');
       final response = await dio.post(path, data: formData);
-      
+
       print('📤 API Client: Response status: ${response.statusCode}');
       print('📤 API Client: Response data: ${response.data}');
-      
+
       final responseData = response.data as Map<String, dynamic>;
       final success = responseData['success'] == true;
       print('📤 API Client: Upload success: $success');
@@ -141,7 +141,7 @@ class ApiClient {
     } on DioException catch (e) {
       print('❌ API Client: DioException - Status: ${e.response?.statusCode}');
       print('❌ API Client: DioException - Data: ${e.response?.data}');
-      
+
       final errorData = e.response?.data;
       String errorMessage = AppStrings.generalError;
 
