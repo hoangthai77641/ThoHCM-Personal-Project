@@ -364,6 +364,23 @@ exports.uploadProofOfPayment = async (req, res) => {
       });
     }
     
+    // Validate wallet and worker exist
+    if (!transaction.wallet) {
+      console.log('❌ Transaction has no wallet');
+      return res.status(400).json({
+        success: false,
+        message: 'Giao dịch không hợp lệ (không có ví)'
+      });
+    }
+    
+    if (!transaction.wallet.worker) {
+      console.log('❌ Wallet has no worker');
+      return res.status(400).json({
+        success: false,
+        message: 'Giao dịch không hợp lệ (ví không có thợ)'
+      });
+    }
+    
     // Check ownership - wallet.worker is an ObjectId
     const walletWorkerId = transaction.wallet.worker.toString();
     console.log('📤 Comparing workers:', { walletWorkerId, workerId });
