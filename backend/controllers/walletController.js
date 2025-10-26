@@ -210,6 +210,9 @@ exports.createDepositRequest = async (req, res) => {
           status: 'pending'
         };
         
+        // Set transaction status to pending until admin approval
+        transaction.status = 'pending';
+        
         await transaction.save();
 
         paymentInfo = {

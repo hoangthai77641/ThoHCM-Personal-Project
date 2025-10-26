@@ -79,7 +79,7 @@ const ManualDepositManagement = () => {
     setActionLoading(true);
     try {
       const response = await api.post(
-        `/api/wallet/approve-manual-deposit/${selectedDeposit._id}`,
+        `/api/wallet/approve-manual-deposit/${selectedDeposit.id}`,
         {
           adminNotes: adminNotes || 'Đã xác nhận chuyển khoản',
           actualAmount: parseFloat(actualAmount),
@@ -110,7 +110,7 @@ const ManualDepositManagement = () => {
     setActionLoading(true);
     try {
       const response = await api.post(
-        `/api/wallet/reject-manual-deposit/${selectedDeposit._id}`,
+        `/api/wallet/reject-manual-deposit/${selectedDeposit.id}`,
         {
           adminNotes: adminNotes,
         }
