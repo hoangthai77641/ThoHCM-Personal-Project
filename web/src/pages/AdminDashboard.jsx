@@ -79,7 +79,7 @@ export default function AdminDashboard(){
         date.setDate(date.getDate() - i)
         const dateStr = date.toISOString().split('T')[0]
         
-        const dayBookings = bookingsData.filter(b => 
+        const dayBookings = (bookingsData || []).filter(b => 
           new Date(b.createdAt).toISOString().split('T')[0] === dateStr
         )
         
@@ -142,25 +142,25 @@ export default function AdminDashboard(){
 
   // Calculate statistics
   const stats = useMemo(() => {
-    const totalRevenue = bookings.reduce((sum, b) => sum + (b.finalPrice || 0), 0)
-    const completedBookings = bookings.filter(b => b.status === 'done').length
-    const pendingBookings = bookings.filter(b => b.status === 'pending').length
-    const activeServices = services.filter(s => s.isActive).length
-    const vipCustomers = customers.filter(c => c.loyaltyLevel === 'vip').length
-    const activeWorkers = workers.filter(w => w.status === 'active').length
+    const totalRevenue = (bookings || []).reduce((sum, b) => sum + (b.finalPrice || 0), 0)
+    const completedBookings = (bookings || []).filter(b => b.status === 'done').length
+    const pendingBookings = (bookings || []).filter(b => b.status === 'pending').length
+    const activeServices = (services || []).filter(s => s.isActive).length
+    const vipCustomers = (customers || []).filter(c => c.loyaltyLevel === 'vip').length
+    const activeWorkers = (workers || []).filter(w => w.status === 'active').length
     
     return {
       totalRevenue,
-      totalBookings: bookings.length,
+      totalBookings: (bookings || []).length,
       completedBookings,
       pendingBookings,
-      totalCustomers: customers.length,
+      totalCustomers: (customers || []).length,
       vipCustomers,
-      totalServices: services.length,
+      totalServices: (services || []).length,
       activeServices,
-      totalWorkers: workers.length,
+      totalWorkers: (workers || []).length,
       activeWorkers,
-      pendingWorkers: pendingWorkers.length
+      pendingWorkers: (pendingWorkers || []).length
     }
   }, [bookings, services, customers, workers, pendingWorkers])
 

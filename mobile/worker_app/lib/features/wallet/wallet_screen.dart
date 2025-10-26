@@ -373,16 +373,16 @@ class _WalletScreenState extends State<WalletScreen> {
                   items: const [
                     DropdownMenuItem(
                       value: 'manual_qr',
-                      child: Text('🔥 Chuyển khoản QR (Khuyến khích)'),
+                      child: Text('🔥 QR Banking'),
                     ),
                     DropdownMenuItem(
                       value: 'bank_transfer',
-                      child: Text('Chuyển khoản ngân hàng'),
+                      child: Text('Chuyển khoản NH'),
                     ),
                     DropdownMenuItem(value: 'momo', child: Text('Ví MoMo')),
                     DropdownMenuItem(
                       value: 'card',
-                      child: Text('Thẻ tín dụng/Ghi nợ'),
+                      child: Text('Thẻ tín dụng'),
                     ),
                   ],
                   onChanged: (value) {

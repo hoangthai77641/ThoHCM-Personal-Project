@@ -25,8 +25,9 @@ export function ServiceMediaGallery({ images = [], videos = [] }) {
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url;
     }
-    // Otherwise, it's a local file path, prepend server URL
-    return `http://localhost:3001${url}`;
+    // Otherwise, it's a local file path, prepend production server URL
+    const API_URL = import.meta.env.VITE_API_URL || 'https://thohcm-backend-181755246333.asia-southeast1.run.app'
+    return `${API_URL}${url}`;
   };
 
   const getVideoEmbedUrl = (url) => {
