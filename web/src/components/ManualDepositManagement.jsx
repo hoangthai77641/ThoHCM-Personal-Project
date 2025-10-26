@@ -152,9 +152,9 @@ const ManualDepositManagement = () => {
   const filteredDeposits = (pendingDeposits || []).filter(deposit => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      deposit.workerId?.name?.toLowerCase().includes(searchLower) ||
-      deposit.workerId?.phone?.includes(searchTerm) ||
-      deposit.transactionId?.toLowerCase().includes(searchLower)
+      deposit.workerInfo?.name?.toLowerCase().includes(searchLower) ||
+      deposit.workerInfo?.phone?.includes(searchTerm) ||
+      deposit.id?.toLowerCase().includes(searchLower)
     );
   });
 
@@ -246,10 +246,10 @@ const ManualDepositManagement = () => {
                     </Avatar>
                     <Box>
                       <Typography variant="h6">
-                        {deposit.workerId?.name || 'N/A'}
+                        {deposit.workerInfo?.name || 'N/A'}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {deposit.workerId?.phone || 'N/A'}
+                        {deposit.workerInfo?.phone || 'N/A'}
                       </Typography>
                     </Box>
                   </Box>
@@ -272,7 +272,7 @@ const ManualDepositManagement = () => {
                         Mã GD:
                       </Typography>
                       <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                        {deposit.transactionId}
+                        {deposit.id}
                       </Typography>
                     </Box>
 
