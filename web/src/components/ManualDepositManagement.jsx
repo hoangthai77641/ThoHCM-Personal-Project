@@ -59,8 +59,9 @@ const ManualDepositManagement = () => {
     setError('');
     try {
       const response = await api.get('/api/wallet/pending-manual-deposits');
+      console.log('📡 Pending deposits API response:', response.data);
       if (response.data.success) {
-        setPendingDeposits(response.data.pendingDeposits);
+        setPendingDeposits(response.data.data || []); // Backend returns data in 'data' field
       } else {
         setError(response.data.message || 'Không thể tải danh sách');
       }
