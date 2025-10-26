@@ -351,6 +351,12 @@ exports.uploadProofOfPayment = async (req, res) => {
     // Find transaction
     const transaction = await Transaction.findById(transactionId).populate('wallet');
     
+    console.log('📤 Transaction found:', transaction ? 'YES' : 'NO');
+    if (transaction) {
+      console.log('📤 Transaction wallet:', transaction.wallet);
+      console.log('📤 Wallet worker:', transaction.wallet ? transaction.wallet.worker : 'NO WALLET');
+    }
+    
     if (!transaction) {
       return res.status(404).json({
         success: false,
@@ -358,8 +364,11 @@ exports.uploadProofOfPayment = async (req, res) => {
       });
     }
     
-    // Check ownership
-    if (transaction.wallet.worker.toString() !== workerId) {
+    // Check ownership - wallet.worker is an ObjectId
+    const walletWorkerId = transaction.wallet.worker.toString();
+    console.log('📤 Comparing workers:', { walletWorkerId, workerId });
+    
+    if (walletWorkerId !== workerId) {
       return res.status(403).json({
         success: false,
         message: 'Không có quyền truy cập giao dịch này'
@@ -376,17 +385,30 @@ exports.uploadProofOfPayment = async (req, res) => {
     
     // Check if file uploaded
     if (!req.file) {
+      console.log('❌ No file uploaded');
       return res.status(400).json({
         success: false,
         message: 'Vui lòng upload ảnh chứng minh chuyển khoản'
       });
     }
     
-    // Save proof image path
-    transaction.proofImage = req.file.path || req.file.location; // Multer local hoặc cloud storage
+    console.log('📤 File uploaded:', req.file);
+    console.log('📤 File path:', req.file.path);
+    console.log('📤 File filename:', req.file.filename);
+    
+    // Save proof image path - use relative path for portability
+    const proofImagePath = req.file.path || req.file.location || `/storage/proof-of-payment/${req.file.filename}`;
+    transaction.proofImage = proofImagePath;
+    
+    // Initialize adminApproval if it doesn't exist
+    if (!transaction.adminApproval) {
+      transaction.adminApproval = {};
+    }
     transaction.adminApproval.status = 'pending'; // Ensure pending for admin review
     
-    console.log('📤 Saving transaction with proof image:', transaction.proofImage);
+    console.log('📤 Saving transaction with proof image:', proofImagePath);
+    console.log('📤 Transaction before save:', JSON.stringify(transaction, null, 2));
+    
     await transaction.save();
     console.log('✅ Transaction saved successfully');
     
@@ -403,6 +425,8 @@ exports.uploadProofOfPayment = async (req, res) => {
     });
     
   } catch (error) {
+    console.error('❌ Upload proof error:', error);
+    console.error('❌ Error stack:', error.stack);
     res.status(500).json({
       success: false,
       message: error.message
