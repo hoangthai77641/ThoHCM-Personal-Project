@@ -342,10 +342,14 @@ class _WalletScreenState extends State<WalletScreen> {
 
   void _showTopUpDialog(BuildContext context, WalletProvider walletProvider) {
     final amountController = TextEditingController();
-                String selectedMethod = 'manual_qr';    showDialog(
+                String selectedMethod = 'manual_qr';    
+    // Store the parent context (WalletScreen context) before opening dialog
+    final parentContext = context;
+    
+    showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setState) => AlertDialog(
           title: const Text('Nạp tiền vào ví'),
           content: SizedBox(
             width: double.maxFinite,
@@ -396,7 +400,7 @@ class _WalletScreenState extends State<WalletScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: Text('Cancel'),
             ),
             ElevatedButton(
@@ -407,30 +411,41 @@ class _WalletScreenState extends State<WalletScreen> {
                 final amount = double.tryParse(amountText);
                 if (amount == null) return;
 
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
 
+                print('🚀 Creating deposit request with amount: $amount, method: $selectedMethod');
                 final success = await walletProvider.createDepositRequest(
                   amount: amount,
                   paymentMethod: selectedMethod,
                 );
 
-                if (success && context.mounted) {
+                print('💳 Deposit creation result: $success');
+                print('📦 Last deposit response: ${walletProvider.lastDepositResponse}');
+
+                if (success && parentContext.mounted) {
+                  print('✅ Success and context mounted - checking method...');
                   if (selectedMethod == 'manual_qr') {
-                    // Navigate to QR deposit screen
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => QRDepositScreen(
-                          depositResponse: walletProvider.lastDepositResponse!,
+                    print('📱 Navigating to QR deposit screen...');
+                    try {
+                      // Navigate to QR deposit screen
+                      Navigator.push(
+                        parentContext,
+                        MaterialPageRoute(
+                          builder: (context) => QRDepositScreen(
+                            depositResponse: walletProvider.lastDepositResponse!,
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                      print('✅ Navigation successful');
+                    } catch (e) {
+                      print('❌ Navigation error: $e');
+                    }
                   } else if (selectedMethod == 'card') {
                     // Navigate to card payment screen
                     final transactionInfo = walletProvider.lastDepositResponse?['transaction'];
                     
                     Navigator.push(
-                      context,
+                      parentContext,
                       MaterialPageRoute(
                         builder: (context) => CardPaymentScreen(
                           amount: amount,
@@ -439,10 +454,12 @@ class _WalletScreenState extends State<WalletScreen> {
                       ),
                     );
                   } else if (selectedMethod == 'bank_transfer') {
-                    _showBankInfoDialog(context, walletProvider, amount);
+                    _showBankInfoDialog(parentContext, walletProvider, amount);
                   } else if (selectedMethod == 'momo') {
-                    _showMoMoInfoDialog(context, walletProvider, amount);
+                    _showMoMoInfoDialog(parentContext, walletProvider, amount);
                   }
+                } else {
+                  print('❌ Navigation blocked - success: $success');
                 }
               },
               child: const Text('Tạo yêu cầu nạp tiền'),

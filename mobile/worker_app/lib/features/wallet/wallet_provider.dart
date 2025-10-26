@@ -173,9 +173,12 @@ class WalletProvider with ChangeNotifier {
     required double amount,
     required String paymentMethod,
   }) async {
+    print('💳 Creating deposit request: amount=$amount, method=$paymentMethod');
+    
     if (amount < minTopup || amount > maxTopup) {
       _error =
           'Số tiền nạp phải từ ${_formatCurrency(minTopup)} đến ${_formatCurrency(maxTopup)}';
+      print('❌ Amount validation failed: $amount not in range [$minTopup, $maxTopup]');
       notifyListeners();
       return false;
     }
@@ -185,22 +188,32 @@ class WalletProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      print('🌐 Calling deposit API...');
       final response = await _apiClient.post('/api/wallet/deposit', {
         'amount': amount,
         'paymentMethod': paymentMethod,
       });
 
+      print('📡 Deposit API response: $response');
+
       if (response['success']) {
         _lastDepositResponse = response['data'];
+        print('✅ Deposit response saved: $_lastDepositResponse');
+        
         // Refresh wallet data after creating deposit request
+        print('🔄 Refreshing wallet data after deposit creation...');
         await fetchWallet();
+        
+        print('💳 Deposit request created successfully');
         return true;
       } else {
         _error = response['message'] ?? 'Không thể tạo yêu cầu nạp tiền';
+        print('❌ Deposit API error: $_error');
         return false;
       }
     } catch (e) {
       _error = 'Lỗi kết nối: ${e.toString()}';
+      print('❌ Deposit request error: $_error');
       return false;
     } finally {
       _isLoading = false;

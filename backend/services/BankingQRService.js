@@ -31,7 +31,7 @@ class BankingQRService {
 
   /**
    * Tạo QR code chuyển khoản ngân hàng Việt Nam
-   * Theo chuẩn VietQR
+   * Theo chuẩn VietQR - Sử dụng VietQR API
    */
   static async generateVietQR(params) {
     const {
@@ -40,34 +40,29 @@ class BankingQRService {
       accountName,
       amount,
       description,
-      template = 'compact'
+      template = 'compact2'
     } = params;
 
-    // VietQR format theo chuẩn EMV
-    const qrData = this.buildVietQRData({
-      bankCode,
-      accountNumber,
-      amount,
-      description
-    });
-
     try {
-      // Generate QR code
-      const qrCodeDataURL = await QRCode.toDataURL(qrData, {
-        errorCorrectionLevel: 'M',
-        type: 'image/png',
-        quality: 0.92,
-        margin: 1,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF'
-        },
-        width: 256
-      });
+      // Sử dụng VietQR API để tạo QR chuẩn
+      const vietQRUrl = `https://img.vietqr.io/image/${bankCode}-${accountNumber}-${template}.png?amount=${amount}&addInfo=${encodeURIComponent(description)}&accountName=${encodeURIComponent(accountName)}`;
+      
+      // Fetch VietQR image từ API
+      const fetch = require('node-fetch');
+      const response = await fetch(vietQRUrl);
+      
+      if (!response.ok) {
+        throw new Error(`VietQR API error: ${response.statusText}`);
+      }
+      
+      // Convert to base64 data URL
+      const buffer = await response.buffer();
+      const qrCodeDataURL = `data:image/png;base64,${buffer.toString('base64')}`;
 
       return {
         qrCode: qrCodeDataURL,
-        qrData,
+        vietQRUrl,
+        qrData: vietQRUrl, // Đây là URL VietQR thật
         bankInfo: {
           bankCode,
           accountNumber,
@@ -77,21 +72,25 @@ class BankingQRService {
         }
       };
     } catch (error) {
-      throw new Error(`Không thể tạo QR code: ${error.message}`);
+      throw new Error(`Không thể tạo VietQR: ${error.message}`);
     }
   }
 
   /**
-   * Build VietQR data theo chuẩn
+   * Build VietQR data theo chuẩn EMV
    */
   static buildVietQRData(params) {
     const { bankCode, accountNumber, amount, description } = params;
     
-    // Simplified VietQR format (basic)
-    // Production should use proper EMV format
-    const qrData = `BANK:${bankCode}|ACC:${accountNumber}|AMT:${amount}|DESC:${description}`;
+    // VietQR chuẩn EMV format
+    // Format: 00020101021238570010A00000072701270006970436011{accountNumber}0208QRIBFTTD5303704540{amount}5802VN62{description}6304{checksum}
     
-    return qrData;
+    // Simplified approach: Use VietQR API URL instead of custom format
+    // This ensures banking apps can recognize the QR code
+    const vietQRData = `00020101021238570010A000000727012700069${bankCode}01${accountNumber.length.toString().padStart(2, '0')}${accountNumber}0208QRIBFTTD5303704540${amount.toString().padStart(2, '0')}5802VN62${description.length.toString().padStart(2, '0')}${description}6304`;
+    
+    // For now, return the VietQR URL as this is more reliable
+    return `https://img.vietqr.io/image/${bankCode}-${accountNumber}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(description)}`;
   }
 
   /**

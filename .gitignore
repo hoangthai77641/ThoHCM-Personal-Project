@@ -77,3 +77,8 @@ mobile/worker_app/pubspec.lock
 # Web
 web/dist/
 web/node_modules/
+
+# Firebase
+.firebase/
+*/.firebase/
+web/.firebase/

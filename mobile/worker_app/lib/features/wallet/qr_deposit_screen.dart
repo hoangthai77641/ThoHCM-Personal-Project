@@ -25,10 +25,26 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bankInfo = widget.depositResponse['bankInfo'] as Map<String, dynamic>?;
-    final transactionId = widget.depositResponse['transactionId'] as String?;
-    final qrData = widget.depositResponse['qrData'] as String?;
-    final amount = widget.depositResponse['amount'] ?? 0;
+    // Debug: Print the entire response structure
+    print('🔍 QRDepositScreen - depositResponse keys: ${widget.depositResponse.keys}');
+    print('🔍 QRDepositScreen - full depositResponse: ${widget.depositResponse}');
+    
+    final paymentInfo = widget.depositResponse['paymentInfo'] as Map<String, dynamic>?;
+    final transaction = widget.depositResponse['transaction'] as Map<String, dynamic>?;
+    final transactionId = transaction?['_id'] as String?;
+    
+    print('🔍 QRDepositScreen - paymentInfo: $paymentInfo');
+    print('🔍 QRDepositScreen - transaction: $transaction');
+    
+    // Get bankInfo and QR data from the correct structure
+    final bankInfo = paymentInfo?['bankInfo'] as Map<String, dynamic>?;
+    // Try both locations for QR data
+    final qrData = paymentInfo?['qrCode'] as String? ?? bankInfo?['qrCode'] as String?;
+    final amount = (transaction?['amount'] ?? 0).toDouble();
+    
+    print('🔍 QRDepositScreen - bankInfo: $bankInfo');
+    print('🔍 QRDepositScreen - qrData found: ${qrData != null ? "YES" : "NO"}');
+    print('🔍 QRDepositScreen - amount: $amount');
 
     return Scaffold(
       appBar: AppBar(
