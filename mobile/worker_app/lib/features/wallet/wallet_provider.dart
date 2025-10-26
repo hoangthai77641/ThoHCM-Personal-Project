@@ -174,11 +174,13 @@ class WalletProvider with ChangeNotifier {
     required String paymentMethod,
   }) async {
     print('💳 Creating deposit request: amount=$amount, method=$paymentMethod');
-    
+
     if (amount < minTopup || amount > maxTopup) {
       _error =
           'Số tiền nạp phải từ ${_formatCurrency(minTopup)} đến ${_formatCurrency(maxTopup)}';
-      print('❌ Amount validation failed: $amount not in range [$minTopup, $maxTopup]');
+      print(
+        '❌ Amount validation failed: $amount not in range [$minTopup, $maxTopup]',
+      );
       notifyListeners();
       return false;
     }
@@ -199,11 +201,11 @@ class WalletProvider with ChangeNotifier {
       if (response['success']) {
         _lastDepositResponse = response['data'];
         print('✅ Deposit response saved: $_lastDepositResponse');
-        
+
         // Refresh wallet data after creating deposit request
         print('🔄 Refreshing wallet data after deposit creation...');
         await fetchWallet();
-        
+
         print('💳 Deposit request created successfully');
         return true;
       } else {
@@ -244,12 +246,17 @@ class WalletProvider with ChangeNotifier {
 
   String formatCurrency(double amount) => _formatCurrency(amount);
 
-  Future<bool> uploadProofOfPayment(String transactionId, File proofImage) async {
+  Future<bool> uploadProofOfPayment(
+    String transactionId,
+    File proofImage,
+  ) async {
+    print('📤 Starting upload proof of payment for transaction: $transactionId');
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
+      print('📤 Uploading file to /api/wallet/upload-proof...');
       final success = await _apiClient.uploadFile(
         '/api/wallet/upload-proof',
         proofImage,
@@ -257,15 +264,20 @@ class WalletProvider with ChangeNotifier {
         additionalFields: {'transactionId': transactionId},
       );
 
+      print('📤 Upload result: $success');
+
       if (success) {
+        print('✅ Upload successful, refreshing wallet data...');
         // Refresh wallet data after upload
         await fetchWallet();
         return true;
       } else {
+        print('❌ Upload failed');
         _error = 'Không thể upload ảnh chuyển khoản';
         return false;
       }
     } catch (e) {
+      print('❌ Upload error: $e');
       _error = 'Lỗi upload: ${e.toString()}';
       return false;
     } finally {

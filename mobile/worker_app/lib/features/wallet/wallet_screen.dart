@@ -129,7 +129,9 @@ class _WalletScreenState extends State<WalletScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  isNegative ? 'Negative Balance - Need to Top Up' : 'Wallet Balance',
+                  isNegative
+                      ? 'Negative Balance - Need to Top Up'
+                      : 'Wallet Balance',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -342,10 +344,10 @@ class _WalletScreenState extends State<WalletScreen> {
 
   void _showTopUpDialog(BuildContext context, WalletProvider walletProvider) {
     final amountController = TextEditingController();
-                String selectedMethod = 'manual_qr';    
+    String selectedMethod = 'manual_qr';
     // Store the parent context (WalletScreen context) before opening dialog
     final parentContext = context;
-    
+
     showDialog(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
@@ -413,14 +415,18 @@ class _WalletScreenState extends State<WalletScreen> {
 
                 Navigator.pop(dialogContext);
 
-                print('🚀 Creating deposit request with amount: $amount, method: $selectedMethod');
+                print(
+                  '🚀 Creating deposit request with amount: $amount, method: $selectedMethod',
+                );
                 final success = await walletProvider.createDepositRequest(
                   amount: amount,
                   paymentMethod: selectedMethod,
                 );
 
                 print('💳 Deposit creation result: $success');
-                print('📦 Last deposit response: ${walletProvider.lastDepositResponse}');
+                print(
+                  '📦 Last deposit response: ${walletProvider.lastDepositResponse}',
+                );
 
                 if (success && parentContext.mounted) {
                   print('✅ Success and context mounted - checking method...');
@@ -432,7 +438,8 @@ class _WalletScreenState extends State<WalletScreen> {
                         parentContext,
                         MaterialPageRoute(
                           builder: (context) => QRDepositScreen(
-                            depositResponse: walletProvider.lastDepositResponse!,
+                            depositResponse:
+                                walletProvider.lastDepositResponse!,
                           ),
                         ),
                       );
@@ -442,14 +449,16 @@ class _WalletScreenState extends State<WalletScreen> {
                     }
                   } else if (selectedMethod == 'card') {
                     // Navigate to card payment screen
-                    final transactionInfo = walletProvider.lastDepositResponse?['transaction'];
-                    
+                    final transactionInfo =
+                        walletProvider.lastDepositResponse?['transaction'];
+
                     Navigator.push(
                       parentContext,
                       MaterialPageRoute(
                         builder: (context) => CardPaymentScreen(
                           amount: amount,
-                          paymentReference: transactionInfo?['paymentReference'] ?? '',
+                          paymentReference:
+                              transactionInfo?['paymentReference'] ?? '',
                         ),
                       ),
                     );

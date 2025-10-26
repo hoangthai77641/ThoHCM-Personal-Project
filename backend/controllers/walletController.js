@@ -338,8 +338,15 @@ exports.createDepositRequest = async (req, res) => {
 // Upload proof of payment for manual deposits
 exports.uploadProofOfPayment = async (req, res) => {
   try {
-    const { transactionId } = req.params;
+    console.log('📤 Upload proof request received');
+    console.log('📤 Request body:', req.body);
+    console.log('📤 Request file:', req.file ? 'File uploaded' : 'No file');
+    
+    const { transactionId } = req.body; // Changed from req.params to req.body
     const workerId = req.user.id;
+    
+    console.log('📤 Transaction ID:', transactionId);
+    console.log('📤 Worker ID:', workerId);
     
     // Find transaction
     const transaction = await Transaction.findById(transactionId).populate('wallet');
@@ -379,7 +386,9 @@ exports.uploadProofOfPayment = async (req, res) => {
     transaction.proofImage = req.file.path || req.file.location; // Multer local hoặc cloud storage
     transaction.adminApproval.status = 'pending'; // Ensure pending for admin review
     
+    console.log('📤 Saving transaction with proof image:', transaction.proofImage);
     await transaction.save();
+    console.log('✅ Transaction saved successfully');
     
     // TODO: Send notification to admin về pending deposit
     

@@ -9,10 +9,7 @@ import 'wallet_provider.dart';
 class QRDepositScreen extends StatefulWidget {
   final Map<String, dynamic> depositResponse;
 
-  const QRDepositScreen({
-    super.key,
-    required this.depositResponse,
-  });
+  const QRDepositScreen({super.key, required this.depositResponse});
 
   @override
   State<QRDepositScreen> createState() => _QRDepositScreenState();
@@ -26,24 +23,33 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
   @override
   Widget build(BuildContext context) {
     // Debug: Print the entire response structure
-    print('🔍 QRDepositScreen - depositResponse keys: ${widget.depositResponse.keys}');
-    print('🔍 QRDepositScreen - full depositResponse: ${widget.depositResponse}');
-    
-    final paymentInfo = widget.depositResponse['paymentInfo'] as Map<String, dynamic>?;
-    final transaction = widget.depositResponse['transaction'] as Map<String, dynamic>?;
+    print(
+      '🔍 QRDepositScreen - depositResponse keys: ${widget.depositResponse.keys}',
+    );
+    print(
+      '🔍 QRDepositScreen - full depositResponse: ${widget.depositResponse}',
+    );
+
+    final paymentInfo =
+        widget.depositResponse['paymentInfo'] as Map<String, dynamic>?;
+    final transaction =
+        widget.depositResponse['transaction'] as Map<String, dynamic>?;
     final transactionId = transaction?['_id'] as String?;
-    
+
     print('🔍 QRDepositScreen - paymentInfo: $paymentInfo');
     print('🔍 QRDepositScreen - transaction: $transaction');
-    
+
     // Get bankInfo and QR data from the correct structure
     final bankInfo = paymentInfo?['bankInfo'] as Map<String, dynamic>?;
     // Try both locations for QR data
-    final qrData = paymentInfo?['qrCode'] as String? ?? bankInfo?['qrCode'] as String?;
+    final qrData =
+        paymentInfo?['qrCode'] as String? ?? bankInfo?['qrCode'] as String?;
     final amount = (transaction?['amount'] ?? 0).toDouble();
-    
+
     print('🔍 QRDepositScreen - bankInfo: $bankInfo');
-    print('🔍 QRDepositScreen - qrData found: ${qrData != null ? "YES" : "NO"}');
+    print(
+      '🔍 QRDepositScreen - qrData found: ${qrData != null ? "YES" : "NO"}',
+    );
     print('🔍 QRDepositScreen - amount: $amount');
 
     return Scaffold(
@@ -65,7 +71,7 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
             _buildQRSection(qrData, amount),
             const SizedBox(height: 24),
 
-            // Bank Info Section  
+            // Bank Info Section
             _buildBankInfoSection(bankInfo),
             const SizedBox(height: 24),
 
@@ -222,7 +228,11 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.account_balance, color: Colors.blue.shade600, size: 24),
+                Icon(
+                  Icons.account_balance,
+                  color: Colors.blue.shade600,
+                  size: 24,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Thông tin chuyển khoản',
@@ -261,7 +271,12 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, IconData icon, {bool copyable = false}) {
+  Widget _buildInfoRow(
+    String label,
+    String value,
+    IconData icon, {
+    bool copyable = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -290,9 +305,9 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
                     icon: const Icon(Icons.copy, size: 16),
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: value));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Đã copy!')),
-                      );
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(const SnackBar(content: Text('Đã copy!')));
                     },
                   ),
               ],
@@ -313,7 +328,11 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.help_outline, color: Colors.orange.shade600, size: 24),
+                Icon(
+                  Icons.help_outline,
+                  color: Colors.orange.shade600,
+                  size: 24,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Hướng dẫn chuyển khoản',
@@ -325,10 +344,22 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
             ),
             const SizedBox(height: 12),
             _buildInstructionStep('1', 'Mở app ngân hàng trên điện thoại'),
-            _buildInstructionStep('2', 'Chọn "Chuyển khoản QR" hoặc "Quét mã QR"'),
-            _buildInstructionStep('3', 'Quét mã QR ở trên hoặc nhập thông tin thủ công'),
-            _buildInstructionStep('4', 'Kiểm tra thông tin và xác nhận chuyển khoản'),
-            _buildInstructionStep('5', 'Chụp ảnh màn hình kết quả và upload bên dưới'),
+            _buildInstructionStep(
+              '2',
+              'Chọn "Chuyển khoản QR" hoặc "Quét mã QR"',
+            ),
+            _buildInstructionStep(
+              '3',
+              'Quét mã QR ở trên hoặc nhập thông tin thủ công',
+            ),
+            _buildInstructionStep(
+              '4',
+              'Kiểm tra thông tin và xác nhận chuyển khoản',
+            ),
+            _buildInstructionStep(
+              '5',
+              'Chụp ảnh màn hình kết quả và upload bên dưới',
+            ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
@@ -382,10 +413,7 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              instruction,
-              style: const TextStyle(fontSize: 14),
-            ),
+            child: Text(instruction, style: const TextStyle(fontSize: 14)),
           ),
         ],
       ),
@@ -402,7 +430,11 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.upload_file, color: Colors.purple.shade600, size: 24),
+                Icon(
+                  Icons.upload_file,
+                  color: Colors.purple.shade600,
+                  size: 24,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Upload ảnh chuyển khoản',
@@ -413,7 +445,7 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             if (_proofImage == null) ...[
               DottedBorder(
                 borderType: BorderType.RRect,
@@ -472,10 +504,7 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.file(
-                    _proofImage!,
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.file(_proofImage!, fit: BoxFit.cover),
                 ),
               ),
               const SizedBox(height: 16),
@@ -492,13 +521,13 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: _isUploading ? null : _uploadProof,
-                      icon: _isUploading 
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.send),
+                      icon: _isUploading
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.send),
                       label: Text(_isUploading ? 'Đang gửi...' : 'Gửi ảnh'),
                     ),
                   ),
@@ -544,7 +573,11 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.schedule, color: Colors.orange.shade600, size: 16),
+                      Icon(
+                        Icons.schedule,
+                        color: Colors.orange.shade600,
+                        size: 16,
+                      ),
                       const SizedBox(width: 8),
                       const Text(
                         'Đang chờ xử lý',
@@ -576,16 +609,16 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
         maxHeight: 1920,
         imageQuality: 85,
       );
-      
+
       if (image != null) {
         setState(() {
           _proofImage = File(image.path);
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi chọn ảnh: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Lỗi chọn ảnh: $e')));
     }
   }
 
@@ -596,14 +629,16 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
 
     try {
       final success = await context.read<WalletProvider>().uploadProofOfPayment(
-        widget.depositResponse['transactionId'] as String,
+        widget.depositResponse['transaction']['id'] as String,
         _proofImage!,
       );
 
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('✅ Đã gửi ảnh thành công! Vui lòng chờ admin xác nhận.'),
+            content: Text(
+              '✅ Đã gửi ảnh thành công! Vui lòng chờ admin xác nhận.',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -626,10 +661,7 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
   }
 
   String _formatCurrency(double amount) {
-    return '${amount.toStringAsFixed(0).replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
-    )} VNĐ';
+    return '${amount.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} VNĐ';
   }
 }
 
@@ -657,9 +689,9 @@ class DottedBorder extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: color, width: strokeWidth),
-        borderRadius: borderType == BorderType.RRect 
-          ? BorderRadius.all(radius) 
-          : null,
+        borderRadius: borderType == BorderType.RRect
+            ? BorderRadius.all(radius)
+            : null,
       ),
       child: child,
     );
