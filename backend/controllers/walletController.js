@@ -1064,18 +1064,20 @@ exports.getPendingManualDeposits = async (req, res) => {
 
     res.json({
       success: true,
-      data: pendingDeposits.map(transaction => ({
-        id: transaction._id,
-        amount: transaction.amount,
-        workerInfo: {
-          name: transaction.wallet.worker.name,
-          phone: transaction.wallet.worker.phone
-        },
-        bankInfo: transaction.bankInfo,
-        proofImage: transaction.proofImage,
-        createdAt: transaction.createdAt,
-        description: transaction.description
-      }))
+      data: pendingDeposits
+        .filter(transaction => transaction.wallet && transaction.wallet.worker) // Filter out invalid data
+        .map(transaction => ({
+          id: transaction._id,
+          amount: transaction.amount,
+          workerInfo: {
+            name: transaction.wallet.worker.name,
+            phone: transaction.wallet.worker.phone
+          },
+          bankInfo: transaction.bankInfo,
+          proofImage: transaction.proofImage,
+          createdAt: transaction.createdAt,
+          description: transaction.description
+        }))
     });
 
   } catch (error) {
