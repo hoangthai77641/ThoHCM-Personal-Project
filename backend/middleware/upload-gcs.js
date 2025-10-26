@@ -202,14 +202,64 @@ async function deleteFromGCS(filename) {
   }
 }
 
+// Middleware to handle banner upload to GCS
+const uploadBannerMiddleware = (req, res, next) => {
+  bannerUpload.single('image')(req, res, async (err) => {
+    if (err) {
+      console.error('Multer error:', err);
+      return res.status(400).json({ message: err.message });
+    }
+    
+    if (!req.file) {
+      return next(); // No file uploaded, continue
+    }
+    
+    try {
+      // Upload to GCS
+      const { publicUrl } = await uploadToGCS(req.file, 'banners');
+      req.file.gcsUrl = publicUrl;
+      req.file.cloudStoragePublicUrl = publicUrl;
+      next();
+    } catch (error) {
+      console.error('GCS upload error:', error);
+      return res.status(500).json({ message: 'Failed to upload image to cloud storage', error: error.message });
+    }
+  });
+};
+
+// Middleware to handle avatar upload to GCS
+const uploadAvatarMiddleware = (req, res, next) => {
+  avatarUpload.single('avatar')(req, res, async (err) => {
+    if (err) {
+      console.error('Multer error:', err);
+      return res.status(400).json({ message: err.message });
+    }
+    
+    if (!req.file) {
+      return next(); // No file uploaded, continue
+    }
+    
+    try {
+      // Upload to GCS
+      const { publicUrl } = await uploadToGCS(req.file, 'avatars');
+      req.file.gcsUrl = publicUrl;
+      req.file.cloudStoragePublicUrl = publicUrl;
+      next();
+    } catch (error) {
+      console.error('GCS upload error:', error);
+      return res.status(500).json({ message: 'Failed to upload avatar to cloud storage', error: error.message });
+    }
+  });
+};
+
 // Middleware wrappers
 const uploadServiceMedia = serviceUpload.fields([
   { name: 'images', maxCount: 5 },
   { name: 'videos', maxCount: 3 }
 ]);
 
-const uploadBanner = bannerUpload.single('image');
-const uploadAvatar = avatarUpload.single('avatar');
+const uploadBanner = uploadBannerMiddleware;
+const uploadAvatar = uploadAvatarMiddleware;
 
 module.exports = {
   uploadServiceMedia,
