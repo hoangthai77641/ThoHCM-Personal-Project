@@ -44,10 +44,38 @@ const transactionSchema = new mongoose.Schema({
   // For deposits
   paymentMethod: { 
     type: String, 
-    enum: ['bank_transfer', 'momo', 'card'] 
+    enum: ['bank_transfer', 'momo', 'card', 'manual_qr'] 
   },
   paymentReference: { 
     type: String // Mã giao dịch ngân hàng
+  },
+  
+  // For manual QR deposits
+  proofImage: { 
+    type: String // URL ảnh chụp proof of payment
+  },
+  bankInfo: {
+    qrCode: String, // QR code data URL
+    accountNumber: String,
+    accountName: String,
+    bankName: String,
+    transferCode: String // Mã chuyển khoản unique để tracking
+  },
+  
+  // Admin approval fields
+  adminApproval: {
+    status: { 
+      type: String, 
+      enum: ['pending', 'approved', 'rejected'], 
+      default: 'pending' 
+    },
+    approvedBy: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'User' 
+    },
+    approvedAt: Date,
+    adminNotes: String,
+    actualAmount: Number // Số tiền thực tế admin xác nhận
   },
   // For deductions
   booking: { 

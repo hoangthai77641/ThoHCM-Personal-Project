@@ -135,7 +135,8 @@ class _ServicesScreenState extends State<ServicesScreen> {
                     imageUrl = '${AppConstants.defaultApiUrl}$firstImage';
                   } else {
                     // Legacy filename only - construct with /uploads/services/ for backward compatibility
-                    imageUrl = '${AppConstants.defaultApiUrl}/uploads/services/$firstImage';
+                    imageUrl =
+                        '${AppConstants.defaultApiUrl}/uploads/services/$firstImage';
                   }
                 }
 

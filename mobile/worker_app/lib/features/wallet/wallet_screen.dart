@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'wallet_provider.dart';
 import 'card_payment_screen.dart';
+import 'qr_deposit_screen.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
@@ -341,9 +342,7 @@ class _WalletScreenState extends State<WalletScreen> {
 
   void _showTopUpDialog(BuildContext context, WalletProvider walletProvider) {
     final amountController = TextEditingController();
-    String selectedMethod = 'bank_transfer';
-
-    showDialog(
+                String selectedMethod = 'manual_qr';    showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
@@ -372,6 +371,10 @@ class _WalletScreenState extends State<WalletScreen> {
                     border: OutlineInputBorder(),
                   ),
                   items: const [
+                    DropdownMenuItem(
+                      value: 'manual_qr',
+                      child: Text('🔥 Chuyển khoản QR (Khuyến khích)'),
+                    ),
                     DropdownMenuItem(
                       value: 'bank_transfer',
                       child: Text('Chuyển khoản ngân hàng'),
@@ -412,7 +415,17 @@ class _WalletScreenState extends State<WalletScreen> {
                 );
 
                 if (success && context.mounted) {
-                  if (selectedMethod == 'card') {
+                  if (selectedMethod == 'manual_qr') {
+                    // Navigate to QR deposit screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => QRDepositScreen(
+                          depositResponse: walletProvider.lastDepositResponse!,
+                        ),
+                      ),
+                    );
+                  } else if (selectedMethod == 'card') {
                     // Navigate to card payment screen
                     final transactionInfo = walletProvider.lastDepositResponse?['transaction'];
                     

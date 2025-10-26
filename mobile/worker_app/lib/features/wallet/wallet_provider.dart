@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'dart:io';
 import '../../core/api_client.dart';
 
 class WalletProvider with ChangeNotifier {
@@ -229,6 +230,36 @@ class WalletProvider with ChangeNotifier {
   }
 
   String formatCurrency(double amount) => _formatCurrency(amount);
+
+  Future<bool> uploadProofOfPayment(String transactionId, File proofImage) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final success = await _apiClient.uploadFile(
+        '/api/wallet/upload-proof',
+        proofImage,
+        fieldName: 'proofImage',
+        additionalFields: {'transactionId': transactionId},
+      );
+
+      if (success) {
+        // Refresh wallet data after upload
+        await fetchWallet();
+        return true;
+      } else {
+        _error = 'Không thể upload ảnh chuyển khoản';
+        return false;
+      }
+    } catch (e) {
+      _error = 'Lỗi upload: ${e.toString()}';
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
   void clearError() {
     _error = null;

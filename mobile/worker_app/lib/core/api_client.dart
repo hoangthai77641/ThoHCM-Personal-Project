@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'env.dart';
@@ -92,6 +93,53 @@ class ApiClient {
       throw Exception(errorMessage);
     } catch (e) {
       throw Exception(AppStrings.connectionError);
+    }
+  }
+
+  Future<bool> uploadFile(
+    String path,
+    File file, {
+    String fieldName = 'file',
+    Map<String, String>? additionalFields,
+  }) async {
+    try {
+      final formData = FormData();
+      
+      // Add the file
+      formData.files.add(
+        MapEntry(
+          fieldName,
+          await MultipartFile.fromFile(
+            file.path,
+            filename: file.path.split('/').last,
+          ),
+        ),
+      );
+
+      // Add additional fields
+      if (additionalFields != null) {
+        for (final entry in additionalFields.entries) {
+          formData.fields.add(MapEntry(entry.key, entry.value));
+        }
+      }
+
+      final response = await dio.post(path, data: formData);
+      
+      final responseData = response.data as Map<String, dynamic>;
+      return responseData['success'] == true;
+    } on DioException catch (e) {
+      final errorData = e.response?.data;
+      String errorMessage = AppStrings.generalError;
+
+      if (errorData is Map<String, dynamic>) {
+        errorMessage = errorData['message'] ?? errorMessage;
+      } else if (errorData is String) {
+        errorMessage = errorData;
+      }
+
+      throw Exception(errorMessage);
+    } catch (e) {
+      throw Exception('Upload failed: ${e.toString()}');
     }
   }
 }

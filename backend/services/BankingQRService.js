@@ -2,6 +2,34 @@ const QRCode = require('qrcode');
 
 class BankingQRService {
   /**
+   * Tạo QR code chuyển khoản ngân hàng Việt Nam cho manual deposit
+   * Theo chuẩn VietQR
+   */
+  static async generateDepositQR(params) {
+    const {
+      bankCode = '970436', // Vietcombank
+      accountNumber,
+      accountName,
+      amount,
+      transactionId, // Unique transaction ID để tracking
+      workerName,
+      template = 'compact'
+    } = params;
+
+    // Tạo mã giao dịch unique để tracking
+    const description = `THOHCM ${transactionId} ${workerName}`.substring(0, 25);
+
+    return await this.generateVietQR({
+      bankCode,
+      accountNumber,
+      accountName,
+      amount,
+      description,
+      template
+    });
+  }
+
+  /**
    * Tạo QR code chuyển khoản ngân hàng Việt Nam
    * Theo chuẩn VietQR
    */

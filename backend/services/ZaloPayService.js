@@ -4,12 +4,27 @@ const axios = require('axios');
 
 class ZaloPayService {
   constructor() {
-    // ZaloPay configuration - using sandbox for testing
-    this.app_id = process.env.ZALOPAY_APP_ID || '2553'; // App ID từ ZaloPay
-    this.key1 = process.env.ZALOPAY_KEY1 || 'PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL'; // Key1 cho create đơn hàng
-    this.key2 = process.env.ZALOPAY_KEY2 || 'kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz'; // Key2 cho callback
-    this.endpoint = process.env.ZALOPAY_ENDPOINT || 'https://sb-openapi.zalopay.vn'; // Sandbox endpoint
-    this.callback_url = process.env.ZALOPAY_CALLBACK_URL || 'http://localhost:5000/api/wallet/zalopay-callback';
+    // ZaloPay configuration - will be updated with real credentials
+    this.app_id = process.env.ZALOPAY_APP_ID || '2553'; // TO BE REPLACED: Real APP_ID from ZaloPay
+    this.key1 = process.env.ZALOPAY_KEY1 || 'PcY4iZIKFCIdgZvA6ueMcMHHUbRLYjPL'; // TO BE REPLACED: Real KEY1
+    this.key2 = process.env.ZALOPAY_KEY2 || 'kLtgPl8HHhfvMuDHPwKfgfsY4Ydm9eIz'; // TO BE REPLACED: Real KEY2
+    
+    // Endpoints
+    this.endpoint = process.env.NODE_ENV === 'production' 
+      ? 'https://openapi.zalopay.vn'  // Production
+      : 'https://sb-openapi.zalopay.vn'; // Sandbox
+    
+    this.callback_url = process.env.ZALOPAY_CALLBACK_URL || 
+      (process.env.NODE_ENV === 'production' 
+        ? `${process.env.SERVER_URL}/api/wallet/zalopay-callback`
+        : 'http://localhost:5000/api/wallet/zalopay-callback');
+
+    console.log('🟡 ZaloPayService initialized with:', {
+      app_id: this.app_id,
+      endpoint: this.endpoint,
+      callback_url: this.callback_url,
+      environment: process.env.NODE_ENV || 'development'
+    });
   }
 
   /**

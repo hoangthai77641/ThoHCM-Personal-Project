@@ -332,12 +332,12 @@ class MediaPickerWidgetState extends State<MediaPickerWidget> {
     final allImages = [
       ..._images, // existing image URLs
       ..._newImageFiles.map((file) => file.path), // new image files
-      ..._newImageUrls // new image URLs
+      ..._newImageUrls, // new image URLs
     ];
     final allVideos = [
       ..._videos, // existing video URLs
       ..._newVideoFiles.map((file) => file.path), // new video files
-      ..._newVideoUrls // new video URLs
+      ..._newVideoUrls, // new video URLs
     ];
 
     print('🔄 _notifyChange called:');
@@ -360,8 +360,9 @@ class MediaPickerWidgetState extends State<MediaPickerWidget> {
     bool isUrl = false,
   }) {
     // Check if this is a network URL or a local file path
-    final bool isNetworkUrl = imageUrl.startsWith('http://') || imageUrl.startsWith('https://');
-    
+    final bool isNetworkUrl =
+        imageUrl.startsWith('http://') || imageUrl.startsWith('https://');
+
     return Stack(
       children: [
         ClipRRect(
@@ -387,7 +388,9 @@ class MediaPickerWidgetState extends State<MediaPickerWidget> {
                   height: 100,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    print('Error loading local image: $imageUrl, Error: $error');
+                    print(
+                      'Error loading local image: $imageUrl, Error: $error',
+                    );
                     return Container(
                       width: 100,
                       height: 100,
@@ -546,8 +549,12 @@ class MediaPickerWidgetState extends State<MediaPickerWidget> {
             children: [
               // Existing images (URLs)
               ..._images.asMap().entries.map(
-                (entry) =>
-                    _buildImageItem(entry.value, entry.key, isExisting: true, isUrl: true),
+                (entry) => _buildImageItem(
+                  entry.value,
+                  entry.key,
+                  isExisting: true,
+                  isUrl: true,
+                ),
               ),
               // New image files (local paths)
               ..._newImageFiles.asMap().entries.map(
@@ -584,8 +591,12 @@ class MediaPickerWidgetState extends State<MediaPickerWidget> {
             children: [
               // Existing videos (URLs)
               ..._videos.asMap().entries.map(
-                (entry) =>
-                    _buildVideoItem(entry.value, entry.key, isExisting: true, isUrl: true),
+                (entry) => _buildVideoItem(
+                  entry.value,
+                  entry.key,
+                  isExisting: true,
+                  isUrl: true,
+                ),
               ),
               // New video files (local paths)
               ..._newVideoFiles.asMap().entries.map(

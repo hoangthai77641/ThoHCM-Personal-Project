@@ -105,7 +105,7 @@ exports.createDepositRequest = async (req, res) => {
     }
 
     // Validate payment method
-    const validMethods = ['bank_transfer', 'momo', 'card', 'vnpay', 'zalopay', 'stripe'];
+    const validMethods = ['bank_transfer', 'momo', 'card', 'vnpay', 'zalopay', 'stripe', 'manual_qr'];
     if (!validMethods.includes(paymentMethod)) {
       return res.status(400).json({ 
         success: false,
@@ -182,6 +182,55 @@ exports.createDepositRequest = async (req, res) => {
             `3. Nội dung CK: ${description}`,
             '4. Chờ xác nhận tự động (1-5 phút)'
           ]
+        };
+      } else if (paymentMethod === 'manual_qr') {
+        // Manual QR Banking - Admin approval required
+        const transferCode = `THOHCM${Date.now().toString().slice(-6)}${workerId.slice(-3)}`;
+        
+        // Generate QR code cho manual banking
+        const qrResult = await BankingQRService.generateDepositQR({
+          bankCode: platformFee.bankAccount.bankCode || '970436',
+          accountNumber: platformFee.bankAccount.accountNumber,
+          accountName: platformFee.bankAccount.accountName,
+          amount: amount,
+          transactionId: transferCode,
+          workerName: req.user.name || 'Unknown'
+        });
+
+        // Update transaction với banking info
+        transaction.bankInfo = {
+          qrCode: qrResult.qrCode,
+          accountNumber: platformFee.bankAccount.accountNumber,
+          accountName: platformFee.bankAccount.accountName, 
+          bankName: platformFee.bankAccount.bankName || 'Vietcombank',
+          transferCode: transferCode
+        };
+        
+        transaction.adminApproval = {
+          status: 'pending'
+        };
+        
+        await transaction.save();
+
+        paymentInfo = {
+          type: 'manual_qr',
+          qrCode: qrResult.qrCode,
+          bankInfo: {
+            bankName: platformFee.bankAccount.bankName || 'Vietcombank',
+            accountNumber: platformFee.bankAccount.accountNumber,
+            accountName: platformFee.bankAccount.accountName,
+            transferCode: transferCode
+          },
+          amount: amount,
+          instructions: [
+            '1. Quét mã QR bằng app ngân hàng của bạn',
+            '2. Hoặc chuyển khoản thủ công với thông tin bên dưới',
+            `3. Nội dung chuyển khoản: ${transferCode}`,
+            '4. Chụp ảnh màn hình xác nhận chuyển khoản',
+            '5. Upload ảnh để admin xác nhận',
+            '6. Chờ admin duyệt (thường trong 30 phút)'
+          ],
+          requiresProof: true // Mobile sẽ hiện upload proof
         };
       } else if (paymentMethod === 'momo') {
         paymentInfo = {
@@ -282,6 +331,72 @@ exports.createDepositRequest = async (req, res) => {
     res.status(500).json({ 
       success: false,
       message: error.message 
+    });
+  }
+};
+
+// Upload proof of payment for manual deposits
+exports.uploadProofOfPayment = async (req, res) => {
+  try {
+    const { transactionId } = req.params;
+    const workerId = req.user.id;
+    
+    // Find transaction
+    const transaction = await Transaction.findById(transactionId).populate('wallet');
+    
+    if (!transaction) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy giao dịch'
+      });
+    }
+    
+    // Check ownership
+    if (transaction.wallet.worker.toString() !== workerId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Không có quyền truy cập giao dịch này'
+      });
+    }
+    
+    // Check if manual QR deposit
+    if (transaction.paymentMethod !== 'manual_qr') {
+      return res.status(400).json({
+        success: false,
+        message: 'Chỉ giao dịch chuyển khoản QR mới cần upload proof'
+      });
+    }
+    
+    // Check if file uploaded
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'Vui lòng upload ảnh chứng minh chuyển khoản'
+      });
+    }
+    
+    // Save proof image path
+    transaction.proofImage = req.file.path || req.file.location; // Multer local hoặc cloud storage
+    transaction.adminApproval.status = 'pending'; // Ensure pending for admin review
+    
+    await transaction.save();
+    
+    // TODO: Send notification to admin về pending deposit
+    
+    res.json({
+      success: true,
+      message: 'Upload ảnh chứng minh thành công. Vui lòng chờ admin xác nhận.',
+      data: {
+        transactionId: transaction._id,
+        proofImage: transaction.proofImage,
+        status: transaction.adminApproval.status
+      }
+    });
+    
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
     });
   }
 };
@@ -889,6 +1004,175 @@ exports.confirmAllPendingTransactions = async (req, res) => {
   }
 };
 
+// Get pending manual deposits for admin
+exports.getPendingManualDeposits = async (req, res) => {
+  try {
+    // Only admin can view pending deposits
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Chỉ admin mới có thể xem danh sách chờ duyệt'
+      });
+    }
+
+    const pendingDeposits = await Transaction.find({
+      paymentMethod: 'manual_qr',
+      'adminApproval.status': 'pending'
+    })
+    .populate('wallet')
+    .populate({
+      path: 'wallet',
+      populate: {
+        path: 'worker',
+        select: 'name phone'
+      }
+    })
+    .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      data: pendingDeposits.map(transaction => ({
+        id: transaction._id,
+        amount: transaction.amount,
+        workerInfo: {
+          name: transaction.wallet.worker.name,
+          phone: transaction.wallet.worker.phone
+        },
+        bankInfo: transaction.bankInfo,
+        proofImage: transaction.proofImage,
+        createdAt: transaction.createdAt,
+        description: transaction.description
+      }))
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// Approve manual deposit
+exports.approveManualDeposit = async (req, res) => {
+  try {
+    const { transactionId } = req.params;
+    const { actualAmount, adminNotes } = req.body;
+    
+    // Only admin can approve
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Chỉ admin mới có thể duyệt giao dịch'
+      });
+    }
+
+    const transaction = await Transaction.findById(transactionId).populate('wallet');
+    
+    if (!transaction) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy giao dịch'
+      });
+    }
+
+    if (transaction.adminApproval.status !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'Giao dịch đã được xử lý'
+      });
+    }
+
+    // Update transaction
+    transaction.adminApproval.status = 'approved';
+    transaction.adminApproval.approvedBy = req.user.id;
+    transaction.adminApproval.approvedAt = new Date();
+    transaction.adminApproval.adminNotes = adminNotes || '';
+    transaction.adminApproval.actualAmount = actualAmount || transaction.amount;
+    transaction.status = 'completed';
+    
+    // Update amount if different
+    if (actualAmount && actualAmount !== transaction.amount) {
+      transaction.amount = actualAmount;
+    }
+
+    await transaction.save(); // Middleware will update wallet balance
+
+    res.json({
+      success: true,
+      message: 'Đã duyệt giao dịch thành công',
+      data: {
+        transactionId: transaction._id,
+        approvedAmount: transaction.amount,
+        approvedAt: transaction.adminApproval.approvedAt
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// Reject manual deposit
+exports.rejectManualDeposit = async (req, res) => {
+  try {
+    const { transactionId } = req.params;
+    const { adminNotes } = req.body;
+    
+    // Only admin can reject
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Chỉ admin mới có thể từ chối giao dịch'
+      });
+    }
+
+    const transaction = await Transaction.findById(transactionId);
+    
+    if (!transaction) {
+      return res.status(404).json({
+        success: false,
+        message: 'Không tìm thấy giao dịch'
+      });
+    }
+
+    if (transaction.adminApproval.status !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'Giao dịch đã được xử lý'
+      });
+    }
+
+    // Update transaction
+    transaction.adminApproval.status = 'rejected';
+    transaction.adminApproval.approvedBy = req.user.id;
+    transaction.adminApproval.approvedAt = new Date();
+    transaction.adminApproval.adminNotes = adminNotes || '';
+    transaction.status = 'failed';
+
+    await transaction.save();
+
+    res.json({
+      success: true,
+      message: 'Đã từ chối giao dịch',
+      data: {
+        transactionId: transaction._id,
+        rejectedAt: transaction.adminApproval.approvedAt,
+        reason: adminNotes
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 module.exports = {
   getWallet: exports.getWallet,
   createDepositRequest: exports.createDepositRequest,
@@ -904,5 +1188,9 @@ module.exports = {
   stripeWebhook: exports.stripeWebhook,
   stripeSuccess: exports.stripeSuccess,
   stripeCancel: exports.stripeCancel,
-  confirmAllPendingTransactions: exports.confirmAllPendingTransactions
+  confirmAllPendingTransactions: exports.confirmAllPendingTransactions,
+  uploadProofOfPayment: exports.uploadProofOfPayment,
+  getPendingManualDeposits: exports.getPendingManualDeposits,
+  approveManualDeposit: exports.approveManualDeposit,
+  rejectManualDeposit: exports.rejectManualDeposit
 };

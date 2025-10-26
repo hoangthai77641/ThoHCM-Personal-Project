@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api'
 import NotificationManager from '../components/NotificationManager'
+import ManualDepositManagement from '../components/ManualDepositManagement'
 
 export default function AdminDashboard(){
   const navigate = useNavigate()
@@ -190,6 +191,12 @@ export default function AdminDashboard(){
               onClick={() => setActiveTab('wallet')}
             >
               💰 Quản lý Ví
+            </button>
+            <button 
+              className={`tab-btn ${activeTab === 'manual-deposits' ? 'active' : ''}`}
+              onClick={() => setActiveTab('manual-deposits')}
+            >
+              🏦 Nạp tiền QR
             </button>
           </div>
           {activeTab === 'dashboard' && (
@@ -562,6 +569,11 @@ export default function AdminDashboard(){
             <WalletsList wallets={wallets} />
           </div>
         </div>
+      )}
+
+      {/* Manual Deposits Management Content */}
+      {activeTab === 'manual-deposits' && (
+        <ManualDepositManagement />
       )}
     </div>
   )
