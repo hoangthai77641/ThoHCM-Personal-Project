@@ -168,7 +168,7 @@ const ManualDepositManagement = () => {
         <Typography variant="h5" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
           <AccountBalanceWallet sx={{ mr: 1, color: 'primary.main' }} />
           Quản lý nạp tiền QR thủ công
-          <Badge badgeContent={pendingDeposits.length} color="error" sx={{ ml: 2 }}>
+          <Badge badgeContent={(pendingDeposits || []).length} color="error" sx={{ ml: 2 }}>
             <Schedule />
           </Badge>
         </Typography>
@@ -198,7 +198,7 @@ const ManualDepositManagement = () => {
             Làm mới
           </Button>
           <Typography variant="body2" color="text.secondary">
-            {filteredDeposits.length} / {pendingDeposits.length} giao dịch
+            {filteredDeposits.length} / {(pendingDeposits || []).length} giao dịch
           </Typography>
         </Stack>
       </Box>
@@ -216,7 +216,7 @@ const ManualDepositManagement = () => {
       )}
 
       {/* Deposits List */}
-      {loading && pendingDeposits.length === 0 ? (
+      {loading && (pendingDeposits || []).length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 4 }}>
           <Typography>Đang tải...</Typography>
         </Box>
@@ -225,7 +225,7 @@ const ManualDepositManagement = () => {
           <CardContent sx={{ textAlign: 'center', py: 4 }}>
             <AccountBalanceWallet sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
             <Typography variant="h6" color="text.secondary">
-              {pendingDeposits.length === 0 
+              {(pendingDeposits || []).length === 0 
                 ? 'Không có giao dịch chờ duyệt'
                 : 'Không tìm thấy giao dịch phù hợp'
               }
