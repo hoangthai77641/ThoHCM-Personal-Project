@@ -148,7 +148,7 @@ const ManualDepositManagement = () => {
     setActualAmount('');
   };
 
-  const filteredDeposits = pendingDeposits.filter(deposit => {
+  const filteredDeposits = (pendingDeposits || []).filter(deposit => {
     const searchLower = searchTerm.toLowerCase();
     return (
       deposit.workerId?.name?.toLowerCase().includes(searchLower) ||
