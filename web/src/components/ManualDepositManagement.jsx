@@ -302,15 +302,20 @@ const ManualDepositManagement = () => {
                     {/* Bank Info */}
                     {deposit.bankInfo && (
                       <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>
                           Thông tin CK:
                         </Typography>
-                        <Typography variant="body2">
-                          {deposit.bankInfo.bankName} - {deposit.bankInfo.accountNumber}
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {deposit.bankInfo.accountName || 'N/A'}
                         </Typography>
-                        <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
-                          {deposit.bankInfo.transferContent}
+                        <Typography variant="body2" color="text.secondary">
+                          {deposit.bankInfo.bankName || 'N/A'} - {deposit.bankInfo.accountNumber || 'N/A'}
                         </Typography>
+                        {deposit.bankInfo.transferCode && (
+                          <Typography variant="body2" sx={{ fontFamily: 'monospace', mt: 0.5 }}>
+                            Mã CK: {deposit.bankInfo.transferCode}
+                          </Typography>
+                        )}
                       </Box>
                     )}
                   </Stack>
