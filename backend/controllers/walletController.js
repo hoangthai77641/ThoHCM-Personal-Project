@@ -1048,6 +1048,8 @@ exports.getPendingManualDeposits = async (req, res) => {
       });
     }
 
+    console.log('🔍 [getPendingManualDeposits] Querying for manual_qr deposits with pending status...');
+    
     const pendingDeposits = await Transaction.find({
       paymentMethod: 'manual_qr',
       'adminApproval.status': 'pending'
@@ -1061,6 +1063,17 @@ exports.getPendingManualDeposits = async (req, res) => {
       }
     })
     .sort({ createdAt: -1 });
+
+    console.log(`✅ [getPendingManualDeposits] Found ${pendingDeposits.length} pending deposits`);
+    
+    if (pendingDeposits.length > 0) {
+      console.log('📋 [getPendingManualDeposits] First deposit sample:', {
+        id: pendingDeposits[0]._id,
+        paymentMethod: pendingDeposits[0].paymentMethod,
+        adminApproval: pendingDeposits[0].adminApproval,
+        proofImage: pendingDeposits[0].proofImage
+      });
+    }
 
     res.json({
       success: true,
