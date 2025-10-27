@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
+import 'package:video_compress/video_compress.dart';
 import 'dart:io';
 
 class MediaPickerWidget extends StatefulWidget {
@@ -109,17 +110,59 @@ class MediaPickerWidgetState extends State<MediaPickerWidget> {
       );
 
       if (video != null) {
-        final file = File(video.path);
-        setState(() {
-          _newVideoFiles.add(file);
-        });
-        _notifyChange();
+        // Show loading indicator
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Đang nén video...')),
+          );
+        }
+
+        // Compress video to reduce file size
+        final MediaInfo? compressedVideo = await VideoCompress.compressVideo(
+          video.path,
+          quality: VideoQuality.MediumQuality,
+          deleteOrigin: false,
+        );
+
+        if (compressedVideo != null && compressedVideo.file != null) {
+          final file = compressedVideo.file!;
+          final fileSizeMB = file.lengthSync() / (1024 * 1024);
+          
+          print('📹 Original video: ${video.path}');
+          print('📹 Compressed video: ${file.path}');
+          print('📹 Compressed size: ${fileSizeMB.toStringAsFixed(2)} MB');
+
+          if (fileSizeMB > 50) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Video vẫn quá lớn sau khi nén. Vui lòng chọn video ngắn hơn.'),
+                ),
+              );
+            }
+            return;
+          }
+
+          setState(() {
+            _newVideoFiles.add(file);
+          });
+          _notifyChange();
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Video đã được nén: ${fileSizeMB.toStringAsFixed(1)} MB'),
+              ),
+            );
+          }
+        }
       }
     } catch (e) {
+      print('❌ Video compression error: $e');
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi chọn video: $e')));
+        ).showSnackBar(SnackBar(content: Text('Lỗi xử lý video: $e')));
       }
     }
   }
@@ -132,17 +175,57 @@ class MediaPickerWidgetState extends State<MediaPickerWidget> {
       );
 
       if (video != null) {
-        final file = File(video.path);
-        setState(() {
-          _newVideoFiles.add(file);
-        });
-        _notifyChange();
+        // Show loading indicator
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Đang nén video...')),
+          );
+        }
+
+        // Compress video to reduce file size
+        final MediaInfo? compressedVideo = await VideoCompress.compressVideo(
+          video.path,
+          quality: VideoQuality.MediumQuality,
+          deleteOrigin: false,
+        );
+
+        if (compressedVideo != null && compressedVideo.file != null) {
+          final file = compressedVideo.file!;
+          final fileSizeMB = file.lengthSync() / (1024 * 1024);
+          
+          print('📹 Recorded video compressed: ${fileSizeMB.toStringAsFixed(2)} MB');
+
+          if (fileSizeMB > 50) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Video quá lớn. Vui lòng quay video ngắn hơn.'),
+                ),
+              );
+            }
+            return;
+          }
+
+          setState(() {
+            _newVideoFiles.add(file);
+          });
+          _notifyChange();
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Video đã được nén: ${fileSizeMB.toStringAsFixed(1)} MB'),
+              ),
+            );
+          }
+        }
       }
     } catch (e) {
+      print('❌ Video recording/compression error: $e');
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi quay video: $e')));
+        ).showSnackBar(SnackBar(content: Text('Lỗi xử lý video: $e')));
       }
     }
   }

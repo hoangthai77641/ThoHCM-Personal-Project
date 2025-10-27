@@ -115,11 +115,11 @@ const serviceUpload = multer({
   storage: memoryStorage,
   fileFilter: serviceFileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
+    fileSize: 50 * 1024 * 1024, // 50MB limit for videos
     files: 8, // Maximum 8 files total
-    fieldSize: 1024 * 1024,
+    fieldSize: 2 * 1024 * 1024, // 2MB for text fields
     fieldNameSize: 100,
-    fields: 10
+    fields: 20 // More fields for JSON data
   }
 });
 
@@ -266,8 +266,8 @@ const uploadServiceMediaMiddleware = (req, res, next) => {
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(413).json({ 
           error: 'File too large', 
-          message: 'File size must be less than 10MB',
-          maxSize: '10MB'
+          message: 'File size must be less than 50MB',
+          maxSize: '50MB'
         });
       }
       
