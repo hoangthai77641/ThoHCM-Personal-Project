@@ -10,7 +10,9 @@ import {
   Typography,
   Alert,
   Container,
-  Link as MuiLink
+  Link as MuiLink,
+  FormControlLabel,
+  Checkbox
 } from '@mui/material'
 import { PersonAdd as PersonAddIcon } from '@mui/icons-material'
 
@@ -19,6 +21,8 @@ export default function Register(){
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [address, setAddress] = useState('')
+  const [isWorker, setIsWorker] = useState(false)
+  
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
@@ -28,8 +32,9 @@ export default function Register(){
     setLoading(true)
     setError(null)
     try{
-      // role is always customer from web registration
-      await api.post('/api/users/register', { name, phone, password, role: 'customer', address })
+      // build payload, allow web users to register as worker when selected
+  const payload = { name, phone, password, role: isWorker ? 'worker' : 'customer', address }
+      await api.post('/api/users/register', payload)
       navigate('/login')
     }catch(err){
       setError(err.response?.data?.message || err.message)
@@ -112,6 +117,25 @@ export default function Register(){
                 margin="normal"
                 autoComplete="street-address"
               />
+
+              <FormControlLabel
+                control={(
+                  <Checkbox
+                    checked={isWorker}
+                    onChange={e => setIsWorker(e.target.checked)}
+                    color="primary"
+                  />
+                )}
+                label="Đăng ký làm Thợ"
+              />
+
+              {isWorker && (
+                <>
+                  <Alert severity="info" sx={{ mb: 2 }}>
+                    Tài khoản Thợ sẽ ở trạng thái <strong>chờ duyệt</strong>. CCCD/giấy tờ do quản trị viên cập nhật khi xét duyệt.
+                  </Alert>
+                </>
+              )}
 
               <Button
                 type="submit"
