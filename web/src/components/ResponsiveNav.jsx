@@ -176,9 +176,16 @@ export default function ResponsiveNav({ user, onLogout }) {
             component={Link}
             to={item.path}
             onClick={handleDrawerToggle}
+            sx={{ 
+              color: 'text.primary',
+              '&:hover': { bgcolor: 'action.hover' }
+            }}
           >
-            <ListItemIcon>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.text} />
+            <ListItemIcon sx={{ color: 'inherit' }}>{item.icon}</ListItemIcon>
+            <ListItemText 
+              primary={item.text}
+              primaryTypographyProps={{ color: 'text.primary' }}
+            />
           </ListItem>
         ))}
 
@@ -189,16 +196,33 @@ export default function ResponsiveNav({ user, onLogout }) {
             component={Link}
             to={item.path}
             onClick={handleDrawerToggle}
+            sx={{ 
+              color: 'text.primary',
+              '&:hover': { bgcolor: 'action.hover' }
+            }}
           >
-            <ListItemIcon>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.text} />
+            <ListItemIcon sx={{ color: 'inherit' }}>{item.icon}</ListItemIcon>
+            <ListItemText 
+              primary={item.text}
+              primaryTypographyProps={{ color: 'text.primary' }}
+            />
           </ListItem>
         ))}
 
         {user && (
-          <ListItem button onClick={() => { handleDrawerToggle(); handleLogout(); }}>
-            <ListItemIcon><LogoutIcon /></ListItemIcon>
-            <ListItemText primary="Đăng xuất" />
+          <ListItem 
+            button 
+            onClick={() => { handleDrawerToggle(); handleLogout(); }}
+            sx={{ 
+              color: 'text.primary',
+              '&:hover': { bgcolor: 'action.hover' }
+            }}
+          >
+            <ListItemIcon sx={{ color: 'inherit' }}><LogoutIcon /></ListItemIcon>
+            <ListItemText 
+              primary="Đăng xuất"
+              primaryTypographyProps={{ color: 'text.primary' }}
+            />
           </ListItem>
         )}
       </List>
