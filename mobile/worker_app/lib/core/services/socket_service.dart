@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../env.dart';
 import 'notification_service.dart';
 import '../../features/notifications/notifications_provider.dart';
@@ -57,18 +58,36 @@ class SocketService {
       final socketUrl = Env.socketBase;
       log('🔗 Connecting to socket URL: $socketUrl');
 
-      // Create socket with explicit configuration for better compatibility
-      _socket = IO.io(
-        socketUrl,
-        IO.OptionBuilder()
-            .setTransports(['websocket'])
-            .enableAutoConnect()
-            .enableReconnection()
-            .setReconnectionDelay(2000)
-            .setReconnectionAttempts(5)
-            .setExtraHeaders({'User-Agent': 'ThoHCM-Worker-App'})
-            .build(),
-      );
+      // Get JWT token from SharedPreferences
+      String? token;
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        token = prefs.getString('token');
+        if (token != null) {
+          log('✅ JWT token found for Socket.IO authentication');
+        } else {
+          log('⚠️ No JWT token found - connecting without authentication (legacy mode)');
+        }
+      } catch (e) {
+        log('⚠️ Error reading token: $e');
+      }
+
+      // Create socket with JWT authentication
+      final optionBuilder = IO.OptionBuilder()
+          .setTransports(['websocket'])
+          .enableAutoConnect()
+          .enableReconnection()
+          .setReconnectionDelay(2000)
+          .setReconnectionAttempts(5)
+          .setExtraHeaders({'User-Agent': 'ThoHCM-Worker-App'});
+
+      // Add JWT token to auth if available
+      if (token != null) {
+        optionBuilder.setAuth({'token': token});
+        log('🔐 Socket.IO configured with JWT authentication');
+      }
+
+      _socket = IO.io(socketUrl, optionBuilder.build());
 
       _socket!.onConnect((_) {
         log('Socket connected successfully');
@@ -87,6 +106,36 @@ class SocketService {
       _socket!.onConnectError((error) {
         log('Socket connection error: $error');
         _isConnected = false;
+      });
+
+      // Listen for authentication errors from backend
+      _socket!.on('error', (data) {
+        try {
+          log('⚠️ Socket error received: $data');
+          if (data is Map) {
+            final errorData = Map<String, dynamic>.from(data);
+            final code = errorData['code'] as String?;
+            final message = errorData['message'] as String?;
+            final action = errorData['action'] as String?;
+
+            if (code == 'AUTH_REQUIRED') {
+              log('🔒 Authentication required: $message');
+              if (action != null) {
+                log('📱 Action: $action');
+              }
+              // Show notification to user
+              NotificationService().showNotification(
+                title: 'Cập nhật ứng dụng',
+                body: action ?? 'Vui lòng cập nhật ứng dụng để tiếp tục nhận thông báo real-time',
+                type: NotificationType.statusUpdate,
+              );
+            } else if (code == 'UNAUTHORIZED') {
+              log('🚫 Unauthorized access: $message');
+            }
+          }
+        } catch (e) {
+          log('❌ Error handling socket error event: $e');
+        }
       });
 
       // Listen for notifications
