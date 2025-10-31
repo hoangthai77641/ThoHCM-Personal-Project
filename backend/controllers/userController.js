@@ -101,9 +101,14 @@ exports.login = async (req, res) => {
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: 'Wrong password' });
+    // Security: JWT_SECRET must be set in environment
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET environment variable is required');
+    }
+    
     const token = jwt.sign(
       { id: user._id, role: user.role, name: user.name },
-      process.env.JWT_SECRET || 'secretkey',
+      process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
@@ -456,7 +461,7 @@ exports.updateMe = async (req, res) => {
     if (phone !== undefined && phone !== user.phone) {
       if (req.user.role !== 'admin') {
         const success = await bcrypt.compare(currentPassword || '', user.password);
-        if (!ok) return res.status(400).json({ message: 'Current password incorrect' });
+        if (!success) return res.status(400).json({ message: 'Current password incorrect' });
       }
       const exists = await User.findOne({ phone, _id: { $ne: user._id } });
       if (exists) return res.status(400).json({ message: 'Phone already in use' });
@@ -466,7 +471,7 @@ exports.updateMe = async (req, res) => {
     if (newPassword && actorRole !== 'worker') {
       if (req.user.role !== 'admin') {
         const success = await bcrypt.compare(currentPassword || '', user.password);
-        if (!ok) return res.status(400).json({ message: 'Current password incorrect' });
+        if (!success) return res.status(400).json({ message: 'Current password incorrect' });
       }
       user.password = await bcrypt.hash(newPassword, 10);
     }
