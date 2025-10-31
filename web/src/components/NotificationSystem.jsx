@@ -10,87 +10,116 @@ const NotificationSystem = ({ user }) => {
   useEffect(() => {
     if (!user) return;
 
-    // Connect to socket - Use Cloud Run for WebSocket support!
-    const SOCKET_URL = 'https://thohcm-backend-181755246333.asia-southeast1.run.app';
-    const newSocket = io(SOCKET_URL, {
-      withCredentials: true,
-      transports: ['websocket', 'polling'] // Fallback support
-    });
-
-    newSocket.on('connect', () => {
-      console.log('Connected to notification service');
-      // Join user's room for targeted notifications
-      const userId = user._id || user.id;
-      newSocket.emit('join', userId);
-      
-      // If admin, also join admin room
-      if (user.role === 'admin') {
-        newSocket.emit('join_admin', userId);
-      }
-    });
-
-    // Listen for notifications
-    newSocket.on('notification', (notification) => {
-      console.log('Received notification:', notification);
-      setNotifications(prev => [notification, ...prev.slice(0, 19)]); // Keep only 20 latest
-      setUnreadCount(prev => prev + 1);
-      
-      // Show browser notification if supported
-      if (Notification.permission === 'granted') {
-        new Notification(notification.title, {
-          body: notification.message,
-          icon: '/favicon.ico',
-          tag: notification.type
+    // Delay socket connection to avoid blocking page load on iOS
+    const connectionTimer = setTimeout(() => {
+      try {
+        // Connect to socket - Use Cloud Run for WebSocket support!
+        const SOCKET_URL = 'https://thohcm-backend-181755246333.asia-southeast1.run.app';
+        const newSocket = io(SOCKET_URL, {
+          withCredentials: true,
+          transports: ['polling', 'websocket'], // Polling first for iOS compatibility
+          reconnection: true,
+          reconnectionDelay: 1000,
+          reconnectionAttempts: 3,
+          timeout: 10000
         });
+
+        newSocket.on('connect', () => {
+          console.log('Connected to notification service');
+          // Join user's room for targeted notifications
+          const userId = user._id || user.id;
+          newSocket.emit('join', userId);
+          
+          // If admin, also join admin room
+          if (user.role === 'admin') {
+            newSocket.emit('join_admin', userId);
+          }
+        });
+
+        newSocket.on('connect_error', (error) => {
+          console.warn('Socket connection error (non-critical):', error.message);
+        });
+
+        // Listen for notifications
+        newSocket.on('notification', (notification) => {
+          console.log('Received notification:', notification);
+          setNotifications(prev => [notification, ...prev.slice(0, 19)]); // Keep only 20 latest
+          setUnreadCount(prev => prev + 1);
+          
+          // Show browser notification if supported (non-blocking)
+          try {
+            if (Notification.permission === 'granted') {
+              new Notification(notification.title, {
+                body: notification.message,
+                icon: '/favicon.ico',
+                tag: notification.type
+              });
+            }
+          } catch (e) {
+            // Ignore notification errors on iOS
+          }
+          
+          // Play notification sound (optional, non-blocking)
+          playNotificationSound();
+        });
+
+        // Listen for other notification types
+        newSocket.on('worker_assigned', (data) => {
+          addNotification({
+            type: 'success',
+            title: data.title,
+            message: data.message,
+            timestamp: data.timestamp,
+            data: data.data
+          });
+        });
+
+        newSocket.on('booking_status_change', (data) => {
+          addNotification({
+            type: 'info',
+            title: data.title,
+            message: data.message,
+            timestamp: data.timestamp,
+            data: data.data
+          });
+        });
+
+        newSocket.on('system_announcement', (data) => {
+          addNotification({
+            type: data.level || 'info',
+            title: data.title,
+            message: data.message,
+            timestamp: data.timestamp,
+            data: data.data,
+            priority: 'high'
+          });
+        });
+
+        setSocket(newSocket);
+      } catch (error) {
+        console.error('Failed to initialize notification system:', error);
       }
-      
-      // Play notification sound (optional)
-      playNotificationSound();
-    });
-
-    // Listen for other notification types
-    newSocket.on('worker_assigned', (data) => {
-      addNotification({
-        type: 'success',
-        title: data.title,
-        message: data.message,
-        timestamp: data.timestamp,
-        data: data.data
-      });
-    });
-
-    newSocket.on('booking_status_change', (data) => {
-      addNotification({
-        type: 'info',
-        title: data.title,
-        message: data.message,
-        timestamp: data.timestamp,
-        data: data.data
-      });
-    });
-
-    newSocket.on('system_announcement', (data) => {
-      addNotification({
-        type: data.level || 'info',
-        title: data.title,
-        message: data.message,
-        timestamp: data.timestamp,
-        data: data.data,
-        priority: 'high'
-      });
-    });
-
-    setSocket(newSocket);
+    }, 500); // 500ms delay to let page load first
 
     return () => {
-      newSocket.disconnect();
+      clearTimeout(connectionTimer);
+      if (socket) {
+        socket.disconnect();
+      }
     };
   }, [user]);
 
-  // Request notification permission on mount
+  // Request notification permission on mount (non-blocking for iOS)
   useEffect(() => {
-    if (Notification.permission === 'default') {
-      Notification.requestPermission();
+    // Don't request permission immediately on iOS to avoid blocking
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (!isIOS && typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      // Request permission asynchronously without blocking
+      setTimeout(() => {
+        Notification.requestPermission().catch(() => {
+          // Ignore permission errors
+        });
+      }, 2000);
     }
   }, []);
 
@@ -101,12 +130,19 @@ const NotificationSystem = ({ user }) => {
   };
 
   const playNotificationSound = () => {
+    // iOS requires user interaction before playing audio
+    // Skip audio on iOS to avoid errors
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) return;
+    
     try {
       const audio = new Audio('/notification-sound.mp3');
       audio.volume = 0.3;
-      audio.play().catch(e => console.log('Could not play notification sound'));
+      audio.play().catch(() => {
+        // Silently fail - audio autoplay blocked
+      });
     } catch (e) {
-      console.log('Notification sound not available');
+      // Ignore audio errors
     }
   };
 
