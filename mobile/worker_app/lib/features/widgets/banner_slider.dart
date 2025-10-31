@@ -147,6 +147,7 @@ class _BannerSliderState extends State<BannerSlider> {
               );
               return Container(
                 decoration: BoxDecoration(
+                  color: const Color(0xFF1a1a2e), // Background color khi ảnh không fill full
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -163,7 +164,7 @@ class _BannerSliderState extends State<BannerSlider> {
                     children: [
                       Image.network(
                         _getImageUrl(banner['imageUrl']),
-                        fit: BoxFit.cover,
+                        fit: BoxFit.contain, // Hiển thị toàn bộ ảnh thay vì crop
                         errorBuilder: (context, error, stackTrace) {
                           print(
                             '❌ Image load error for ${_getImageUrl(banner['imageUrl'])}: $error',

@@ -1814,7 +1814,8 @@ img {
 
 .banner-container {
   position: relative;
-  height: 160px; /* Mobile: smaller height */
+  height: 200px; /* Mobile: đồng bộ với Flutter app (200px) */
+  min-height: 200px;
   overflow: hidden;
   border-radius: 8px; /* Mobile: smaller radius */
   box-shadow: 0 2px 16px rgba(0,0,0,0.1); /* Mobile: smaller shadow */
@@ -1823,7 +1824,7 @@ img {
 /* Tablet: medium height */
 @media (min-width: 640px) {
   .banner-container {
-    height: 200px;
+    height: 220px;
     border-radius: 10px;
   }
 }
@@ -1843,9 +1844,10 @@ img {
   left: 0;
   width: 100%;
   height: 100%;
-  background-size: cover;
+  background-size: contain; /* Hiển thị toàn bộ ảnh thay vì crop */
   background-position: center;
   background-repeat: no-repeat;
+  background-color: #1a1a2e; /* Background color khi ảnh không fill full */
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
   display: flex;
