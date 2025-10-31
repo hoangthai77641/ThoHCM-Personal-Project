@@ -59,25 +59,27 @@ export default function Home(){
   }
 
   if (loading) return (
-    <Box>
-      <Grid container spacing={3}>
-        {Array.from({length:6}).map((_,i)=> (
-          <Grid item xs={12} sm={6} md={4} key={i}>
-            <Card>
-              <Skeleton variant="rectangular" height={200} />
-              <CardContent>
-                <Skeleton variant="text" height={32} width="60%" />
-                <Skeleton variant="text" height={20} width="90%" />
-                <Skeleton variant="text" height={20} width="70%" />
-              </CardContent>
-              <CardActions>
-                <Skeleton variant="rectangular" height={36} width={100} />
-                <Skeleton variant="rectangular" height={36} width={100} />
-              </CardActions>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+    <Box 
+      sx={{ 
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+        gap: 3
+      }}
+    >
+      {Array.from({length:6}).map((_,i)=> (
+        <Card key={i}>
+          <Skeleton variant="rectangular" height={200} />
+          <CardContent>
+            <Skeleton variant="text" height={32} width="60%" />
+            <Skeleton variant="text" height={20} width="90%" />
+            <Skeleton variant="text" height={20} width="70%" />
+          </CardContent>
+          <CardActions>
+            <Skeleton variant="rectangular" height={36} width={100} />
+            <Skeleton variant="rectangular" height={36} width={100} />
+          </CardActions>
+        </Card>
+      ))}
     </Box>
   )
   return (
@@ -126,21 +128,27 @@ export default function Home(){
           </Button>
         </Card>
       ) : (
-        <Grid container spacing={3}>
+        <Box 
+          sx={{ 
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+            gap: 3
+          }}
+        >
           {services.map(s=> (
-            <Grid item xs={12} sm={6} md={4} key={s._id}>
-              <Card 
-                sx={{ 
-                  height: '100%', 
-                  display: 'flex', 
-                  flexDirection: 'column',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: 6
-                  }
-                }}
-              >
+            <Card 
+              key={s._id}
+              sx={{ 
+                height: '100%', 
+                display: 'flex', 
+                flexDirection: 'column',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: 6
+                }
+              }}
+            >
                 <ServiceMediaGallery 
                   images={s.images || []} 
                   videos={s.videos || []} 
@@ -226,9 +234,8 @@ export default function Home(){
                   )}
                 </CardActions>
               </Card>
-            </Grid>
           ))}
-        </Grid>
+        </Box>
       )}
     </Box>
   )
