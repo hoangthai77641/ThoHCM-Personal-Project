@@ -35,6 +35,28 @@ class NotificationService {
       onDidReceiveNotificationResponse: _onNotificationTapped,
     );
 
+    // Create high-priority notification channel for new orders
+    final AndroidNotificationChannel newOrdersChannel = AndroidNotificationChannel(
+      'new_orders_channel',
+      'Đơn hàng mới',
+      description: 'Thông báo khi có đơn hàng mới',
+      importance: Importance.max,
+      playSound: true,
+      enableVibration: true,
+      vibrationPattern: Int64List.fromList([0, 1000, 500, 1000]),
+      enableLights: true,
+      ledColor: const Color(0xFF0ea5e9),
+      showBadge: true,
+    );
+
+    // Register the channel with the system
+    await _notifications
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(newOrdersChannel);
+
+    debugPrint('✅ High-priority notification channel created: new_orders_channel');
+
     _initialized = true;
   }
 
@@ -121,42 +143,58 @@ class NotificationService {
     required String serviceName,
     required String orderId,
   }) async {
-    await showNotification(
-      title: 'Đơn hàng mới!',
-      body: 'Khách hàng $customerName vừa đặt lịch $serviceName',
-      payload: orderId,
-      type: NotificationType.newOrder,
-    );
+    if (!_initialized) await initialize();
 
-    const androidDetails = AndroidNotificationDetails(
-      'new_orders',
+    // Create high-priority notification with sound and vibration
+    final androidDetails = AndroidNotificationDetails(
+      'new_orders_channel',
       'Đơn hàng mới',
       channelDescription: 'Thông báo khi có đơn hàng mới',
-      importance: Importance.high,
-      priority: Priority.high,
+      importance: Importance.max,
+      priority: Priority.max,
       showWhen: true,
       icon: '@mipmap/ic_launcher',
       color: const Color(0xFF0ea5e9),
+      playSound: true,
+      enableVibration: true,
+      vibrationPattern: Int64List.fromList([0, 1000, 500, 1000]), // Strong vibration pattern
+      enableLights: true,
+      ledColor: const Color(0xFF0ea5e9),
+      ledOnMs: 1000,
+      ledOffMs: 500,
+      ticker: 'Đơn hàng mới từ $customerName',
+      fullScreenIntent: true, // Show as heads-up notification
+      category: AndroidNotificationCategory.call, // High priority category
     );
 
     const iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
+      sound: 'default',
+      interruptionLevel: InterruptionLevel.timeSensitive,
     );
 
-    const details = NotificationDetails(
+    final details = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
     );
 
+    final notificationId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    
+    debugPrint(
+      '📱 Showing NEW ORDER notification: ID=$notificationId, Customer=$customerName, Service=$serviceName',
+    );
+
     await _notifications.show(
-      DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      'Đơn hàng mới! 🔔',
-      '$customerName đã đặt dịch vụ "$serviceName"',
+      notificationId,
+      '🔔 Đơn hàng mới!',
+      'Khách hàng $customerName vừa đặt lịch $serviceName',
       details,
       payload: orderId,
     );
+
+    debugPrint('✅ New order notification displayed successfully');
   }
 
   Future<void> showOrderStatusNotification({

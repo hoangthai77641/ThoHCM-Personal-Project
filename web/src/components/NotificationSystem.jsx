@@ -13,6 +13,9 @@ const NotificationSystem = ({ user }) => {
     // Delay socket connection to avoid blocking page load on iOS
     const connectionTimer = setTimeout(() => {
       try {
+        // Get JWT token from localStorage
+        const token = localStorage.getItem('token');
+        
         // Connect to socket - Use Cloud Run for WebSocket support!
         const SOCKET_URL = 'https://thohcm-backend-181755246333.asia-southeast1.run.app';
         const newSocket = io(SOCKET_URL, {
@@ -21,23 +24,36 @@ const NotificationSystem = ({ user }) => {
           reconnection: true,
           reconnectionDelay: 1000,
           reconnectionAttempts: 3,
-          timeout: 10000
+          timeout: 10000,
+          auth: {
+            token: token // Send JWT token for authentication
+          }
         });
 
         newSocket.on('connect', () => {
-          console.log('Connected to notification service');
+          console.log('✅ Connected to notification service');
           // Join user's room for targeted notifications
           const userId = user._id || user.id;
+          console.log(`📡 Joining room for user: ${userId}`);
           newSocket.emit('join', userId);
           
           // If admin, also join admin room
           if (user.role === 'admin') {
+            console.log('👑 Admin joining admin room');
             newSocket.emit('join_admin', userId);
           }
         });
 
         newSocket.on('connect_error', (error) => {
-          console.warn('Socket connection error (non-critical):', error.message);
+          console.warn('⚠️ Socket connection error (non-critical):', error.message);
+        });
+
+        // Listen for authentication errors
+        newSocket.on('error', (error) => {
+          console.error('❌ Socket error:', error);
+          if (error.code === 'AUTH_REQUIRED') {
+            console.error('🔐 Authentication required - token may be invalid');
+          }
         });
 
         // Listen for notifications
