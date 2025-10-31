@@ -27,30 +27,57 @@ function AppContent() {
   
   // Fetch fresh user data on mount to ensure avatar is up-to-date
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      const token = localStorage.getItem('token')
-      if (!token) return
+    // Use refs to avoid multiple concurrent fetches which could trigger rate limits
+    let isMounted = true
+    const isFetchingRef = { current: false }
+    const lastFetchRef = { current: 0 }
 
+    const fetchUserProfile = async () => {
       try {
+        const token = localStorage.getItem('token')
+        if (!token) return
+
+        // Throttle: skip if a fetch is in progress or we've fetched recently
+        const now = Date.now()
+        if (isFetchingRef.current) return
+        if (now - lastFetchRef.current < 3000) return // 3s throttle
+
+        isFetchingRef.current = true
+        lastFetchRef.current = now
+
         const response = await api.get('/api/users/me')
         const freshUser = response.data
 
         // Update localStorage with fresh data
         localStorage.setItem('user', JSON.stringify(freshUser))
-        setUser(freshUser)
+        if (isMounted) setUser(freshUser)
       } catch (error) {
         console.error('Failed to fetch user profile:', error)
         // If token is invalid, logout
         if (error.response?.status === 401) {
           localStorage.removeItem('token')
           localStorage.removeItem('user')
-          setUser(null)
+          if (isMounted) setUser(null)
         }
+        // If rate limited (429), avoid retrying aggressively
+        if (error.response?.status === 429) {
+          const retryAfter = error.response.headers['retry-after']
+          const wait = retryAfter ? parseInt(retryAfter, 10) * 1000 : 5000
+          // schedule a delayed attempt (no UI blocking)
+          setTimeout(() => {
+            // only attempt if token still exists
+            if (localStorage.getItem('token')) fetchUserProfile()
+          }, wait)
+        }
+      } finally {
+        isFetchingRef.current = false
       }
     }
 
     // Fetch once on mount if there's a token (user may be null when page first loads)
     fetchUserProfile()
+
+    return () => { isMounted = false }
   }, [])
   
   // Listen for user data changes (e.g., avatar updates)

@@ -4,7 +4,8 @@ const API_URL = import.meta.env.VITE_API_URL || 'https://thohcm-backend-18175524
 
 const client = axios.create({
   baseURL: API_URL,
-  headers: { 'Content-Type': 'application/json' }
+  headers: { 'Content-Type': 'application/json' },
+  timeout: 10000 // 10s timeout for requests to avoid hanging
 })
 
 client.interceptors.request.use(cfg => {
