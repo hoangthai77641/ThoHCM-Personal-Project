@@ -3,6 +3,7 @@ const express = require('express');
 const http = require('http');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const { Server } = require('socket.io');
 const { setupSecurity } = require('./middleware/security');
 
@@ -194,24 +195,112 @@ const notificationController = require('./controllers/notificationController');
 const notificationService = new NotificationService(io);
 notificationController.setNotificationService(notificationService);
 
+// Socket.IO Authentication Middleware (Backward Compatible)
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  
+  // Backward compatibility: Allow connections without token temporarily
+  // TODO: Remove this after mobile app update (planned for 2 weeks)
+  if (!token) {
+    console.warn(`[Socket.IO Security] Unauthenticated connection from ${socket.id}`);
+    console.warn('[Socket.IO Security] Client IP:', socket.handshake.address);
+    console.warn('[Socket.IO Security] User-Agent:', socket.handshake.headers['user-agent']);
+    
+    // Mark as unauthenticated
+    socket.isAuthenticated = false;
+    socket.userId = null;
+    socket.userRole = null;
+    
+    // Allow connection but log for monitoring
+    return next();
+  }
+  
+  // Verify JWT token
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      console.error('[Socket.IO Security] Invalid token:', err.message);
+      console.error('[Socket.IO Security] Socket ID:', socket.id);
+      
+      // Mark as unauthenticated but still allow (backward compatible)
+      socket.isAuthenticated = false;
+      socket.userId = null;
+      socket.userRole = null;
+      return next();
+    }
+    
+    // Token valid - mark as authenticated
+    socket.isAuthenticated = true;
+    socket.userId = decoded.id;
+    socket.userRole = decoded.role;
+    
+    console.log(`[Socket.IO Security] Authenticated connection:`, {
+      socketId: socket.id,
+      userId: decoded.id,
+      role: decoded.role
+    });
+    
+    next();
+  });
+});
+
 // Socket.IO connection
 io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id);
+  console.log('A user connected:', socket.id, socket.isAuthenticated ? '(Authenticated)' : '(Unauthenticated - Legacy)');
   
   // Join room by user id if provided
   socket.on('join', (room) => {
+    // Security check: Only authenticated users can join specific rooms
+    if (!socket.isAuthenticated) {
+      console.warn(`[Socket.IO Security] Unauthenticated user tried to join room: ${room}`);
+      socket.emit('error', { 
+        message: 'Authentication required to join rooms',
+        code: 'AUTH_REQUIRED',
+        action: 'Please update your app to the latest version'
+      });
+      return;
+    }
+    
+    // Additional security: Users can only join their own room
+    if (room !== socket.userId && socket.userRole !== 'admin') {
+      console.warn(`[Socket.IO Security] User ${socket.userId} tried to join unauthorized room: ${room}`);
+      socket.emit('error', { 
+        message: 'Unauthorized room access',
+        code: 'UNAUTHORIZED'
+      });
+      return;
+    }
+    
     socket.join(room);
-    console.log(`Socket ${socket.id} joined room ${room}`);
+    console.log(`Socket ${socket.id} (User: ${socket.userId}) joined room ${room}`);
   });
   
   // Handle admin room joining
   socket.on('join_admin', (userId) => {
+    // Security check: Only authenticated admins can join admin room
+    if (!socket.isAuthenticated) {
+      console.warn(`[Socket.IO Security] Unauthenticated user tried to join admin room`);
+      socket.emit('error', { 
+        message: 'Authentication required',
+        code: 'AUTH_REQUIRED'
+      });
+      return;
+    }
+    
+    if (socket.userRole !== 'admin') {
+      console.warn(`[Socket.IO Security] Non-admin user ${socket.userId} tried to join admin room`);
+      socket.emit('error', { 
+        message: 'Admin access required',
+        code: 'FORBIDDEN'
+      });
+      return;
+    }
+    
     socket.join('admin_room');
-    console.log(`Admin ${userId} joined admin room via socket ${socket.id}`);
+    console.log(`Admin ${socket.userId} joined admin room via socket ${socket.id}`);
   });
   
   socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
+    console.log('User disconnected:', socket.id, socket.isAuthenticated ? `(User: ${socket.userId})` : '(Unauthenticated)');
   });
 });
 

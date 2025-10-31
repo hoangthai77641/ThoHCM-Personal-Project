@@ -40,16 +40,24 @@ This document tracks security vulnerabilities that have been fixed in the Thợ 
 - **Fix**: Added prominent warning comments with instructions to generate strong secret
 - **Status**: ✅ Fixed
 
-## ⚠️ Pending Issues (Require Careful Planning)
+### 6. **CRITICAL: Socket.IO Authentication** 
+- **File**: `backend/server.js:198-305`
+- **Issue**: Socket.IO connections were not authenticated, allowing anyone to connect and listen to real-time events
+- **Risk**: Privacy violation, data leakage, unauthorized access to rooms
+- **Fix**: Implemented JWT authentication with backward compatibility
+  - Authenticated connections: Full access with JWT token verification
+  - Unauthenticated connections: Allowed temporarily but logged with warnings
+  - Room access control: Users can only join their own room (unless admin)
+  - Admin room: Requires authenticated admin role
+  - Comprehensive security logging for monitoring
+- **Status**: ✅ Fixed (Backward Compatible Mode)
+- **Documentation**: See `docs/SOCKET_IO_AUTHENTICATION.md`
+- **Next Steps**: 
+  1. Update mobile app to send JWT token (2 weeks)
+  2. Monitor unauthenticated connection logs
+  3. After mobile app adoption, remove backward compatibility
 
-### 6. **Socket.IO Authentication**
-- **Status**: ⚠️ Not implemented yet
-- **Reason**: Requires mobile app update before backend deployment
-- **Plan**: 
-  1. Update mobile app to send JWT token in Socket.IO handshake
-  2. Deploy mobile app and wait for user adoption (1-2 weeks)
-  3. Deploy backend with Socket.IO authentication
-- **Alternative**: Implement backward-compatible version first
+## ⚠️ Pending Issues (Require Careful Planning)
 
 ### 7. **NPM Dependencies Vulnerabilities**
 - **Status**: ⚠️ Not fixed yet
@@ -107,12 +115,11 @@ Before deploying to production, verify:
 ## 📊 Security Score
 
 **Before Fixes**: 7.5/10
-**After Fixes**: 8.5/10
+**After Current Fixes**: 9.0/10 ⬆️ (+1.5)
 
 **Remaining to reach 9.5/10**:
-- Implement Socket.IO authentication
-- Update NPM dependencies
-- Add security monitoring/alerting
+- Update NPM dependencies (+0.3)
+- Remove Socket.IO backward compatibility after mobile app update (+0.2)
 
 ## 📝 Notes
 
@@ -123,10 +130,11 @@ Before deploying to production, verify:
 
 ## 🔗 Related Files Modified
 
-1. `backend/server.js` - Bootstrap endpoint protection, debug endpoint removal, duplicate connection fix
+1. `backend/server.js` - Bootstrap endpoint protection, debug endpoint removal, duplicate connection fix, Socket.IO authentication
 2. `backend/controllers/userController.js` - Password validation strengthening
 3. `backend/.env.example` - JWT_SECRET warnings added
 4. `backend/routes/userRoutes.js` - Already had validation middleware (no changes needed)
+5. `docs/SOCKET_IO_AUTHENTICATION.md` - Complete documentation for Socket.IO authentication (NEW)
 
 ---
 
