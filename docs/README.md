@@ -2,27 +2,27 @@
 
 Thư mục này chứa tất cả tài liệu hướng dẫn và documentation của dự án ThoHCM.
 
-## 📄 Files
+## 📁 Structure
 
-### **DEPLOYMENT.md**
-- Hướng dẫn deploy ứng dụng lên Google Cloud Platform
-- Cấu hình App Engine và Cloud Run
-- Setup CI/CD pipeline với GitHub Actions
+### `/deployment`
+Production deployment guides and checklists
+- **production-checklist.md** - Pre-deployment checklist and verification steps
 
-### **DEPLOYMENT_STATUS.md**  
-- Trạng thái deployment hiện tại
-- Thông tin môi trường production/staging
-- Monitoring và health check
+### `/security`
+Security audits, fixes, and best practices
+- **fixes.md** - Applied security improvements and vulnerability fixes
 
-### **CLOUDRUN_MIGRATION.md**
-- Hướng dẫn migrate từ App Engine sang Cloud Run
-- WebSocket support và cấu hình
-- Performance comparison và best practices
+### `/payment`
+Payment integration guides and configurations
+- **setup-guide.md** - Payment gateway setup (VNPay, ZaloPay, Stripe)
+- **wallet-assessment.md** - Wallet system production readiness assessment
 
-### **MOBILE_TESTING_GUIDE.md**
-- Hướng dẫn test mobile app trên emulator
-- Rate limiting bypass cho development
-- Debugging tips và troubleshooting
+### Other Guides
+- **DEPLOYMENT.md** - Deploy ứng dụng lên Google Cloud Platform
+- **DEPLOYMENT_STATUS.md** - Trạng thái deployment hiện tại
+- **CLOUDRUN_MIGRATION.md** - Migrate từ App Engine sang Cloud Run
+- **MOBILE_TESTING_GUIDE.md** - Test mobile app trên emulator
+- **SOCKET_IO_AUTHENTICATION.md** - Socket.IO JWT authentication implementation
 
 ## 🔗 Related Links
 
