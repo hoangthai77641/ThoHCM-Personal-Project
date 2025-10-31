@@ -12,13 +12,17 @@ const path = require('path');
 exports.register = async (req, res) => {
   try {
     let { name, phone, password, role, address, citizenId } = req.body;
-    // basic validation
+    // Note: Validation middleware already handles input validation
+    // This is a secondary check for safety
     name = (name || '').toString().trim();
     phone = (phone || '').toString().trim();
     password = (password || '').toString();
     if (!name) return res.status(400).json({ message: 'Name is required' });
     if (!phone) return res.status(400).json({ message: 'Phone is required' });
-    if (!password || password.length < 6) return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    // Password validation: minimum 8 characters with complexity (handled by middleware)
+    if (!password || password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    }
     
     // prevent arbitrary elevation; block admin self-register
     let userRole = 'customer';

@@ -159,6 +159,7 @@ app.use('/storage', staticLimiter, (req, res, next) => {
 
 
 // Import routes
+const auth = require('./middleware/auth');
 const userRoutes = require('./routes/userRoutes');
 const serviceRoutes = require('./routes/serviceRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
@@ -218,23 +219,7 @@ io.on('connection', (socket) => {
 app.set('io', io);
 app.set('notificationService', notificationService);
 
-// Add debug route to check avatars
-app.get('/debug/avatars', async (req, res) => {
-  try {
-    const User = require('./models/User');
-    const users = await User.find({ avatar: { $exists: true, $ne: null } });
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
-    const avatarInfo = users.map(user => ({
-      userId: user._id,
-      email: user.email,
-      avatar: user.avatar,
-      fullUrl: `${baseUrl}${user.avatar}`
-    }));
-    res.json(avatarInfo);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Debug route removed for security - use admin dashboard instead
 
 // MongoDB connection
 // Cloud Run uses PORT environment variable, default to 8080 for Cloud Run, 5000 for local
@@ -276,7 +261,6 @@ if (!DB_NAME) {
 }
 DB_NAME = DB_NAME || 'thohcm';
 
-mongoose.connect(MONGODB_URI, { dbName: DB_NAME })
 mongoose.connect(MONGODB_URI)
   .then(() => {
     const conn = mongoose.connection;
@@ -298,7 +282,7 @@ mongoose.connect(MONGODB_URI)
     });
 
     // Manual bootstrap endpoint for production (admin only)
-    app.post('/api/admin/bootstrap', async (req, res) => {
+    app.post('/api/admin/bootstrap', auth(['admin']), async (req, res) => {
       try {
         const bootstrap = require('./scripts/bootstrap');
         await bootstrap();
