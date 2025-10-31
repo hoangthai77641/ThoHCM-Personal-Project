@@ -29,12 +29,12 @@ function AppContent() {
   useEffect(() => {
     const fetchUserProfile = async () => {
       const token = localStorage.getItem('token')
-      if (!token || !user) return
-      
+      if (!token) return
+
       try {
         const response = await api.get('/api/users/me')
         const freshUser = response.data
-        
+
         // Update localStorage with fresh data
         localStorage.setItem('user', JSON.stringify(freshUser))
         setUser(freshUser)
@@ -48,7 +48,8 @@ function AppContent() {
         }
       }
     }
-    
+
+    // Fetch once on mount if there's a token (user may be null when page first loads)
     fetchUserProfile()
   }, [])
   
@@ -60,7 +61,29 @@ function AppContent() {
     }
     
     window.addEventListener('storage', handleStorageChange)
-    return () => window.removeEventListener('storage', handleStorageChange)
+    // Listen to custom authChanged event dispatched in the same tab (localStorage events don't fire in same tab)
+    const handleAuthChanged = () => {
+      const updatedUser = JSON.parse(localStorage.getItem('user') || 'null')
+      setUser(updatedUser)
+      // try to refresh profile too
+      (async () => {
+        try {
+          const token = localStorage.getItem('token')
+          if (!token) return
+          const response = await api.get('/api/users/me')
+          const freshUser = response.data
+          localStorage.setItem('user', JSON.stringify(freshUser))
+          setUser(freshUser)
+        } catch (e) {
+          // ignore
+        }
+      })()
+    }
+    window.addEventListener('authChanged', handleAuthChanged)
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('authChanged', handleAuthChanged)
+    }
   }, [])
   
   const logout = () => {
