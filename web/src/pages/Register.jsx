@@ -20,6 +20,7 @@ export default function Register(){
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [address, setAddress] = useState('')
   const [isWorker, setIsWorker] = useState(false)
   
@@ -31,6 +32,14 @@ export default function Register(){
     e.preventDefault()
     setLoading(true)
     setError(null)
+    
+    // Validate password confirmation
+    if (password !== confirmPassword) {
+      setError('Mật khẩu xác nhận không khớp')
+      setLoading(false)
+      return
+    }
+    
     try{
       // build payload, allow web users to register as worker when selected
   const payload = { name, phone, password, role: isWorker ? 'worker' : 'customer', address }
@@ -106,6 +115,24 @@ export default function Register(){
                 margin="normal"
                 required
                 autoComplete="new-password"
+              />
+
+              <TextField
+                fullWidth
+                label="Xác nhận mật khẩu"
+                type="password"
+                placeholder="••••••"
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                margin="normal"
+                required
+                autoComplete="new-password"
+                error={confirmPassword && password !== confirmPassword}
+                helperText={
+                  confirmPassword && password !== confirmPassword
+                    ? 'Mật khẩu xác nhận không khớp'
+                    : ''
+                }
               />
 
               <TextField

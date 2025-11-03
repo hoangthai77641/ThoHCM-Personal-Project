@@ -29,10 +29,13 @@ export default function Login(){
       const res = await api.post('/api/users/login', { phone, password })
       localStorage.setItem('token', res.data.token)
       localStorage.setItem('user', JSON.stringify(res.data.user))
-      
-      // Force a full page reload to ensure state is properly initialized
-      // This fixes issues on Safari/iOS where state doesn't update immediately
-      window.location.href = '/'
+      // Notify other parts of the app in the same tab that auth changed
+      try {
+        window.dispatchEvent(new Event('authChanged'))
+      } catch (e) {
+        // ignore
+      }
+      navigate('/')
     }catch(err){
       setError(err.response?.data?.message || err.message)
     } finally {

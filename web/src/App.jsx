@@ -59,9 +59,15 @@ function AppContent() {
           localStorage.removeItem('user')
           if (isMounted) setUser(null)
         }
-        // If rate limited (429), don't retry automatically to avoid infinite loop
+        // If rate limited (429), avoid retrying aggressively
         if (error.response?.status === 429) {
-          console.warn('Rate limited. Please refresh the page later.')
+          const retryAfter = error.response.headers['retry-after']
+          const wait = retryAfter ? parseInt(retryAfter, 10) * 1000 : 5000
+          // schedule a delayed attempt (no UI blocking)
+          setTimeout(() => {
+            // only attempt if token still exists
+            if (localStorage.getItem('token')) fetchUserProfile()
+          }, wait)
         }
       } finally {
         isFetchingRef.current = false
@@ -82,9 +88,28 @@ function AppContent() {
     }
     
     window.addEventListener('storage', handleStorageChange)
-    
+    // Listen to custom authChanged event dispatched in the same tab (localStorage events don't fire in same tab)
+    const handleAuthChanged = () => {
+      const updatedUser = JSON.parse(localStorage.getItem('user') || 'null')
+      setUser(updatedUser)
+      // try to refresh profile too
+      (async () => {
+        try {
+          const token = localStorage.getItem('token')
+          if (!token) return
+          const response = await api.get('/api/users/me')
+          const freshUser = response.data
+          localStorage.setItem('user', JSON.stringify(freshUser))
+          setUser(freshUser)
+        } catch (e) {
+          // ignore
+        }
+      })()
+    }
+    window.addEventListener('authChanged', handleAuthChanged)
     return () => {
       window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('authChanged', handleAuthChanged)
     }
   }, [])
   

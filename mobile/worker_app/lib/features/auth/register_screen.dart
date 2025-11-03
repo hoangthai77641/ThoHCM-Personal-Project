@@ -14,6 +14,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _name = TextEditingController();
   final _phone = TextEditingController();
   final _password = TextEditingController();
+  final _confirmPassword = TextEditingController();
   final _address = TextEditingController();
 
   @override
@@ -21,6 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _name.dispose();
     _phone.dispose();
     _password.dispose();
+    _confirmPassword.dispose();
     _address.dispose();
     super.dispose();
   }
@@ -73,6 +75,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 obscureText: true,
                 validator: (v) =>
                     (v == null || v.length < 6) ? 'Tối thiểu 6 ký tự' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _confirmPassword,
+                decoration: const InputDecoration(
+                  labelText: 'Xác nhận mật khẩu',
+                  helperText: 'Nhập lại mật khẩu',
+                ),
+                obscureText: true,
+                validator: (v) {
+                  if (v == null || v.isEmpty) return 'Bắt buộc';
+                  if (v != _password.text) return 'Mật khẩu không khớp';
+                  return null;
+                },
               ),
               const SizedBox(height: 12),
               TextFormField(
