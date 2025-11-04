@@ -212,6 +212,7 @@ export default function Users(){
               <option value="">Tất cả vai trò</option>
               <option value="customer">Khách hàng</option>
               <option value="worker">Thợ</option>
+              <option value="driver">Tài xế</option>
             </select>
             <select value={status} onChange={e=>{ setStatus(e.target.value); setPage(1) }} className="filter-select">
               <option value="">Tất cả trạng thái</option>
@@ -258,7 +259,7 @@ export default function Users(){
                     <td className="col-citizen">{u.citizenId || '—'}</td>
                     <td className="col-role">
                       <span className={`role-badge role-${u.role}`}>
-                        {u.role === 'customer' ? 'Khách hàng' : 'Thợ'}
+                        {u.role === 'customer' ? 'Khách hàng' : (u.role === 'driver' ? 'Tài xế' : 'Thợ')}
                       </span>
                     </td>
                     <td className="col-status">
@@ -286,7 +287,7 @@ export default function Users(){
                     </td>
                     <td className="col-created">{new Date(u.createdAt).toLocaleDateString('vi-VN')}</td>
                     <td className="actions-cell col-actions">
-                      {u.role === 'worker' ? (
+                      {(u.role === 'worker' || u.role === 'driver') ? (
                         <div className="action-icons">
                           <button
                             className="icon-btn"
