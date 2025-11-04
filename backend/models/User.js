@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   phone: { type: String, required: true, trim: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['customer', 'worker', 'admin'], default: 'customer' }
+  role: { type: String, enum: ['customer', 'worker', 'driver', 'admin'], default: 'customer' }
 }, { timestamps: true });
 
 // extra fields
@@ -34,12 +34,12 @@ userSchema.add({
 // 1 phone can have 1 customer + 1 worker
 userSchema.index({ phone: 1, role: 1 }, { unique: true });
 
-// CCCD must be unique across all workers only (customers don't have CCCD)
+// CCCD must be unique across all workers and drivers only (customers don't have CCCD)
 userSchema.index({ citizenId: 1 }, { 
   unique: true, 
   partialFilterExpression: { 
     citizenId: { $exists: true },
-    role: 'worker' 
+    role: { $in: ['worker', 'driver'] }
   }
 });
 

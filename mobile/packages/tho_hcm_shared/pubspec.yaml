@@ -1,0 +1,37 @@
+name: tho_hcm_shared
+description: "Shared package for Thợ HCM - Customer & Worker apps"
+publish_to: 'none'
+
+version: 1.0.0
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Core dependencies
+  dio: ^5.7.0
+  socket_io_client: ^3.1.2
+  provider: ^6.1.2
+  shared_preferences: ^2.3.2
+  intl: ^0.19.0
+  
+  # Firebase packages
+  firebase_core: ^2.24.2
+  firebase_messaging: ^14.7.10
+  firebase_analytics: ^10.7.4
+  firebase_auth: ^4.15.3
+  cloud_firestore: ^4.13.6
+  
+  # Notifications
+  flutter_local_notifications: ^17.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

@@ -16,6 +16,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _password = TextEditingController();
   final _confirmPassword = TextEditingController();
   final _address = TextEditingController();
+  String _selectedRole = 'worker'; // 'worker' or 'driver'
 
   @override
   void dispose() {
@@ -99,6 +100,69 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
               const SizedBox(height: 20),
+              // Role Selection
+              const Text(
+                'Loại tài khoản',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              SegmentedButton<String>(
+                segments: const [
+                  ButtonSegment(
+                    value: 'worker',
+                    label: Text('Thợ'),
+                    icon: Icon(Icons.build),
+                  ),
+                  ButtonSegment(
+                    value: 'driver',
+                    label: Text('Tài xế'),
+                    icon: Icon(Icons.local_shipping),
+                  ),
+                ],
+                selected: {_selectedRole},
+                onSelectionChanged: (Set<String> newSelection) {
+                  setState(() {
+                    _selectedRole = newSelection.first;
+                  });
+                },
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _selectedRole == 'worker'
+                    ? 'Cung cấp dịch vụ sửa chữa điện lạnh, máy giặt, v.v.'
+                    : 'Cung cấp dịch vụ vận chuyển hàng hóa',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue[50],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, size: 20, color: Colors.blue[700]),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Tài khoản sẽ ở trạng thái chờ duyệt. CCCD/giấy tờ do quản trị viên cập nhật.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.blue[700],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -108,10 +172,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           if (!_formKey.currentState!.validate()) return;
                           final ok = await context
                               .read<AuthProvider>()
-                              .registerWorker(
+                              .register(
                                 name: _name.text.trim(),
                                 phone: _phone.text.trim(),
                                 password: _password.text,
+                                role: _selectedRole,
                                 address: _address.text.trim().isEmpty
                                     ? null
                                     : _address.text.trim(),

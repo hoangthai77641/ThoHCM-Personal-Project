@@ -74,6 +74,9 @@ mobile/worker_app/.pub-cache/
 mobile/worker_app/.pub/
 mobile/worker_app/pubspec.lock
 
+# Customer App (exclude from repo)
+mobile/customer_app/
+
 # Web
 web/dist/
 web/node_modules/
@@ -82,3 +85,7 @@ web/node_modules/
 .firebase/
 */.firebase/
 web/.firebase/
+
+# Documentation files (exclude MD files)
+*.md
+!README.md

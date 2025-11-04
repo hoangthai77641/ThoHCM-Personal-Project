@@ -44,11 +44,24 @@ exports.createService = async (req, res) => {
     console.log('Create service files:', req.files);
     
     const workerId = req.user && req.user.id;
-    const { name, description, basePrice, promoPercent, images, videos, category } = req.body;
+    const { name, description, basePrice, promoPercent, images, videos, category, vehicleSpecs } = req.body;
     
     // Basic validation
     if (!name || name.trim().length === 0) {
       return res.status(400).json({ error: 'Tên dịch vụ là bắt buộc' });
+    }
+    
+    // Validate vehicle specs for drivers creating transportation services
+    if (category === 'Dịch Vụ Vận Chuyển' && req.user && req.user.role === 'driver') {
+      if (!vehicleSpecs || !vehicleSpecs.loadCapacity) {
+        return res.status(400).json({ error: 'Tải trọng xe là bắt buộc cho dịch vụ vận chuyển' });
+      }
+      if (!vehicleSpecs.truckBedDimensions || 
+          !vehicleSpecs.truckBedDimensions.length || 
+          !vehicleSpecs.truckBedDimensions.width || 
+          !vehicleSpecs.truckBedDimensions.height) {
+        return res.status(400).json({ error: 'Kích thước thùng xe (dài, rộng, cao) là bắt buộc cho dịch vụ vận chuyển' });
+      }
     }
     
     // Safe JSON parsing helper
@@ -155,7 +168,8 @@ exports.createService = async (req, res) => {
     const allImages = [...existingImages, ...imageUrls];
     const allVideos = [...existingVideos, ...videoUrls];
     
-    const service = new Service({ 
+    // Prepare service data
+    const serviceData = { 
       name: name,
       description: description,
       basePrice: basePrice ? Number(basePrice) : undefined, 
@@ -164,7 +178,22 @@ exports.createService = async (req, res) => {
       images: allImages,
       videos: allVideos,
       category: category || 'Điện Lạnh'
-    });
+    };
+    
+    // Add vehicle specs for transportation services
+    if (category === 'Dịch Vụ Vận Chuyển' && vehicleSpecs) {
+      const parsedVehicleSpecs = typeof vehicleSpecs === 'string' ? JSON.parse(vehicleSpecs) : vehicleSpecs;
+      serviceData.vehicleSpecs = {
+        loadCapacity: Number(parsedVehicleSpecs.loadCapacity),
+        truckBedDimensions: {
+          length: Number(parsedVehicleSpecs.truckBedDimensions.length),
+          width: Number(parsedVehicleSpecs.truckBedDimensions.width),
+          height: Number(parsedVehicleSpecs.truckBedDimensions.height)
+        }
+      };
+    }
+    
+    const service = new Service(serviceData);
     
     await service.save();
     res.status(201).json(decorate(service));
@@ -344,6 +373,24 @@ exports.updateService = async (req, res) => {
         service[field] = req.body[field];
       }
     });
+    
+    // Handle vehicle specs for transportation services
+    if (req.body.vehicleSpecs) {
+      const vehicleSpecs = typeof req.body.vehicleSpecs === 'string' 
+        ? JSON.parse(req.body.vehicleSpecs) 
+        : req.body.vehicleSpecs;
+      
+      if (vehicleSpecs) {
+        service.vehicleSpecs = {
+          loadCapacity: vehicleSpecs.loadCapacity ? Number(vehicleSpecs.loadCapacity) : service.vehicleSpecs?.loadCapacity,
+          truckBedDimensions: {
+            length: vehicleSpecs.truckBedDimensions?.length ? Number(vehicleSpecs.truckBedDimensions.length) : service.vehicleSpecs?.truckBedDimensions?.length,
+            width: vehicleSpecs.truckBedDimensions?.width ? Number(vehicleSpecs.truckBedDimensions.width) : service.vehicleSpecs?.truckBedDimensions?.width,
+            height: vehicleSpecs.truckBedDimensions?.height ? Number(vehicleSpecs.truckBedDimensions.height) : service.vehicleSpecs?.truckBedDimensions?.height
+          }
+        };
+      }
+    }
     
     // Handle uploaded files
     const newImageUrls = [];
@@ -537,7 +584,8 @@ exports.getCategories = async (req, res) => {
       'Sửa Xe Đạp', 
       'Sửa Xe Máy', 
       'Sửa Xe Oto', 
-      'Sửa Xe Điện'
+      'Sửa Xe Điện',
+      'Dịch Vụ Vận Chuyển'
     ];
     
     // Get count for each category

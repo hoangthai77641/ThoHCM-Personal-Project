@@ -32,11 +32,11 @@ const upload = multer({
   }
 });
 
-// Worker wallet routes
-router.get('/', auth(['worker']), walletController.getWallet);
-router.get('/my-wallet', auth(['worker']), walletController.getWallet); // Keep backward compatibility
-router.post('/deposit', auth(['worker']), authLimiter, walletController.createDepositRequest);
-router.post('/upload-proof', auth(['worker']), upload.single('proofImage'), walletController.uploadProofOfPayment);
+// Worker and Driver wallet routes
+router.get('/', auth(['worker', 'driver']), walletController.getWallet);
+router.get('/my-wallet', auth(['worker', 'driver']), walletController.getWallet); // Keep backward compatibility
+router.post('/deposit', auth(['worker', 'driver']), authLimiter, walletController.createDepositRequest);
+router.post('/upload-proof', auth(['worker', 'driver']), upload.single('proofImage'), walletController.uploadProofOfPayment);
 
 // Admin routes
 router.get('/stats', auth(['admin']), walletController.getWalletStats);

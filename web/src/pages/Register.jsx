@@ -12,9 +12,12 @@ import {
   Container,
   Link as MuiLink,
   FormControlLabel,
-  Checkbox
+  Radio,
+  RadioGroup,
+  FormControl,
+  FormLabel
 } from '@mui/material'
-import { PersonAdd as PersonAddIcon } from '@mui/icons-material'
+import { PersonAdd as PersonAddIcon, LocalShipping as TruckIcon, Build as WorkerIcon, Person as CustomerIcon } from '@mui/icons-material'
 
 export default function Register(){
   const [name, setName] = useState('')
@@ -22,7 +25,7 @@ export default function Register(){
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [address, setAddress] = useState('')
-  const [isWorker, setIsWorker] = useState(false)
+  const [role, setRole] = useState('customer') // customer, worker, driver
   
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -41,8 +44,8 @@ export default function Register(){
     }
     
     try{
-      // build payload, allow web users to register as worker when selected
-  const payload = { name, phone, password, role: isWorker ? 'worker' : 'customer', address }
+      // build payload with selected role
+      const payload = { name, phone, password, role, address }
       await api.post('/api/users/register', payload)
       navigate('/login')
     }catch(err){
@@ -145,23 +148,52 @@ export default function Register(){
                 autoComplete="street-address"
               />
 
-              <FormControlLabel
-                control={(
-                  <Checkbox
-                    checked={isWorker}
-                    onChange={e => setIsWorker(e.target.checked)}
-                    color="primary"
+              <FormControl component="fieldset" sx={{ mb: 2, mt: 1 }}>
+                <FormLabel component="legend" sx={{ mb: 1 }}>
+                  Loại tài khoản
+                </FormLabel>
+                <RadioGroup
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                >
+                  <FormControlLabel 
+                    value="customer" 
+                    control={<Radio />} 
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <CustomerIcon fontSize="small" />
+                        Khách hàng (Sử dụng dịch vụ)
+                      </Box>
+                    }
                   />
-                )}
-                label="Đăng ký làm Thợ"
-              />
+                  <FormControlLabel 
+                    value="worker" 
+                    control={<Radio />} 
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <WorkerIcon fontSize="small" />
+                        Thợ (Cung cấp dịch vụ sửa chữa)
+                      </Box>
+                    }
+                  />
+                  <FormControlLabel 
+                    value="driver" 
+                    control={<Radio />} 
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <TruckIcon fontSize="small" />
+                        Tài xế (Cung cấp dịch vụ vận chuyển)
+                      </Box>
+                    }
+                  />
+                </RadioGroup>
+              </FormControl>
 
-              {isWorker && (
-                <>
-                  <Alert severity="info" sx={{ mb: 2 }}>
-                    Tài khoản Thợ sẽ ở trạng thái <strong>chờ duyệt</strong>. CCCD/giấy tờ do quản trị viên cập nhật khi xét duyệt.
-                  </Alert>
-                </>
+              {(role === 'worker' || role === 'driver') && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  Tài khoản {role === 'worker' ? 'Thợ' : 'Tài xế'} sẽ ở trạng thái <strong>chờ duyệt</strong>. 
+                  CCCD/giấy tờ do quản trị viên cập nhật khi xét duyệt.
+                </Alert>
               )}
 
               <Button

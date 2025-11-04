@@ -181,6 +181,41 @@ export default function Home(){
                     </Typography>
                   )}
                   
+                  {s.category && (
+                    <Chip 
+                      label={s.category}
+                      size="small"
+                      color={s.category === 'Dịch Vụ Vận Chuyển' ? 'primary' : 'default'}
+                      sx={{ mb: 1 }}
+                    />
+                  )}
+                  
+                  {s.category === 'Dịch Vụ Vận Chuyển' && s.vehicleSpecs && (
+                    <Box sx={{ 
+                      fontSize: 13, 
+                      color: 'text.secondary',
+                      mb: 1,
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: 0.5
+                    }}>
+                      {s.vehicleSpecs.loadCapacity && (
+                        <Chip 
+                          label={`🚚 ${s.vehicleSpecs.loadCapacity} kg`}
+                          size="small"
+                          variant="outlined"
+                        />
+                      )}
+                      {s.vehicleSpecs.truckBedDimensions && (
+                        <Chip 
+                          label={`📦 ${s.vehicleSpecs.truckBedDimensions.length}x${s.vehicleSpecs.truckBedDimensions.width}x${s.vehicleSpecs.truckBedDimensions.height}m`}
+                          size="small"
+                          variant="outlined"
+                        />
+                      )}
+                    </Box>
+                  )}
+                  
                   <Box sx={{ mb: 1 }}>
                     <StarDisplay 
                       rating={s.averageRating} 

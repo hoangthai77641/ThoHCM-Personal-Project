@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'services_repository.dart';
 import 'media_picker_new.dart';
 import 'dart:io';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ServiceEditScreen extends StatefulWidget {
   final Map<String, dynamic>? service;
@@ -19,6 +21,13 @@ class _ServiceEditScreenState extends State<ServiceEditScreen> {
   final _descController = TextEditingController();
   final _priceController = TextEditingController();
   final _promoController = TextEditingController();
+  
+  // Vehicle specs controllers
+  final _loadCapacityController = TextEditingController();
+  final _lengthController = TextEditingController();
+  final _widthController = TextEditingController();
+  final _heightController = TextEditingController();
+  
   final _repo = ServicesRepository();
 
   final GlobalKey<MediaPickerWidgetState> _mediaPickerKey = GlobalKey();
@@ -26,6 +35,9 @@ class _ServiceEditScreenState extends State<ServiceEditScreen> {
   bool _loading = false;
   List<String> _existingImages = [];
   List<String> _existingVideos = [];
+  
+  String? _selectedCategory;
+  Map<String, dynamic>? _currentUser;
 
   @override
   void initState() {
@@ -33,7 +45,18 @@ class _ServiceEditScreenState extends State<ServiceEditScreen> {
     _initializeData();
   }
 
-  void _initializeData() {
+  void _initializeData() async {
+    // Get current user from storage
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final meStr = prefs.getString('me');
+      if (meStr != null) {
+        setState(() {
+          _currentUser = Map<String, dynamic>.from(jsonDecode(meStr));
+        });
+      }
+    } catch (_) {}
+    
     if (widget.service != null) {
       final service = widget.service!;
 
@@ -41,9 +64,32 @@ class _ServiceEditScreenState extends State<ServiceEditScreen> {
       _descController.text = service['description'] ?? '';
       _priceController.text = service['basePrice']?.toString() ?? '';
       _promoController.text = service['promoPercent']?.toString() ?? '';
+      
+      setState(() {
+        _selectedCategory = service['category'];
+      });
+      
+      // Load vehicle specs if exists
+      final vehicleSpecs = service['vehicleSpecs'];
+      if (vehicleSpecs != null) {
+        _loadCapacityController.text = vehicleSpecs['loadCapacity']?.toString() ?? '';
+        final dimensions = vehicleSpecs['truckBedDimensions'];
+        if (dimensions != null) {
+          _lengthController.text = dimensions['length']?.toString() ?? '';
+          _widthController.text = dimensions['width']?.toString() ?? '';
+          _heightController.text = dimensions['height']?.toString() ?? '';
+        }
+      }
 
       _existingImages = List<String>.from(service['images'] ?? []);
       _existingVideos = List<String>.from(service['videos'] ?? []);
+    } else {
+      // New service - set default category for driver
+      if (_currentUser?['role'] == 'driver') {
+        setState(() {
+          _selectedCategory = 'Dịch Vụ Vận Chuyển';
+        });
+      }
     }
   }
 
@@ -53,6 +99,10 @@ class _ServiceEditScreenState extends State<ServiceEditScreen> {
     _descController.dispose();
     _priceController.dispose();
     _promoController.dispose();
+    _loadCapacityController.dispose();
+    _lengthController.dispose();
+    _widthController.dispose();
+    _heightController.dispose();
     super.dispose();
   }
 
@@ -83,6 +133,7 @@ class _ServiceEditScreenState extends State<ServiceEditScreen> {
           'basePrice': int.tryParse(_priceController.text.trim()),
         if (_promoController.text.trim().isNotEmpty)
           'promoPercent': int.tryParse(_promoController.text.trim()),
+        if (_selectedCategory != null) 'category': _selectedCategory,
         // Send existing URLs only
         'images': originalImages,
         'videos': originalVideos,
@@ -90,6 +141,23 @@ class _ServiceEditScreenState extends State<ServiceEditScreen> {
         if (newImageUrls.isNotEmpty) 'newImageUrls': newImageUrls,
         if (newVideoUrls.isNotEmpty) 'newVideoUrls': newVideoUrls,
       };
+      
+      // Add vehicle specs for transportation services
+      if (_selectedCategory == 'Dịch Vụ Vận Chuyển') {
+        if (_loadCapacityController.text.isNotEmpty &&
+            _lengthController.text.isNotEmpty &&
+            _widthController.text.isNotEmpty &&
+            _heightController.text.isNotEmpty) {
+          payload['vehicleSpecs'] = {
+            'loadCapacity': double.tryParse(_loadCapacityController.text),
+            'truckBedDimensions': {
+              'length': double.tryParse(_lengthController.text),
+              'width': double.tryParse(_widthController.text),
+              'height': double.tryParse(_heightController.text),
+            },
+          };
+        }
+      }
 
       print('💾 Save service payload:');
       print('  originalImages: $originalImages');
@@ -239,11 +307,167 @@ class _ServiceEditScreenState extends State<ServiceEditScreen> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 16),
+                    
+                    // Category Dropdown
+                    DropdownButtonFormField<String>(
+                      value: _selectedCategory,
+                      decoration: const InputDecoration(
+                        labelText: 'Danh mục dịch vụ',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: [
+                        'Điện Lạnh',
+                        'Máy Giặt',
+                        'Điện Gia Dụng',
+                        'Hệ Thống Điện',
+                        'Sửa Xe Đạp',
+                        'Sửa Xe Máy',
+                        'Sửa Xe Oto',
+                        'Sửa Xe Điện',
+                        'Dịch Vụ Vận Chuyển',
+                      ].map((cat) => DropdownMenuItem(
+                        value: cat,
+                        enabled: _currentUser?['role'] != 'driver' || cat == 'Dịch Vụ Vận Chuyển',
+                        child: Text(cat),
+                      )).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCategory = value;
+                        });
+                      },
+                    ),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 16),
+            
+            // Vehicle Specs Card (only for transportation)
+            if (_selectedCategory == 'Dịch Vụ Vận Chuyển') ..[
+              Card(
+                color: Colors.blue[50],
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.local_shipping, color: Colors.blue[700]),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Thông Tin Xe',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Colors.blue[700],
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Thông tin xe là bắt buộc cho dịch vụ vận chuyển',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Load Capacity
+                      TextFormField(
+                        controller: _loadCapacityController,
+                        decoration: const InputDecoration(
+                          labelText: 'Tải trọng (kg) *',
+                          hintText: 'Ví dụ: 1000 (cho xe 1 tấn)',
+                          prefixIcon: Icon(Icons.scale),
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        validator: (value) {
+                          if (_selectedCategory == 'Dịch Vụ Vận Chuyển') {
+                            if (value == null || value.isEmpty) {
+                              return 'Tải trọng là bắt buộc';
+                            }
+                            if (double.tryParse(value) == null) {
+                              return 'Phải là số';
+                            }
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Dimensions
+                      Text(
+                        'Kích thước thùng xe (mét)',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: _lengthController,
+                              decoration: const InputDecoration(
+                                labelText: 'Dài (m) *',
+                                hintText: '2.5',
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              validator: (value) {
+                                if (_selectedCategory == 'Dịch Vụ Vận Chuyển') {
+                                  if (value == null || value.isEmpty) return 'Bắt buộc';
+                                  if (double.tryParse(value) == null) return 'Số';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _widthController,
+                              decoration: const InputDecoration(
+                                labelText: 'Rộng (m) *',
+                                hintText: '1.6',
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              validator: (value) {
+                                if (_selectedCategory == 'Dịch Vụ Vận Chuyển') {
+                                  if (value == null || value.isEmpty) return 'Bắt buộc';
+                                  if (double.tryParse(value) == null) return 'Số';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: TextFormField(
+                              controller: _heightController,
+                              decoration: const InputDecoration(
+                                labelText: 'Cao (m) *',
+                                hintText: '1.8',
+                                border: OutlineInputBorder(),
+                              ),
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              validator: (value) {
+                                if (_selectedCategory == 'Dịch Vụ Vận Chuyển') {
+                                  if (value == null || value.isEmpty) return 'Bắt buộc';
+                                  if (double.tryParse(value) == null) return 'Số';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
 
             // Media Card
             Card(

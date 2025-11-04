@@ -70,9 +70,71 @@ export default function ServiceDetail() {
           </div>
         )}
         
+        {service.category && (
+          <div style={{marginBottom: 12}}>
+            <span style={{
+              display: 'inline-block',
+              padding: '4px 12px',
+              backgroundColor: service.category === 'Dịch Vụ Vận Chuyển' ? '#e3f2fd' : '#f5f5f5',
+              color: service.category === 'Dịch Vụ Vận Chuyển' ? '#1976d2' : '#666',
+              borderRadius: 16,
+              fontSize: 14,
+              fontWeight: 500
+            }}>
+              {service.category}
+            </span>
+          </div>
+        )}
+        
         <p style={{fontSize: 16, lineHeight: 1.6, marginBottom: 20, color: 'var(--muted)'}}>
           {service.description}
         </p>
+        
+        {service.category === 'Dịch Vụ Vận Chuyển' && service.vehicleSpecs && (
+          <div style={{
+            backgroundColor: '#f8f9fa',
+            border: '1px solid #e0e0e0',
+            borderRadius: 8,
+            padding: 16,
+            marginBottom: 20
+          }}>
+            <h3 style={{fontSize: 16, fontWeight: 600, marginBottom: 12, color: '#333'}}>
+              🚚 Thông Tin Xe
+            </h3>
+            <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12}}>
+              {service.vehicleSpecs.loadCapacity && (
+                <div>
+                  <div style={{fontSize: 13, color: '#666', marginBottom: 4}}>Tải trọng</div>
+                  <div style={{fontSize: 16, fontWeight: 600, color: '#1976d2'}}>
+                    {service.vehicleSpecs.loadCapacity.toLocaleString('vi-VN')} kg
+                  </div>
+                </div>
+              )}
+              {service.vehicleSpecs.truckBedDimensions && (
+                <>
+                  <div>
+                    <div style={{fontSize: 13, color: '#666', marginBottom: 4}}>Chiều dài thùng</div>
+                    <div style={{fontSize: 16, fontWeight: 600}}>
+                      {service.vehicleSpecs.truckBedDimensions.length} m
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{fontSize: 13, color: '#666', marginBottom: 4}}>Chiều rộng thùng</div>
+                    <div style={{fontSize: 16, fontWeight: 600}}>
+                      {service.vehicleSpecs.truckBedDimensions.width} m
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{fontSize: 13, color: '#666', marginBottom: 4}}>Chiều cao thùng</div>
+                    <div style={{fontSize: 16, fontWeight: 600}}>
+                      {service.vehicleSpecs.truckBedDimensions.height} m
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
         
         <div style={{display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24}}>
           <div className="price" style={{fontSize: 20, fontWeight: 600}}>

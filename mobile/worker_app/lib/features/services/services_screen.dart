@@ -322,6 +322,59 @@ class _ServicesScreenState extends State<ServicesScreen> {
 
                             const SizedBox(height: 8),
 
+                            // Category
+                            if (service['category'] != null) ...[
+                              Chip(
+                                label: Text(
+                                  service['category'],
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                                backgroundColor: service['category'] == 'Dịch Vụ Vận Chuyển'
+                                    ? Colors.blue[100]
+                                    : Colors.grey[200],
+                                labelStyle: TextStyle(
+                                  color: service['category'] == 'Dịch Vụ Vận Chuyển'
+                                      ? Colors.blue[700]
+                                      : Colors.grey[700],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                            
+                            // Vehicle Specs for Transportation Services
+                            if (service['category'] == 'Dịch Vụ Vận Chuyển' &&
+                                service['vehicleSpecs'] != null) ...[
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue[50],
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.blue[200]!),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.local_shipping,
+                                        size: 16, color: Colors.blue[700]),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        '${service['vehicleSpecs']['loadCapacity']?.toString() ?? '?'}kg • '
+                                        '${service['vehicleSpecs']['truckBedDimensions']?['length']?.toString() ?? '?'}x'
+                                        '${service['vehicleSpecs']['truckBedDimensions']?['width']?.toString() ?? '?'}x'
+                                        '${service['vehicleSpecs']['truckBedDimensions']?['height']?.toString() ?? '?'}m',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.blue[700],
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+
                             // Rating
                             Row(
                               children: [

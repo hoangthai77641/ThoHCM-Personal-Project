@@ -104,10 +104,12 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> registerWorker({
+  // Generic register supporting both worker and driver
+  Future<bool> register({
     required String name,
     required String phone,
     required String password,
+    required String role,
     String? address,
   }) async {
     loading = true;
@@ -116,10 +118,11 @@ class AuthProvider with ChangeNotifier {
     errorDetails = null;
     notifyListeners();
     try {
-      await _repo.registerWorker(
+      await _repo.register(
         name: name,
         phone: phone,
         password: password,
+        role: role,
         address: address,
       );
       loading = false;
@@ -131,6 +134,22 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  // Keep registerWorker for backward compatibility
+  Future<bool> registerWorker({
+    required String name,
+    required String phone,
+    required String password,
+    String? address,
+  }) async {
+    return register(
+      name: name,
+      phone: phone,
+      password: password,
+      role: 'worker',
+      address: address,
+    );
   }
 
   Future<bool> uploadAvatar(dynamic imageFile) async {

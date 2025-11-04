@@ -126,10 +126,12 @@ class AuthRepository {
     }
   }
 
-  Future<void> registerWorker({
+  // Generic register function supporting both worker and driver
+  Future<void> register({
     required String name,
     required String phone,
     required String password,
+    required String role, // 'worker' or 'driver'
     String? address,
   }) async {
     try {
@@ -140,12 +142,28 @@ class AuthRepository {
           'phone': phone,
           'password': password,
           'address': address,
-          'role': 'worker',
+          'role': role,
         },
       );
     } catch (e) {
       throw Exception(_extractErrorMessage(e));
     }
+  }
+
+  // Keep registerWorker for backward compatibility
+  Future<void> registerWorker({
+    required String name,
+    required String phone,
+    required String password,
+    String? address,
+  }) async {
+    return register(
+      name: name,
+      phone: phone,
+      password: password,
+      role: 'worker',
+      address: address,
+    );
   }
 
   Future<Map<String, dynamic>> uploadAvatar(dynamic imageFile) async {

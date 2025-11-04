@@ -18,18 +18,18 @@ router.get('/my', auth('customer'), bookingController.getMyBookings);
 router.get('/my/stats', auth('customer'), bookingController.getMyStats);
 // Get available workers for a service and time (public for customers)
 router.get('/available-workers', bookingController.getAvailableWorkers);
-// Get bookings (worker or admin). Admin sẽ xem tất cả, worker xem của mình
-router.get('/', auth(['worker','admin']), bookingController.getBookings);
+// Get bookings (worker, driver, or admin). Admin sẽ xem tất cả, worker/driver xem của mình
+router.get('/', auth(['worker','driver','admin']), bookingController.getBookings);
 
-// Stats for worker dashboard
-router.get('/stats/worker', auth(['worker','admin']), bookingController.getWorkerStats);
+// Stats for worker/driver dashboard
+router.get('/stats/worker', auth(['worker','driver','admin']), bookingController.getWorkerStats);
 
 // Get worker's busy times (public endpoint for customers)
 router.get('/worker/:workerId/busy-times', bookingController.getWorkerBusyTimes);
 
-// Update booking status (worker hoặc admin) with ownership check
+// Update booking status (worker, driver, hoặc admin) with ownership check
 router.patch('/:id/status', 
-  auth(['worker','admin']), 
+  auth(['worker','driver','admin']), 
   validateBookingStatusUpdate, 
   checkBookingOwnership, 
   bookingController.updateBookingStatus

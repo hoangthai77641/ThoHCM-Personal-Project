@@ -28,30 +28,32 @@ exports.register = async (req, res) => {
     let userRole = 'customer';
     if (role === 'worker') {
       userRole = 'worker';
+    } else if (role === 'driver') {
+      userRole = 'driver';
     } else if (role === 'admin') {
       return res.status(403).json({ message: 'Not allowed' });
     }
     
-    // Flexible validation: 1 phone can have 1 customer + 1 worker
+    // Flexible validation: 1 phone can have 1 customer + 1 worker + 1 driver
     const existingWithSameRole = await User.findOne({ phone, role: userRole });
     if (existingWithSameRole) {
-      const roleText = userRole === 'customer' ? 'khách hàng' : 'thợ';
+      const roleText = userRole === 'customer' ? 'khách hàng' : (userRole === 'worker' ? 'thợ' : 'tài xế');
       return res.status(400).json({ message: `Số điện thoại này đã được đăng ký tài khoản ${roleText}` });
     }
     
-    // CCCD validation: NOT required for worker registration - admin will add later
+    // CCCD validation: NOT required for worker/driver registration - admin will add later
     // Skip CCCD validation during registration
-    if (userRole === 'worker' && citizenId && citizenId.trim()) {
+    if ((userRole === 'worker' || userRole === 'driver') && citizenId && citizenId.trim()) {
       // Optional: if user provides CCCD during registration, check for duplicates
-      const existingCitizenId = await User.findOne({ citizenId: citizenId.trim(), role: 'worker' });
+      const existingCitizenId = await User.findOne({ citizenId: citizenId.trim(), role: { $in: ['worker', 'driver'] } });
       if (existingCitizenId) {
-        return res.status(400).json({ message: 'CCCD này đã được đăng ký bởi thợ khác' });
+        return res.status(400).json({ message: 'CCCD này đã được đăng ký bởi thợ/tài xế khác' });
       }
     }
     
     const hashedPassword = await bcrypt.hash(password, 10);
-    // default status: workers start as pending, others active
-    const status = userRole === 'worker' ? 'pending' : 'active';
+    // default status: workers and drivers start as pending, others active
+    const status = (userRole === 'worker' || userRole === 'driver') ? 'pending' : 'active';
     
     // Only set citizenId for workers
     const userData = { 
@@ -545,8 +547,8 @@ exports.uploadAvatar = async (req, res) => {
       ? (req.body.userId || req.query.userId)
       : req.user.id;
 
-    if (req.user.role === 'worker' && targetUserId === req.user.id) {
-      return res.status(403).json({ message: 'Ảnh đại diện của thợ sẽ do quản trị viên update.' });
+    if ((req.user.role === 'worker' || req.user.role === 'driver') && targetUserId === req.user.id) {
+      return res.status(403).json({ message: 'Ảnh đại diện của thợ/tài xế sẽ do quản trị viên update.' });
     }
 
     const user = await User.findById(targetUserId);
@@ -554,7 +556,7 @@ exports.uploadAvatar = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    if (req.user.role === 'worker' && !user._id.equals(req.user.id)) {
+    if ((req.user.role === 'worker' || req.user.role === 'driver') && !user._id.equals(req.user.id)) {
       return res.status(403).json({ message: 'Không thể update avatar cho tài khoản khác.' });
     }
 
@@ -652,9 +654,9 @@ exports.toggleOnlineStatus = async (req, res) => {
     const userId = req.user.id;
     const { isOnline } = req.body;
     
-    // Only workers can toggle their online status
-    if (req.user.role !== 'worker') {
-      return res.status(403).json({ message: 'Only workers can toggle online status' });
+    // Only workers and drivers can toggle their online status
+    if (req.user.role !== 'worker' && req.user.role !== 'driver') {
+      return res.status(403).json({ message: 'Only workers and drivers can toggle online status' });
     }
 
     const user = await User.findById(userId);
@@ -999,5 +1001,156 @@ exports.updateFcmToken = async (req, res) => {
   } catch (error) {
     console.error('Update FCM token error:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// ====================== DRIVER MANAGEMENT (Admin) ======================
+
+// Admin: Create driver account
+exports.adminCreateDriver = async (req, res) => {
+  try {
+    const { name, phone, password, address, citizenId, status } = req.body;
+    if (!name || !name.trim()) return res.status(400).json({ message: 'Name is required' });
+    if (!phone || !phone.trim()) return res.status(400).json({ message: 'Phone is required' });
+    if (!password || password.length < 6) return res.status(400).json({ message: 'Password must be at least 6 characters' });
+
+    // Check if phone already used for driver role
+    const existingDriver = await User.findOne({ phone: phone.trim(), role: 'driver' });
+    if (existingDriver) return res.status(400).json({ message: 'Số điện thoại này đã được đăng ký tài khoản tài xế' });
+
+    // Check if CCCD already used for driver
+    if (citizenId && citizenId.trim()) {
+      const existingCitizenId = await User.findOne({ citizenId: citizenId.trim(), role: { $in: ['worker', 'driver'] } });
+      if (existingCitizenId) return res.status(400).json({ message: 'CCCD này đã được đăng ký bởi thợ/tài xế khác' });
+    }
+
+    const driver = new User({
+      name: name.trim(),
+      phone: phone.trim(),
+      password: await bcrypt.hash(password, 10),
+      role: 'driver',
+      address,
+      citizenId,
+      status: ['pending', 'active', 'suspended'].includes(status) ? status : 'pending',
+    });
+
+    await driver.save();
+    const sanitized = driver.toObject({ versionKey: false });
+    delete sanitized.password;
+    delete sanitized.resetOTP;
+    res.status(201).json(sanitized);
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+};
+
+// Admin: Update driver account
+exports.adminUpdateDriver = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const driver = await User.findById(id);
+    if (!driver || driver.role !== 'driver') {
+      return res.status(404).json({ message: 'Driver not found' });
+    }
+
+    const { name, phone, address, citizenId, status, password } = req.body;
+
+    if (name !== undefined) driver.name = name;
+    if (address !== undefined) driver.address = address;
+
+    if (phone !== undefined && phone !== driver.phone) {
+      // Check if phone already used by another driver
+      const existsDriver = await User.findOne({ phone, role: 'driver', _id: { $ne: driver._id } });
+      if (existsDriver) return res.status(400).json({ message: 'Số điện thoại này đã được sử dụng bởi tài xế khác' });
+      driver.phone = phone;
+    }
+
+    if (citizenId !== undefined && citizenId !== driver.citizenId) {
+      // Check if CCCD already used by another driver or worker
+      if (citizenId && citizenId.trim()) {
+        const existsCitizenId = await User.findOne({ citizenId: citizenId.trim(), role: { $in: ['worker', 'driver'] }, _id: { $ne: driver._id } });
+        if (existsCitizenId) return res.status(400).json({ message: 'CCCD này đã được sử dụng bởi thợ/tài xế khác' });
+      }
+      driver.citizenId = citizenId;
+    }
+
+    if (status !== undefined) {
+      if (!['pending', 'active', 'suspended'].includes(status)) {
+        return res.status(400).json({ message: 'Invalid status' });
+      }
+      driver.status = status;
+    }
+
+    if (password !== undefined) {
+      if (password.length < 6) return res.status(400).json({ message: 'Password must be at least 6 characters' });
+      driver.password = await bcrypt.hash(password, 10);
+    }
+
+    await driver.save();
+    const sanitized = driver.toObject({ versionKey: false });
+    delete sanitized.password;
+    delete sanitized.resetOTP;
+    res.json(sanitized);
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+};
+
+// Admin: Delete driver account (and all related data)
+exports.adminDeleteDriver = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const driver = await User.findById(id);
+    if (!driver || driver.role !== 'driver') {
+      return res.status(404).json({ message: 'Driver not found' });
+    }
+
+    // Get all services of this driver first (for deleting reviews)
+    const driverServices = await Service.find({ worker: id });
+    const serviceIds = driverServices.map(service => service._id);
+
+    // Delete all reviews for this driver's services
+    const deletedReviews = await Review.deleteMany({ service: { $in: serviceIds } });
+    console.log(`Deleted ${deletedReviews.deletedCount} reviews for driver ${driver.name}`);
+
+    // Delete all services associated with this driver
+    const deletedServices = await Service.deleteMany({ worker: id });
+    console.log(`Deleted ${deletedServices.deletedCount} services for driver ${driver.name}`);
+
+    // Delete all bookings associated with this driver
+    const deletedBookings = await Booking.deleteMany({ worker: id });
+    console.log(`Deleted ${deletedBookings.deletedCount} bookings for driver ${driver.name}`);
+
+    // Delete all schedules associated with this driver
+    const WorkerSchedule = require('../models/WorkerSchedule');
+    const deletedSchedules = await WorkerSchedule.deleteMany({ worker: id });
+    console.log(`Deleted ${deletedSchedules.deletedCount} schedules for driver ${driver.name}`);
+
+    // Delete wallet associated with this driver
+    const Wallet = require('../models/Wallet');
+    const Transaction = require('../models/Transaction');
+    const wallet = await Wallet.findOne({ worker: id });
+    if (wallet) {
+      await Transaction.deleteMany({ wallet: wallet._id });
+      await wallet.deleteOne();
+      console.log(`Deleted wallet and transactions for driver ${driver.name}`);
+    }
+
+    // Delete the driver account
+    await driver.deleteOne();
+
+    res.json({ 
+      message: 'Driver deleted successfully',
+      deletedData: {
+        services: deletedServices.deletedCount,
+        reviews: deletedReviews.deletedCount,
+        bookings: deletedBookings.deletedCount,
+        schedules: deletedSchedules.deletedCount,
+        wallet: wallet ? 1 : 0
+      }
+    });
+  } catch (e) {
+    console.error('Error deleting driver:', e);
+    res.status(400).json({ message: e.message });
   }
 };
