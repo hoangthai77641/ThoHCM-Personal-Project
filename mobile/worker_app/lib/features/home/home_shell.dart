@@ -44,8 +44,8 @@ class _HomeShellState extends State<HomeShell> {
     final pages = <Widget>[
       const ReceiveOrdersScreen(),
       const BookingsScreen(),
-      const NotificationsScreen(),
       const WalletScreen(),
+      const NotificationsScreen(),
       MultiProvider(
         providers: [
           ChangeNotifierProvider.value(value: _statsProvider),
@@ -140,6 +140,11 @@ class _HomeShellState extends State<HomeShell> {
               label: 'Đơn hàng',
             ),
             NavigationDestination(
+              icon: const Icon(Icons.account_balance_wallet_outlined),
+              selectedIcon: const Icon(Icons.account_balance_wallet),
+              label: 'Ví',
+            ),
+            NavigationDestination(
               icon: Consumer<NotificationsProvider>(
                 builder: (context, notificationsProv, child) {
                   final count = notificationsProv.unreadCount;
@@ -161,11 +166,6 @@ class _HomeShellState extends State<HomeShell> {
                 },
               ),
               label: 'Thông báo',
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.account_balance_wallet_outlined),
-              selectedIcon: const Icon(Icons.account_balance_wallet),
-              label: 'Ví',
             ),
             NavigationDestination(
               icon: const Icon(Icons.person_outline),

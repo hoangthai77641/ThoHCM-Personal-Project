@@ -258,8 +258,8 @@ exports.adminUpdateWorker = async (req, res) => {
   try {
     const { id } = req.params;
     const worker = await User.findById(id);
-    if (!worker || worker.role !== 'worker') {
-      return res.status(404).json({ message: 'Worker not found' });
+    if (!worker || (worker.role !== 'worker' && worker.role !== 'driver')) {
+      return res.status(404).json({ message: 'Worker/Driver not found' });
     }
 
     const { name, phone, address, citizenId, status, password } = req.body;
@@ -269,17 +269,17 @@ exports.adminUpdateWorker = async (req, res) => {
     if (citizenId !== undefined) worker.citizenId = citizenId;
 
     if (phone !== undefined && phone !== worker.phone) {
-      // Check if phone already used by another worker
-      const existsWorker = await User.findOne({ phone, role: 'worker', _id: { $ne: worker._id } });
-      if (existsWorker) return res.status(400).json({ message: 'Số điện thoại này đã được sử dụng bởi thợ khác' });
+      // Check if phone already used by another worker/driver with same role
+      const existsWorker = await User.findOne({ phone, role: worker.role, _id: { $ne: worker._id } });
+      if (existsWorker) return res.status(400).json({ message: 'Số điện thoại này đã được sử dụng bởi tài khoản khác' });
       worker.phone = phone;
     }
 
     if (citizenId !== undefined && citizenId !== worker.citizenId) {
-      // Check if CCCD already used by another worker
+      // Check if CCCD already used by another worker/driver
       if (citizenId && citizenId.trim()) {
-        const existsCitizenId = await User.findOne({ citizenId: citizenId.trim(), role: 'worker', _id: { $ne: worker._id } });
-        if (existsCitizenId) return res.status(400).json({ message: 'CCCD này đã được sử dụng bởi thợ khác' });
+        const existsCitizenId = await User.findOne({ citizenId: citizenId.trim(), role: { $in: ['worker', 'driver'] }, _id: { $ne: worker._id } });
+        if (existsCitizenId) return res.status(400).json({ message: 'CCCD này đã được sử dụng bởi thợ/tài xế khác' });
       }
       worker.citizenId = citizenId;
     }
@@ -307,8 +307,8 @@ exports.adminDeleteWorker = async (req, res) => {
   try {
     const { id } = req.params;
     const worker = await User.findById(id);
-    if (!worker || worker.role !== 'worker') {
-      return res.status(404).json({ message: 'Worker not found' });
+    if (!worker || (worker.role !== 'worker' && worker.role !== 'driver')) {
+      return res.status(404).json({ message: 'Worker/Driver not found' });
     }
 
     // Get all services of this worker first (for deleting reviews)

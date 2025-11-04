@@ -147,10 +147,10 @@ router.post('/worker/location', auth, async (req, res) => {
     const { coordinates, district, ward, fullAddress } = req.body;
     const workerId = req.user._id;
     
-    if (req.user.role !== 'worker') {
+    if (req.user.role !== 'worker' && req.user.role !== 'driver') {
       return res.status(403).json({
         success: false,
-        message: 'Chỉ thợ mới có thể update vị trí'
+        message: 'Chỉ thợ/tài xế mới có thể update vị trí'
       });
     }
 
@@ -227,10 +227,10 @@ router.post('/worker/status', auth, async (req, res) => {
     const { isOnline } = req.body;
     const workerId = req.user._id;
     
-    if (req.user.role !== 'worker') {
+    if (req.user.role !== 'worker' && req.user.role !== 'driver') {
       return res.status(403).json({
         success: false,
-        message: 'Chỉ thợ mới có thể thay đổi trạng thái'
+        message: 'Chỉ thợ/tài xế mới có thể thay đổi trạng thái'
       });
     }
 

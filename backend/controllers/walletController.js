@@ -16,11 +16,11 @@ exports.getWallet = async (req, res) => {
   try {
     const workerId = req.user.id;
     
-    // Only workers can access wallet
-    if (req.user.role !== 'worker') {
+    // Only workers and drivers can access wallet
+    if (req.user.role !== 'worker' && req.user.role !== 'driver') {
       return res.status(403).json({ 
         success: false,
-        message: 'Chỉ thợ mới có thể truy cập ví' 
+        message: 'Chỉ thợ/tài xế mới có thể truy cập ví' 
       });
     }
 
@@ -85,11 +85,11 @@ exports.createDepositRequest = async (req, res) => {
     
     console.log('💳 Deposit request:', { workerId, amount, paymentMethod });
 
-    // Only workers can deposit
-    if (req.user.role !== 'worker') {
+    // Only workers and drivers can deposit
+    if (req.user.role !== 'worker' && req.user.role !== 'driver') {
       return res.status(403).json({ 
         success: false,
-        message: 'Chỉ thợ mới có thể nạp tiền' 
+        message: 'Chỉ thợ/tài xế mới có thể nạp tiền' 
       });
     }
 

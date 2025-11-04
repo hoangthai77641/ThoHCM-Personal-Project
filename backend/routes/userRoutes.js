@@ -108,7 +108,7 @@ router.put('/workers/:id/approve', auth(['admin']), async (req, res) => {
 	try {
 		const User = require('../models/User');
 		const user = await User.findById(req.params.id);
-		if (!user || user.role !== 'worker') return res.status(404).json({ message: 'Worker not found' });
+		if (!user || (user.role !== 'worker' && user.role !== 'driver')) return res.status(404).json({ message: 'Worker/Driver not found' });
 		user.status = 'active';
 		await user.save();
 		res.json({ message: 'Approved' });
@@ -119,7 +119,7 @@ router.put('/workers/:id/suspend', auth(['admin']), async (req, res) => {
 	try {
 		const User = require('../models/User');
 		const user = await User.findById(req.params.id);
-		if (!user || user.role !== 'worker') return res.status(404).json({ message: 'Worker not found' });
+		if (!user || (user.role !== 'worker' && user.role !== 'driver')) return res.status(404).json({ message: 'Worker/Driver not found' });
 		user.status = 'suspended';
 		await user.save();
 		res.json({ message: 'Suspended' });
