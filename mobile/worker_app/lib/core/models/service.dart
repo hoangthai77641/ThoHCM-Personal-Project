@@ -109,7 +109,7 @@ class Service {
     };
 
     if (promoPercent != null) {
-      data['promoPercent'] = promoPercent;
+      data['promoPercent'] = promoPercent!;
     }
 
     if (vehicleSpecs != null) {

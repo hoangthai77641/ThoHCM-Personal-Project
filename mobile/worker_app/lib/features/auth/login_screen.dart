@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   );
                                 } else if (mounted) {
-                                  if (auth.errorCode == 'WORKER_PENDING') {
+                                  if (auth.errorCode == 'WORKER_PENDING' || auth.errorCode == 'ACCOUNT_PENDING') {
                                     final instructions =
                                         auth.errorDetails?['instructions']
                                             as String? ??

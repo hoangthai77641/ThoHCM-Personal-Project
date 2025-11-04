@@ -40,8 +40,8 @@ const validateUserRegistration = [
   
   body('role')
     .optional()
-    .isIn(['customer', 'worker'])
-    .withMessage('Role must be customer or worker'),
+    .isIn(['customer', 'worker', 'driver'])
+    .withMessage('Role must be customer, worker, or driver'),
   
   body('address')
     .optional()

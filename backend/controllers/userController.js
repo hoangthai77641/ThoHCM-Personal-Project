@@ -55,7 +55,7 @@ exports.register = async (req, res) => {
     // default status: workers and drivers start as pending, others active
     const status = (userRole === 'worker' || userRole === 'driver') ? 'pending' : 'active';
     
-    // Only set citizenId for workers
+    // Only set citizenId for workers and drivers
     const userData = { 
       name, 
       phone, 
@@ -65,7 +65,7 @@ exports.register = async (req, res) => {
       status 
     };
     
-    if (userRole === 'worker' && citizenId) {
+    if ((userRole === 'worker' || userRole === 'driver') && citizenId) {
       userData.citizenId = citizenId.trim();
     }
     
@@ -94,10 +94,11 @@ exports.login = async (req, res) => {
     if (!user) return res.status(400).json({ message: 'User not found' });
     // block login if not active
     if (user.status && user.status !== 'active') {
+      const roleText = user.role === 'worker' ? 'Thợ' : (user.role === 'driver' ? 'Tài xế' : 'Đối tác');
       return res.status(403).json({
-        message: 'Tài khoản thợ chưa được kích hoạt',
-        code: 'WORKER_PENDING',
-        instructions: 'Xin Chào Đối tác mới của Thợ HCM, Đối tác vui lòng đến văn phòng Thợ HCM tại địa chỉ: 456 Phan Văn Trị, P. An Nhơn, TP HCM vào khung giờ 8:00 - 11:00 Sáng và 13:00 - 16:00 Chiều để kích hoạt tài khoản Thợ của đối tác, vui lòng mang theo CCCD để xác minh, update thông tin, ảnh đại diện trên ứng dụng và receive nón bảo hiểm miễn phí',
+        message: `Tài khoản ${roleText} chưa được kích hoạt`,
+        code: 'ACCOUNT_PENDING',
+        instructions: `Xin Chào Đối tác mới của Thợ HCM, Đối tác vui lòng đến văn phòng Thợ HCM tại địa chỉ: 456 Phan Văn Trị, P. An Nhơn, TP HCM vào khung giờ 8:00 - 11:00 Sáng và 13:00 - 16:00 Chiều để kích hoạt tài khoản ${roleText} của đối tác, vui lòng mang theo CCCD để xác minh, update thông tin, ảnh đại diện trên ứng dụng và receive nón bảo hiểm miễn phí`,
         status: user.status,
       });
     }
