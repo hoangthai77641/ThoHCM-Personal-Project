@@ -31,6 +31,7 @@ import {
   Logout as LogoutIcon,
   Receipt as ReceiptIcon,
   PersonSearch as PersonSearchIcon,
+  LocalShipping as LocalShippingIcon,
 } from '@mui/icons-material';
 import { useThemeMode } from '../ThemeProvider';
 import SearchBox from './SearchBox';
@@ -88,6 +89,11 @@ export default function ResponsiveNav({ user, onLogout }) {
     { text: 'Đơn của tôi', path: '/my-bookings', icon: <ReceiptIcon /> },
   ] : [];
 
+  // Public menu items (available to all users)
+  const publicMenuItems = [
+    { text: 'Dịch Vụ Vận Chuyển', path: '/transport-services', icon: <LocalShippingIcon /> },
+  ];
+
   // User dropdown menu items
   const userDropdownItems = [
     ...customerMenuItems,
@@ -128,6 +134,27 @@ export default function ResponsiveNav({ user, onLogout }) {
       ) : null}
 
       <List>
+        {/* Public menu items */}
+        {publicMenuItems.map((item) => (
+          <ListItem
+            button
+            key={item.path}
+            component={Link}
+            to={item.path}
+            onClick={handleDrawerToggle}
+            sx={{ 
+              color: 'text.primary',
+              '&:hover': { bgcolor: 'action.hover' }
+            }}
+          >
+            <ListItemIcon sx={{ color: 'inherit' }}>{item.icon}</ListItemIcon>
+            <ListItemText 
+              primary={item.text}
+              primaryTypographyProps={{ color: 'text.primary' }}
+            />
+          </ListItem>
+        ))}
+
         {!user && (
           <>
             <ListItem 
@@ -275,6 +302,19 @@ export default function ResponsiveNav({ user, onLogout }) {
             {/* Desktop navigation */}
             {!isMobile && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexGrow: 1 }}>
+                {/* Public menu items */}
+                {publicMenuItems.map((item) => (
+                  <Button
+                    key={item.path}
+                    color="inherit"
+                    component={Link}
+                    to={item.path}
+                    startIcon={item.icon}
+                  >
+                    {item.text}
+                  </Button>
+                ))}
+
                 {!user && (
                   <>
                     <Button 
