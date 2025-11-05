@@ -18,7 +18,8 @@ import ResetPassword from "./pages/ResetPassword";
 import NearbyWorkers from "./pages/NearbyWorkers";
 import TransportServices from "./pages/TransportServices";
 
-import ResponsiveNav from './components/ResponsiveNav'
+import AdminLayout from './layouts/AdminLayout'
+import PublicLayout from './layouts/PublicLayout'
 import api from './api'
 
 
@@ -134,51 +135,34 @@ function AppContent() {
   }
   
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <ResponsiveNav user={user} onLogout={logout} />
-      
-      <Box component="main" sx={{ flexGrow: 1, bgcolor: 'background.default', py: 3 }}>
-        <Container maxWidth="xl">
-          <Routes>
-            <Route path="/" element={<Home/>} />
-            <Route path="/service/:id" element={<ServiceDetail/>} />
-            <Route path="/transport-services" element={<TransportServices/>} />
-            <Route path="/login" element={<Login/>} />
-            <Route path="/register" element={<Register/>} />
-            <Route path="/forgot-password" element={<ForgotPassword/>} />
-            <Route path="/verify-otp" element={<OTPVerification/>} />
-            <Route path="/reset-password" element={<ResetPassword/>} />
-            <Route path="/booking" element={<Booking/>} />
-            <Route path="/my-bookings" element={<MyBookings/>} />
-            <Route path="/nearby-workers" element={<NearbyWorkers/>} />
-            <Route path="/profile" element={<Profile/>} />
-            <Route path="/admin" element={<AdminDashboard/>} />
-            <Route path="/users" element={<Users/>} />
-            <Route path="/administrators" element={<AdministratorManagement/>} />
-            <Route path="/banners" element={<BannerManagement/>} />
-          </Routes>
-        </Container>
-      </Box>
-      
-      <Box
-        component="footer"
-        sx={{
-          py: 3,
-          px: 2,
-          mt: 'auto',
-          bgcolor: 'background.paper',
-          borderTop: 1,
-          borderColor: 'divider',
-          textAlign: 'center',
-        }}
-      >
-        <Container maxWidth="lg">
-          <Box sx={{ color: 'text.secondary' }}>
-            &copy; 2025 Thợ HCM. All rights reserved.
-          </Box>
-        </Container>
-      </Box>
-    </Box>
+    <Routes>
+      {/* Admin routes with AdminLayout (sidebar) */}
+      <Route element={<AdminLayout user={user} onLogout={logout} />}>
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/users" element={<Users />} />
+        <Route path="/workers" element={<Users />} />
+        <Route path="/drivers" element={<Users />} />
+        <Route path="/administrators" element={<AdministratorManagement />} />
+        <Route path="/banners" element={<BannerManagement />} />
+      </Route>
+
+      {/* Public routes with PublicLayout (header nav) */}
+      <Route element={<PublicLayout user={user} onLogout={logout} />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/service/:id" element={<ServiceDetail />} />
+        <Route path="/transport-services" element={<TransportServices />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/verify-otp" element={<OTPVerification />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/booking" element={<Booking />} />
+        <Route path="/my-bookings" element={<MyBookings />} />
+        <Route path="/nearby-workers" element={<NearbyWorkers />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/services" element={<Home />} />
+      </Route>
+    </Routes>
   )
 }
 
