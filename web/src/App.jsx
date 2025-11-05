@@ -20,7 +20,6 @@ import TransportServices from "./pages/TransportServices";
 
 import AdminLayout from './layouts/AdminLayout'
 import PublicLayout from './layouts/PublicLayout'
-import ProtectedRoute from './components/ProtectedRoute'
 import api from './api'
 
 
@@ -138,51 +137,30 @@ function AppContent() {
   return (
     <Routes>
       {/* Admin routes with AdminLayout (sidebar) */}
-      <Route element={
-        <ProtectedRoute user={user} requiredRole="admin">
-          <AdminLayout user={user} onLogout={logout} />
-        </ProtectedRoute>
-      }>
-        {/* Dashboard */}
+      <Route element={<AdminLayout user={user} onLogout={logout} />}>
         <Route path="/admin" element={<AdminDashboard />} />
-        
-        {/* User Management */}
         <Route path="/users" element={<Users />} />
         <Route path="/workers" element={<Users />} />
         <Route path="/drivers" element={<Users />} />
         <Route path="/administrators" element={<AdministratorManagement />} />
-        
-        {/* Service Management */}
-        <Route path="/services" element={<Home />} />
-        <Route path="/transport-services" element={<TransportServices />} />
-        
-        {/* Booking Management */}
-        <Route path="/bookings" element={<MyBookings />} />
-        
-        {/* Financial Management */}
-        <Route path="/admin/wallet" element={<AdminDashboard />} />
-        <Route path="/admin/transactions" element={<AdminDashboard />} />
-        <Route path="/admin/revenue" element={<AdminDashboard />} />
-        
-        {/* Marketing & Notifications */}
         <Route path="/banners" element={<BannerManagement />} />
-        <Route path="/admin/notifications" element={<AdminDashboard />} />
-        
-        {/* Profile in admin context */}
-        <Route path="/profile" element={<Profile />} />
       </Route>
 
       {/* Public routes with PublicLayout (header nav) */}
       <Route element={<PublicLayout user={user} onLogout={logout} />}>
         <Route path="/" element={<Home />} />
         <Route path="/service/:id" element={<ServiceDetail />} />
+        <Route path="/transport-services" element={<TransportServices />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/verify-otp" element={<OTPVerification />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/booking" element={<Booking />} />
+        <Route path="/my-bookings" element={<MyBookings />} />
         <Route path="/nearby-workers" element={<NearbyWorkers />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/services" element={<Home />} />
       </Route>
     </Routes>
   )

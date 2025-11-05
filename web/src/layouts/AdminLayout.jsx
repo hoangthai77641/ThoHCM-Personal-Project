@@ -34,13 +34,6 @@ import {
   AdminPanelSettings as AdminIcon,
   Logout as LogoutIcon,
   AccountCircle as AccountCircleIcon,
-  Engineering as EngineeringIcon,
-  DirectionsCar as DriversIcon,
-  HomeRepairService as HomeRepairServiceIcon,
-  Assessment as AssessmentIcon,
-  Notifications as NotificationsIcon,
-  ViewCarousel as ViewCarouselIcon,
-  Payment as PaymentIcon,
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../assets/logo.png';
@@ -52,9 +45,6 @@ export default function AdminLayout({ user, onLogout }) {
   const location = useLocation();
   const [open, setOpen] = useState(true);
   const [usersMenuOpen, setUsersMenuOpen] = useState(false);
-  const [servicesMenuOpen, setServicesMenuOpen] = useState(false);
-  const [financialMenuOpen, setFinancialMenuOpen] = useState(false);
-  const [marketingMenuOpen, setMarketingMenuOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
   const isAdmin = user?.role === 'admin';
@@ -65,18 +55,6 @@ export default function AdminLayout({ user, onLogout }) {
 
   const handleUsersMenuToggle = () => {
     setUsersMenuOpen(!usersMenuOpen);
-  };
-
-  const handleServicesMenuToggle = () => {
-    setServicesMenuOpen(!servicesMenuOpen);
-  };
-
-  const handleFinancialMenuToggle = () => {
-    setFinancialMenuOpen(!financialMenuOpen);
-  };
-
-  const handleMarketingMenuToggle = () => {
-    setMarketingMenuOpen(!marketingMenuOpen);
   };
 
   const handleUserMenuClick = (event) => {
@@ -102,61 +80,51 @@ export default function AdminLayout({ user, onLogout }) {
       icon: <DashboardIcon />,
       path: '/admin',
       show: true,
-      type: 'single',
     },
     {
-      text: 'Quản lý Người dùng',
+      text: 'Người dùng',
       icon: <PeopleIcon />,
       show: isAdmin,
-      type: 'submenu',
-      stateKey: 'users',
       subItems: [
         { text: 'Khách hàng', icon: <PersonSearchIcon />, path: '/users' },
-        { text: 'Thợ sửa chữa', icon: <EngineeringIcon />, path: '/workers' },
-        { text: 'Tài xế vận chuyển', icon: <DriversIcon />, path: '/drivers' },
+        { text: 'Thợ', icon: <BuildIcon />, path: '/workers' },
+        { text: 'Tài xế', icon: <TransportIcon />, path: '/drivers' },
         { text: 'Quản trị viên', icon: <AdminIcon />, path: '/administrators' },
       ],
     },
     {
-      text: 'Quản lý Dịch vụ',
-      icon: <HomeRepairServiceIcon />,
+      text: 'Dịch vụ',
+      icon: <BuildIcon />,
+      path: '/services',
       show: true,
-      type: 'submenu',
-      stateKey: 'services',
-      subItems: [
-        { text: 'Dịch vụ sửa chữa', icon: <BuildIcon />, path: '/services' },
-        { text: 'Dịch vụ vận chuyển', icon: <TransportIcon />, path: '/transport-services' },
-      ],
     },
     {
-      text: 'Quản lý Đơn hàng',
+      text: 'Dịch vụ Vận Chuyển',
+      icon: <TransportIcon />,
+      path: '/transport-services',
+      show: isAdmin,
+    },
+    {
+      text: 'Đặt lịch',
       icon: <ReceiptIcon />,
       path: '/bookings',
       show: true,
-      type: 'single',
     },
     {
-      text: 'Tài chính & Ví',
+      text: 'Quản lý Ví',
       icon: <WalletIcon />,
+      path: '/admin',
       show: isAdmin,
-      type: 'submenu',
-      stateKey: 'financial',
-      subItems: [
-        { text: 'Quản lý ví thợ', icon: <WalletIcon />, path: '/admin/wallet' },
-        { text: 'Lịch sử giao dịch', icon: <PaymentIcon />, path: '/admin/transactions' },
-        { text: 'Báo cáo doanh thu', icon: <AssessmentIcon />, path: '/admin/revenue' },
-      ],
+      onClick: () => {
+        navigate('/admin');
+        // Trigger wallet tab - có thể emit event hoặc dùng query param
+      },
     },
     {
-      text: 'Marketing & Thông báo',
+      text: 'Banner & Thông báo',
       icon: <CampaignIcon />,
+      path: '/banners',
       show: isAdmin,
-      type: 'submenu',
-      stateKey: 'marketing',
-      subItems: [
-        { text: 'Quản lý Banner', icon: <ViewCarouselIcon />, path: '/banners' },
-        { text: 'Gửi thông báo', icon: <NotificationsIcon />, path: '/admin/notifications' },
-      ],
     },
   ];
 
@@ -300,38 +268,13 @@ export default function AdminLayout({ user, onLogout }) {
           {menuItems.map((item) => {
             if (!item.show) return null;
 
-            // Get the correct open state for this submenu
-            const getSubmenuOpenState = () => {
-              switch(item.stateKey) {
-                case 'users': return usersMenuOpen;
-                case 'services': return servicesMenuOpen;
-                case 'financial': return financialMenuOpen;
-                case 'marketing': return marketingMenuOpen;
-                default: return false;
-              }
-            };
-
-            // Get the correct toggle handler for this submenu
-            const getSubmenuToggleHandler = () => {
-              switch(item.stateKey) {
-                case 'users': return handleUsersMenuToggle;
-                case 'services': return handleServicesMenuToggle;
-                case 'financial': return handleFinancialMenuToggle;
-                case 'marketing': return handleMarketingMenuToggle;
-                default: return () => {};
-              }
-            };
-
             // Item with submenu
-            if (item.type === 'submenu' && item.subItems) {
-              const isSubmenuOpen = getSubmenuOpenState();
-              const toggleHandler = getSubmenuToggleHandler();
-
+            if (item.subItems) {
               return (
                 <React.Fragment key={item.text}>
                   <ListItem disablePadding sx={{ mb: 0.5 }}>
                     <ListItemButton
-                      onClick={toggleHandler}
+                      onClick={handleUsersMenuToggle}
                       sx={{
                         borderRadius: 2,
                         justifyContent: open ? 'initial' : 'center',
@@ -353,17 +296,14 @@ export default function AdminLayout({ user, onLogout }) {
                       </ListItemIcon>
                       {open && (
                         <>
-                          <ListItemText 
-                            primary={item.text}
-                            sx={{ '& .MuiListItemText-primary': { fontSize: '0.9rem', fontWeight: 500 } }}
-                          />
-                          {isSubmenuOpen ? <ExpandLess /> : <ExpandMore />}
+                          <ListItemText primary={item.text} />
+                          {usersMenuOpen ? <ExpandLess /> : <ExpandMore />}
                         </>
                       )}
                     </ListItemButton>
                   </ListItem>
                   {open && (
-                    <Collapse in={isSubmenuOpen} timeout="auto" unmountOnExit>
+                    <Collapse in={usersMenuOpen} timeout="auto" unmountOnExit>
                       <List component="div" disablePadding>
                         {item.subItems.map((subItem) => (
                           <ListItemButton
@@ -375,7 +315,6 @@ export default function AdminLayout({ user, onLogout }) {
                               py: 1,
                               borderRadius: 2,
                               mx: 1,
-                              mb: 0.5,
                               '&.Mui-selected': {
                                 backgroundColor: 'rgba(99, 102, 241, 0.2)',
                                 '&:hover': {
