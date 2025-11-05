@@ -607,7 +607,7 @@ exports.cancelBooking = async (req, res) => {
     booking.note = (booking.note || '') + '\n[Cancelled by customer]';
     await booking.save();
 
-    // Emit realtime event
+    // Emit realtime event and send push notification
     try {
       const io = req.app.get('io');
       if (io) {
@@ -616,16 +616,35 @@ exports.cancelBooking = async (req, res) => {
           .populate({ path: 'worker', select: 'name phone' })
           .populate({ path: 'service', select: 'name basePrice' });
 
-        // Notify worker
+        // Notify worker via Socket.IO
         if (booking.worker) {
           io.to(`worker_${booking.worker}`).emit('booking_cancelled', populatedBooking);
+          
+          // Send push notification to worker
+          const notificationService = new NotificationService(io);
+          await notificationService.sendNotificationToUser(
+            booking.worker,
+            {
+              type: 'booking_cancelled',
+              title: 'Đơn hàng đã bị hủy',
+              message: `Khách hàng ${populatedBooking.customer.name} đã hủy đơn ${populatedBooking.service.name}`,
+              data: {
+                bookingId: booking._id.toString(),
+                customerName: populatedBooking.customer.name,
+                serviceName: populatedBooking.service.name,
+                cancelledAt: new Date().toISOString()
+              },
+              priority: 'high'
+            }
+          );
+          console.log(`[CANCEL] Push notification sent to worker ${booking.worker}`);
         }
         
         // Broadcast to all connected clients
         io.emit('booking_updated', populatedBooking);
       }
     } catch (ioErr) {
-      console.error('Socket emission error:', ioErr);
+      console.error('Socket/notification error:', ioErr);
     }
 
     res.json({ 
@@ -807,7 +826,7 @@ exports.cancelBooking = async (req, res) => {
     booking.status = 'cancelled';
     await booking.save();
 
-    // Emit realtime notification to worker that booking was cancelled
+    // Emit realtime notification and send push notification to worker
     try {
       const io = req.app.get('io');
       if (io && booking.worker) {
@@ -818,6 +837,25 @@ exports.cancelBooking = async (req, res) => {
           message: `Booking for ${booking.service.name} has been cancelled by customer`
         });
         
+        // Send push notification to worker
+        const notificationService = new NotificationService(io);
+        await notificationService.sendNotificationToUser(
+          booking.worker._id,
+          {
+            type: 'booking_cancelled',
+            title: 'Đơn hàng đã bị hủy',
+            message: `Khách hàng ${booking.customer.name} đã hủy đơn ${booking.service.name}`,
+            data: {
+              bookingId: booking._id.toString(),
+              customerName: booking.customer.name,
+              serviceName: booking.service.name,
+              cancelledAt: new Date().toISOString()
+            },
+            priority: 'high'
+          }
+        );
+        console.log(`[CANCEL] Push notification sent to worker ${booking.worker._id}`);
+        
         // Emit to all for availability updates
         io.emit('bookingAvailabilityUpdate', { 
           serviceId: booking.service._id, 
@@ -826,7 +864,7 @@ exports.cancelBooking = async (req, res) => {
         });
       }
     } catch (e) {
-      console.error('Socket emit error on cancel', e.message);
+      console.error('Socket/notification error on cancel:', e.message);
     }
 
     res.json({

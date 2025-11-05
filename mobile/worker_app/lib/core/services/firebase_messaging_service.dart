@@ -163,6 +163,9 @@ class FirebaseMessagingService {
       case 'order_update':
         _handleOrderUpdateNotification(message);
         break;
+      case 'booking_cancelled':
+        _handleBookingCancelledNotification(message);
+        break;
       case 'system_announcement':
         _handleSystemNotification(message);
         break;
@@ -200,6 +203,26 @@ class FirebaseMessagingService {
     );
   }
 
+  void _handleBookingCancelledNotification(RemoteMessage message) {
+    debugPrint('❌ Booking cancelled notification received');
+
+    // Show local notification for cancelled booking
+    NotificationService().showNotification(
+      title: message.notification?.title ?? 'Đơn hàng bị hủy',
+      body: message.notification?.body ?? 'Khách hàng đã hủy đơn hàng',
+      payload: message.data.toString(),
+      type: NotificationType.error,
+    );
+
+    // Trigger app-wide state updates so booking lists refresh immediately
+    try {
+      BookingEventBus().emitGlobalRefresh();
+      debugPrint('🔄 Triggered global refresh for cancelled booking');
+    } catch (e) {
+      debugPrint('⚠️ Error triggering global refresh: $e');
+    }
+  }
+
   void _handleSystemNotification(RemoteMessage message) {
     debugPrint('📢 System notification received');
 
@@ -228,6 +251,7 @@ class FirebaseMessagingService {
 
     final messageType = message.data['type'];
     final orderId = message.data['orderId'];
+    final bookingId = message.data['bookingId'];
 
     switch (messageType) {
       case 'new_order':
@@ -236,6 +260,14 @@ class FirebaseMessagingService {
           // Navigate to specific order details
           debugPrint('🔀 Navigating to order: $orderId');
           // TODO: Implement navigation to order details page
+        }
+        break;
+      case 'booking_cancelled':
+        if (bookingId != null) {
+          // Navigate to bookings screen to see updated list
+          debugPrint('🔀 Navigating to bookings list (cancelled: $bookingId)');
+          // Trigger refresh of booking list
+          BookingEventBus().emitGlobalRefresh();
         }
         break;
       default:
