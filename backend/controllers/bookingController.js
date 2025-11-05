@@ -177,8 +177,8 @@ exports.getBookings = async (req, res) => {
     if (req.query && req.query.status) {
       filter.status = req.query.status;
     }
-    // if worker role, show only their bookings; admin sees all
-    if (req.user && req.user.role === 'worker') {
+    // if worker or driver role, show only their bookings; admin sees all
+    if (req.user && (req.user.role === 'worker' || req.user.role === 'driver')) {
       filter.worker = req.user.id;
     }
     const bookings = await Booking.find(filter)
