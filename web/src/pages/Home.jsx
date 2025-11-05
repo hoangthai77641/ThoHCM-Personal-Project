@@ -53,7 +53,13 @@ export default function Home(){
     setLoading(true)
     const url = searchQuery ? `/api/services?search=${encodeURIComponent(searchQuery)}` : '/api/services'
     api.get(url)
-      .then(r=>setServices(r.data))
+      .then(r => {
+        // Filter out transport services - they have their own dedicated page
+        const servicesWithoutTransport = r.data.filter(service => 
+          service.category !== 'Dịch Vụ Vận Chuyển'
+        )
+        setServices(servicesWithoutTransport)
+      })
       .catch(e=>console.error(e))
       .finally(()=>setLoading(false))
   }
