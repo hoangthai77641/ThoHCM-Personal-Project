@@ -35,7 +35,16 @@ export default function Login(){
       } catch (e) {
         // ignore
       }
-      navigate('/')
+      
+      // Redirect based on user role
+      const userRole = res.data.user?.role
+      if (userRole === 'admin') {
+        navigate('/admin')
+      } else if (userRole === 'worker') {
+        navigate('/profile')
+      } else {
+        navigate('/')
+      }
     }catch(err){
       setError(err.response?.data?.message || err.message)
     } finally {
