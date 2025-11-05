@@ -7,7 +7,7 @@ const WorkerSchedule = require('../models/WorkerSchedule');
 const Review = require('../models/Review');
 const fs = require('fs');
 const path = require('path');
-const { getSMSService } = require('../services/smsService');
+const { getSMSService } = require('../services/SMSService');
 
 // Đăng ký
 exports.register = async (req, res) => {
