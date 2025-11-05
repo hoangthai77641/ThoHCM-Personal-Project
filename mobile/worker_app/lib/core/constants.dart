@@ -3,7 +3,7 @@ import 'env.dart';
 /// Shared constants between web and mobile applications
 class AppConstants {
   // Brand
-  static const String appName = 'Điện lạnh Quy';
+  static const String appName = 'Thợ HCM';
   static const String appNameWorker = '$appName - Worker';
   static const String appNameCustomer = '$appName - Customer';
 

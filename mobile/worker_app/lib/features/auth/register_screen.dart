@@ -32,7 +32,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Điện lạnh Quy - Đăng ký')),
+      appBar: AppBar(title: const Text('Thợ HCM - Đăng ký')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -81,8 +81,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               TextFormField(
                 controller: _confirmPassword,
                 decoration: const InputDecoration(
-                  labelText: 'Xác nhận mật khẩu',
-                  helperText: 'Nhập lại mật khẩu',
+                  labelText: 'Nhập lại mật khẩu',
+
                 ),
                 obscureText: true,
                 validator: (v) {

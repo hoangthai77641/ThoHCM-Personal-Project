@@ -1,0 +1,225 @@
+==========================================================================
+         HƯỚNG DẪN CHUẨN HÓA NGÔN NGỮ THÔNG BÁO - THỢ HCM
+==========================================================================
+
+📊 TÌNH TRẠNG HIỆN TẠI:
+-----------------------
+❌ HỆ THỐNG CHƯA THỐNG NHẤT - LẪN LỘN TIẾNG ANH & TIẾNG VIỆT
+
+Chi tiết phát hiện:
+
+1. userController.js
+   - Tiếng Anh: 35 messages (57%)
+     + 'Name is required', 'Phone is required'
+     + 'User not found', 'Wrong password'
+     + 'Register success', 'Updated'
+   - Tiếng Việt: 26 messages (43%)
+     + 'Số điện thoại là bắt buộc'
+     + 'Tài khoản chưa được kích hoạt'
+
+2. bookingController.js
+   - Tiếng Anh: 12 messages (60%)
+     + 'Address is required', 'Service not found'
+     + 'Booking not found', 'Invalid status value'
+   - Tiếng Việt: 8 messages (40%)
+     + 'Không thể đặt lịch trong quá khứ'
+     + 'Thời gian này đã được đặt'
+
+3. serviceController.js
+   - Tiếng Anh: 6 messages (86%)
+   - Tiếng Việt: 1 message (14%)
+
+4. bannerController.js
+   - Tiếng Anh: 8 messages (100%)
+   - Tiếng Việt: 0 messages (0%)
+
+5. workerScheduleController.js
+   - Tiếng Anh: 2 messages (20%)
+   - Tiếng Việt: 8 messages (80%)
+
+6. walletController.js
+   - Tiếng Anh: 8 messages (35%)
+   - Tiếng Việt: 15 messages (65%)
+
+==========================================================================
+🎯 GIẢI PHÁP ĐÃ CHUẨN BỊ:
+==========================================================================
+
+1. ✅ Đã tạo: backend/constants/messages.js
+   - Tất cả messages chuẩn tiếng Việt
+   - Phân loại theo module (USER, BOOKING, SERVICE, etc.)
+   - Dễ maintain và mở rộng
+
+2. ✅ Đã tạo: backend/scripts/standardize-messages.js
+   - Script tự động chuyển đổi
+   - Thay thế tất cả messages tiếng Anh
+   - Thêm import MSG vào các controller
+
+==========================================================================
+📝 HƯỚNG DẪN ÁP DỤNG:
+==========================================================================
+
+OPTION 1: TỰ ĐỘNG (KHUYẾN NGHỊ)
+--------------------------------
+
+Bước 1: Backup project (quan trọng!)
+```bash
+git add .
+git commit -m "Backup before language standardization"
+```
+
+Bước 2: Chạy script tự động
+```bash
+cd backend
+node scripts/standardize-messages.js
+```
+
+Bước 3: Review changes
+```bash
+git diff
+```
+
+Bước 4: Test lại toàn bộ API
+```bash
+npm test
+# hoặc test thủ công các endpoint chính
+```
+
+Bước 5: Commit changes
+```bash
+git add .
+git commit -m "Standardize all messages to Vietnamese"
+```
+
+
+OPTION 2: THỦ CÔNG (AN TOÀN HƠN)
+---------------------------------
+
+Bước 1: Import MSG constants
+```javascript
+const MSG = require('../constants/messages');
+```
+
+Bước 2: Thay thế từng message
+TRƯỚC:
+```javascript
+return res.status(400).json({ message: 'Name is required' });
+```
+
+SAU:
+```javascript
+return res.status(400).json({ message: MSG.USER.NAME_REQUIRED });
+```
+
+Bước 3: Test từng controller một
+
+
+==========================================================================
+📋 DANH SÁCH CẦN THAY ĐỔI:
+==========================================================================
+
+PRIORITY 1 - USER CONTROLLER (QUAN TRỌNG NHẤT):
+-----------------------------------------------
+❌ 'Name is required' → ✅ MSG.USER.NAME_REQUIRED
+❌ 'Phone is required' → ✅ MSG.USER.PHONE_REQUIRED
+❌ 'Password must be at least 8 characters' → ✅ MSG.USER.PASSWORD_MIN_LENGTH
+❌ 'User not found' → ✅ MSG.USER.USER_NOT_FOUND
+❌ 'Wrong password' → ✅ MSG.USER.WRONG_PASSWORD
+❌ 'Register success' → ✅ MSG.USER.REGISTER_SUCCESS
+❌ 'Not allowed' → ✅ MSG.USER.NOT_ALLOWED
+❌ 'Invalid status' → ✅ MSG.USER.INVALID_STATUS
+❌ 'Updated' → ✅ MSG.COMMON.UPDATED
+❌ 'Unauthorized' → ✅ MSG.USER.UNAUTHORIZED
+❌ 'Worker/Driver not found' → ✅ MSG.USER.WORKER_NOT_FOUND
+
+PRIORITY 2 - BOOKING CONTROLLER:
+---------------------------------
+❌ 'Address is required' → ✅ MSG.BOOKING.ADDRESS_REQUIRED
+❌ 'Service not found' → ✅ MSG.BOOKING.SERVICE_NOT_FOUND
+❌ 'Customer not found' → ✅ MSG.BOOKING.CUSTOMER_NOT_FOUND
+❌ 'Booking not found' → ✅ MSG.BOOKING.BOOKING_NOT_FOUND
+❌ 'Invalid status value' → ✅ MSG.BOOKING.INVALID_STATUS
+❌ 'Cannot complete booking that is not confirmed' → ✅ MSG.BOOKING.CANNOT_COMPLETE_NOT_CONFIRMED
+
+PRIORITY 3 - SERVICE CONTROLLER:
+---------------------------------
+❌ 'Not found' → ✅ MSG.SERVICE.SERVICE_NOT_FOUND
+❌ 'Deleted' → ✅ MSG.SERVICE.SERVICE_DELETED
+❌ 'Authentication required' → ✅ MSG.SERVICE.AUTHENTICATION_REQUIRED
+
+PRIORITY 4 - BANNER CONTROLLER:
+--------------------------------
+❌ 'Banner image is required' → ✅ MSG.BANNER.IMAGE_REQUIRED
+❌ 'Banner not found' → ✅ MSG.BANNER.BANNER_NOT_FOUND
+❌ 'Banner deleted successfully' → ✅ MSG.BANNER.BANNER_DELETED
+❌ 'View count incremented' → ✅ MSG.BANNER.VIEW_COUNT_UPDATED
+
+
+==========================================================================
+✅ LỢI ÍCH SAU KHI CHUẨN HÓA:
+==========================================================================
+
+1. 🇻🇳 Thống nhất 100% tiếng Việt
+2. 📱 User experience tốt hơn (người Việt dễ hiểu)
+3. 🔧 Dễ maintain (tất cả messages ở 1 file)
+4. 🚀 Dễ mở rộng (thêm message mới vào constants)
+5. 🌐 Dễ đa ngôn ngữ sau này (thêm messages_en.js)
+6. 🎯 Professional hơn
+7. ⚡ Không cần sửa logic, chỉ đổi text
+
+
+==========================================================================
+⚠️  LƯU Ý:
+==========================================================================
+
+1. BACKUP trước khi chạy script!
+2. Review kỹ git diff
+3. Test lại tất cả API endpoints
+4. Kiểm tra mobile app (Flutter) có cần update không
+5. Kiểm tra web frontend có hardcode message không
+
+
+==========================================================================
+🧪 TEST CHECKLIST:
+==========================================================================
+
+□ Đăng ký (register)
+□ Đăng nhập (login)
+□ Quên mật khẩu (forgot password)
+□ Tạo booking
+□ Cập nhật booking
+□ Hủy booking
+□ Tạo dịch vụ
+□ Upload banner
+□ Thông báo lỗi hiển thị đúng tiếng Việt
+□ Mobile app nhận message đúng
+
+
+==========================================================================
+📞 HỖ TRỢ:
+==========================================================================
+
+Nếu gặp vấn đề:
+1. Check git diff để xem thay đổi gì
+2. Revert: git checkout .
+3. Chạy lại từng bước một
+4. Test từng controller riêng lẻ
+
+
+==========================================================================
+🎉 KẾT LUẬN:
+==========================================================================
+
+Sau khi áp dụng, TẤT CẢ thông báo sẽ là tiếng Việt thống nhất!
+
+Ví dụ TRƯỚC:
+- "User not found" (❌)
+- "Số điện thoại không tồn tại" (✅)
+→ Không thống nhất!
+
+Ví dụ SAU:
+- "Không tìm thấy người dùng" (✅)
+- "Số điện thoại không tồn tại" (✅)
+→ Thống nhất 100%!
+
+==========================================================================

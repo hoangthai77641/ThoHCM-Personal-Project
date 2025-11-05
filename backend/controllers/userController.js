@@ -7,6 +7,7 @@ const WorkerSchedule = require('../models/WorkerSchedule');
 const Review = require('../models/Review');
 const fs = require('fs');
 const path = require('path');
+const { getSMSService } = require('../services/smsService');
 
 // Đăng ký
 exports.register = async (req, res) => {
@@ -716,12 +717,14 @@ exports.forgotPassword = async (req, res) => {
       return res.status(404).json({ message: 'Số điện thoại không tồn tại' });
     }
 
-    // Generate OTP - use test OTP in development or for specific test phones
+    // Get SMS Service instance
+    const smsService = getSMSService();
+    
+    // Generate OTP - use test OTP in development or for test phones
     let otp;
     const isTestEnvironment = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
-    const testPhones = ['0123456789', '0987654321', '0999999999']; // Test phone numbers
     
-    if (isTestEnvironment || testPhones.includes(phone)) {
+    if (isTestEnvironment || smsService.isTestPhone(phone)) {
       // Use fixed OTP for testing
       otp = '123456';
     } else {
@@ -736,16 +739,24 @@ exports.forgotPassword = async (req, res) => {
     user.resetOTPExpiry = otpExpiry;
     await user.save();
 
-    // In production, you would send SMS here
-    // For development, we'll return the OTP in response
-    console.log(`OTP for ${phone}: ${otp}`);
+    // Send OTP via SMS
+    const smsResult = await smsService.sendOTP(phone, otp);
+    
+    if (!smsResult.success) {
+      console.error('[Forgot Password] Failed to send SMS:', smsResult.error);
+      // Still return success to user (OTP saved in DB)
+      // Admin can check logs for SMS failures
+    } else {
+      console.log(`[Forgot Password] OTP sent successfully to ${phone} via ${smsResult.provider}`);
+    }
     
     res.json({ 
-      message: 'Mã OTP đã được send đến số điện thoại của bạn',
-      // Remove this in production
-      otp: process.env.NODE_ENV === 'development' ? otp : undefined
+      message: 'Mã OTP đã được gửi đến số điện thoại của bạn',
+      // Return OTP only in mock mode for testing
+      otp: smsResult.provider === 'mock' ? otp : undefined
     });
   } catch (error) {
+    console.error('[Forgot Password] Error:', error);
     res.status(500).json({ error: error.message });
   }
 };
