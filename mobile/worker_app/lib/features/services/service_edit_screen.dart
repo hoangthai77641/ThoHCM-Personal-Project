@@ -27,6 +27,7 @@ class _ServiceEditScreenState extends State<ServiceEditScreen> {
   final _lengthController = TextEditingController();
   final _widthController = TextEditingController();
   final _heightController = TextEditingController();
+  final _pricePerKmController = TextEditingController();
   
   final _repo = ServicesRepository();
 
@@ -73,12 +74,16 @@ class _ServiceEditScreenState extends State<ServiceEditScreen> {
       final vehicleSpecs = service['vehicleSpecs'];
       if (vehicleSpecs != null) {
         _loadCapacityController.text = vehicleSpecs['loadCapacity']?.toString() ?? '';
+        _pricePerKmController.text = vehicleSpecs['pricePerKm']?.toString() ?? '5000';
         final dimensions = vehicleSpecs['truckBedDimensions'];
         if (dimensions != null) {
           _lengthController.text = dimensions['length']?.toString() ?? '';
           _widthController.text = dimensions['width']?.toString() ?? '';
           _heightController.text = dimensions['height']?.toString() ?? '';
         }
+      } else if (_selectedCategory == 'Dịch Vụ Vận Chuyển') {
+        // Set default price per km for new transport services
+        _pricePerKmController.text = '5000';
       }
 
       _existingImages = List<String>.from(service['images'] ?? []);
@@ -89,6 +94,8 @@ class _ServiceEditScreenState extends State<ServiceEditScreen> {
         setState(() {
           _selectedCategory = 'Dịch Vụ Vận Chuyển';
         });
+        // Set default price per km
+        _pricePerKmController.text = '5000';
       }
     }
   }
@@ -103,6 +110,7 @@ class _ServiceEditScreenState extends State<ServiceEditScreen> {
     _lengthController.dispose();
     _widthController.dispose();
     _heightController.dispose();
+    _pricePerKmController.dispose();
     super.dispose();
   }
 
@@ -155,6 +163,7 @@ class _ServiceEditScreenState extends State<ServiceEditScreen> {
               'width': double.tryParse(_widthController.text),
               'height': double.tryParse(_heightController.text),
             },
+            'pricePerKm': double.tryParse(_pricePerKmController.text) ?? 5000,
           };
         }
       }
@@ -344,7 +353,7 @@ class _ServiceEditScreenState extends State<ServiceEditScreen> {
             const SizedBox(height: 16),
             
             // Vehicle Specs Card (only for transportation)
-            if (_selectedCategory == 'Dịch Vụ Vận Chuyển') ..[
+            if (_selectedCategory == 'Dịch Vụ Vận Chuyển') ...[
               Card(
                 color: Colors.blue[50],
                 child: Padding(
@@ -461,6 +470,32 @@ class _ServiceEditScreenState extends State<ServiceEditScreen> {
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 16),
+                      
+                      // Price per km
+                      TextFormField(
+                        controller: _pricePerKmController,
+                        decoration: const InputDecoration(
+                          labelText: 'Giá tiền trên mỗi km (VNĐ/km) *',
+                          hintText: '5000',
+                          prefixIcon: Icon(Icons.attach_money),
+                          border: OutlineInputBorder(),
+                          helperText: 'Khách hàng sẽ được tính phí dựa trên khoảng cách',
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        validator: (value) {
+                          if (_selectedCategory == 'Dịch Vụ Vận Chuyển') {
+                            if (value == null || value.isEmpty) {
+                              return 'Giá tiền trên km là bắt buộc';
+                            }
+                            final price = double.tryParse(value);
+                            if (price == null || price <= 0) {
+                              return 'Giá phải là số dương';
+                            }
+                          }
+                          return null;
+                        },
                       ),
                     ],
                   ),

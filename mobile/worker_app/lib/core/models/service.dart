@@ -29,10 +29,12 @@ class TruckBedDimensions {
 class VehicleSpecs {
   final double loadCapacity;
   final TruckBedDimensions truckBedDimensions;
+  final double pricePerKm; // Giá tiền trên mỗi km (VND/km)
 
   VehicleSpecs({
     required this.loadCapacity,
     required this.truckBedDimensions,
+    this.pricePerKm = 5000, // Giá mặc định 5000 VND/km
   });
 
   factory VehicleSpecs.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,9 @@ class VehicleSpecs {
       truckBedDimensions: TruckBedDimensions.fromJson(
         json['truckBedDimensions'] as Map<String, dynamic>,
       ),
+      pricePerKm: json['pricePerKm'] != null 
+          ? (json['pricePerKm'] as num).toDouble() 
+          : 5000,
     );
   }
 
@@ -48,6 +53,7 @@ class VehicleSpecs {
     return {
       'loadCapacity': loadCapacity,
       'truckBedDimensions': truckBedDimensions.toJson(),
+      'pricePerKm': pricePerKm,
     };
   }
 }

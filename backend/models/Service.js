@@ -32,7 +32,8 @@ const serviceSchema = new mongoose.Schema({
       length: { type: Number }, // Chiều dài thùng xe (m)
       width: { type: Number },  // Chiều rộng thùng xe (m)
       height: { type: Number }  // Chiều cao thùng xe (m)
-    }
+    },
+    pricePerKm: { type: Number, default: 5000 } // Giá tiền trên mỗi km (VND/km)
   }
 }, { timestamps: true });
 
