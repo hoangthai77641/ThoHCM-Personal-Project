@@ -4,6 +4,7 @@ const User = require('../models/User');
 const { assignOptimalWorker, getWorkerAvailability } = require('../utils/workerAssignment');
 const { deductPlatformFee } = require('./walletController');
 const NotificationService = require('../services/NotificationService');
+const MSG = require('../constants/messages');
 
 exports.createBooking = async (req, res) => {
   try {
@@ -18,11 +19,11 @@ exports.createBooking = async (req, res) => {
     }
   // Expect service to be ObjectId; calculate finalPrice with enhanced worker assignment
   const { service: serviceId, customer, worker: requestedWorker, date, address, note } = req.body;
-  if (!address || !address.trim()) return res.status(400).json({ message: 'Address is required' });
+  if (!address || !address.trim()) return res.status(400).json({ message: MSG.BOOKING.ADDRESS_REQUIRED });
   const service = await Service.findById(serviceId);
-  if (!service) return res.status(400).json({ message: 'Service not found' });
+  if (!service) return res.status(400).json({ message: MSG.BOOKING.SERVICE_NOT_FOUND });
   const cust = await User.findById(req.body.customer);
-  if (!cust) return res.status(400).json({ message: 'Customer not found' });
+  if (!cust) return res.status(400).json({ message: MSG.BOOKING.CUSTOMER_NOT_FOUND });
 
   // Enhanced worker assignment logic
   let finalWorker = requestedWorker;
@@ -57,13 +58,13 @@ exports.createBooking = async (req, res) => {
   
   // Check if booking is in the past (with 5 minutes buffer for timezone issues)
   if (bookingDate.getTime() < now.getTime() - 5 * 60 * 1000) {
-    return res.status(400).json({ message: 'Không thể đặt lịch trong quá khứ. Vui lòng chọn thời gian trong tương lai.' });
+    return res.status(400).json({ message: MSG.BOOKING.CANNOT_BOOK_PAST });
   }
   
   // Check if booking is too far in the future (e.g., 90 days)
   const maxFutureDate = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
   if (bookingDate.getTime() > maxFutureDate.getTime()) {
-    return res.status(400).json({ message: 'Không thể đặt lịch quá xa trong tương lai. Tối đa 90 ngày.' });
+    return res.status(400).json({ message: MSG.BOOKING.CANNOT_BOOK_TOO_FAR });
   }
   
   // Final conflict check for the assigned worker
@@ -79,7 +80,7 @@ exports.createBooking = async (req, res) => {
   
   if (existingBooking) {
     return res.status(409).json({ 
-      message: 'Thời gian này đã được đặt hoặc quá gần với lịch hẹn khác. Vui lòng chọn thời gian cách xa ít nhất 30 phút.',
+      message: MSG.BOOKING.TIME_CONFLICT,
       conflictDate: existingBooking.date,
       suggestedTimes: [
         new Date(endBuffer.getTime() + 15 * 60 * 1000), // 15 mins after end buffer
@@ -195,7 +196,7 @@ exports.getBookings = async (req, res) => {
 // customers: get their own bookings
 exports.getMyBookings = async (req, res) => {
   try {
-    if (!req.user || !req.user.id) return res.status(401).json({ message: 'Unauthorized' })
+    if (!req.user || !req.user.id) return res.status(401).json({ message: MSG.BOOKING.UNAUTHORIZED })
     const bookings = await Booking.find({ customer: req.user.id })
       .populate({ path: 'customer', select: 'name phone address' })
       .populate({ path: 'worker', select: 'name phone' })
@@ -213,11 +214,11 @@ exports.updateBookingStatus = async (req, res) => {
     const { id } = req.params
     const { status, estimatedCompletionTime } = req.body
     const booking = await Booking.findById(id)
-    if (!booking) return res.status(404).json({ message: 'Booking not found' })
+    if (!booking) return res.status(404).json({ message: MSG.BOOKING.BOOKING_NOT_FOUND })
 
     const allowedStatuses = ['pending', 'confirmed', 'done', 'cancelled']
     if (!allowedStatuses.includes(status)) {
-      return res.status(400).json({ message: 'Invalid status value' })
+      return res.status(400).json({ message: MSG.BOOKING.INVALID_STATUS })
     }
 
     const previousStatus = booking.status
@@ -229,7 +230,7 @@ exports.updateBookingStatus = async (req, res) => {
 
     // Only allow move to done status nếu currently in confirmed status
     if (status === 'done' && previousStatus !== 'confirmed') {
-      return res.status(400).json({ message: 'Cannot complete booking that is not confirmed' })
+      return res.status(400).json({ message: MSG.BOOKING.CANNOT_COMPLETE_UNCONFIRMED })
     }
 
     booking.status = status
@@ -399,7 +400,7 @@ exports.updateBookingStatus = async (req, res) => {
     res.json(populated)
   } catch (err) {
     console.error('updateBookingStatus error', err)
-    res.status(400).json({ message: err.message || 'Failed to update booking status' })
+    res.status(400).json({ message: err.message || MSG.COMMON.INTERNAL_ERROR })
   }
 }
 
@@ -414,7 +415,7 @@ exports.getWorkerStats = async (req, res) => {
     if (req.user && req.user.role === 'admin' && req.query.workerId) {
       workerId = req.query.workerId;
     }
-    if (!workerId) return res.status(400).json({ message: 'workerId required' });
+    if (!workerId) return res.status(400).json({ message: MSG.BOOKING.WORKER_ID_REQUIRED });
 
     // Time range filter
     const range = req.query.range || 'today';
@@ -581,13 +582,13 @@ exports.cancelBooking = async (req, res) => {
     });
 
     if (!booking) {
-      return res.status(404).json({ message: 'Booking not found or not authorized' });
+      return res.status(404).json({ message: MSG.BOOKING.BOOKING_NOT_AUTHORIZED });
     }
 
     // Only allow cancellation if booking is pending or confirmed
     if (!['pending', 'confirmed'].includes(booking.status)) {
       return res.status(400).json({ 
-        message: 'Cannot cancel booking with current status: ' + booking.status 
+        message: MSG.BOOKING.CANNOT_CANCEL_STATUS + ': ' + booking.status 
       });
     }
 
@@ -598,7 +599,7 @@ exports.cancelBooking = async (req, res) => {
 
     if (hoursDifference < 24) {
       return res.status(400).json({ 
-        message: 'Cannot cancel booking less than 24 hours before scheduled time' 
+        message: MSG.BOOKING.CANNOT_CANCEL_WITHIN_24H 
       });
     }
 
@@ -648,7 +649,7 @@ exports.cancelBooking = async (req, res) => {
     }
 
     res.json({ 
-      message: 'Booking cancelled successfully',
+      message: MSG.BOOKING.BOOKING_CANCELLED_SUCCESS,
       booking: booking
     });
 
@@ -664,13 +665,13 @@ exports.getAvailableWorkers = async (req, res) => {
     
     if (!serviceId || !date) {
       return res.status(400).json({ 
-        message: 'serviceId và date là bắt buộc' 
+        message: MSG.BOOKING.SERVICE_DATE_REQUIRED 
       });
     }
 
     const service = await Service.findById(serviceId);
     if (!service) {
-      return res.status(404).json({ message: 'Dịch vụ không tồn tại' });
+      return res.status(404).json({ message: MSG.BOOKING.SERVICE_NOT_EXISTS });
     }
 
     // Get all active workers
@@ -806,18 +807,18 @@ exports.cancelBooking = async (req, res) => {
       .populate({ path: 'service', select: 'name' });
     
     if (!booking) {
-      return res.status(404).json({ message: 'Booking not found' });
+      return res.status(404).json({ message: MSG.BOOKING.BOOKING_NOT_FOUND });
     }
 
     // Check if user is the customer who made this booking
     if (booking.customer._id.toString() !== req.user.id) {
-      return res.status(403).json({ message: 'You can only cancel your own bookings' });
+      return res.status(403).json({ message: MSG.BOOKING.ONLY_CANCEL_OWN });
     }
 
     // Check if booking can still be cancelled (only pending status)
     if (booking.status !== 'pending') {
       return res.status(400).json({ 
-        message: 'Cannot cancel booking. Worker has already accepted this booking.',
+        message: MSG.BOOKING.WORKER_ALREADY_ACCEPTED,
         currentStatus: booking.status 
       });
     }
@@ -868,7 +869,7 @@ exports.cancelBooking = async (req, res) => {
     }
 
     res.json({
-      message: 'Booking cancelled successfully',
+      message: MSG.BOOKING.BOOKING_CANCELLED_SUCCESS,
       booking: booking
     });
 

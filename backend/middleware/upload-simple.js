@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const MSG = require('../constants/messages');
 
 // Ensure uploads directory exists - with better error handling for Cloud Run
 const uploadsDir = path.join(__dirname, '../storage');
@@ -105,15 +106,15 @@ const uploadAvatar = (req, res, next) => {
     if (err instanceof multer.MulterError) {
       console.error('Multer error:', err);
       if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({ message: 'File too large. Maximum size is 2MB.' });
+        return res.status(400).json({ message: MSG.MIDDLEWARE.FILE_TOO_LARGE });
       } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
-        return res.status(400).json({ message: 'Unexpected field. Use "avatar" as field name.' });
+        return res.status(400).json({ message: MSG.MIDDLEWARE.UNEXPECTED_FIELD });
       } else {
-        return res.status(400).json({ message: `Upload error: ${err.message}` });
+        return res.status(400).json({ message: MSG.MIDDLEWARE.UPLOAD_ERROR });
       }
     } else if (err) {
       console.error('Upload error:', err);
-      return res.status(400).json({ message: err.message });
+      return res.status(400).json({ message: MSG.MIDDLEWARE.UPLOAD_ERROR });
     }
     
     console.log('Upload successful:', req.file);

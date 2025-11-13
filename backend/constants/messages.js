@@ -60,13 +60,32 @@ const MESSAGES = {
 
   // BOOKING MESSAGES
   BOOKING: {
+    BOOKING_CREATED: 'Đã tạo đơn hàng',
+    BOOKING_UPDATED: 'Đã cập nhật đơn hàng',
+    BOOKING_CANCELLED: 'Đã hủy đơn hàng',
+    BOOKING_NOT_FOUND: 'Không tìm thấy đơn hàng',
+    STATUS_UPDATED: 'Đã cập nhật trạng thái',
+    CANNOT_CANCEL: 'Không thể hủy đơn hàng này',
     ADDRESS_REQUIRED: 'Địa chỉ là bắt buộc',
     SERVICE_NOT_FOUND: 'Không tìm thấy dịch vụ',
     CUSTOMER_NOT_FOUND: 'Không tìm thấy khách hàng',
-    BOOKING_NOT_FOUND: 'Không tìm thấy đơn hàng',
-    BOOKING_CREATED: 'Đặt lịch thành công',
-    BOOKING_UPDATED: 'Cập nhật đơn hàng thành công',
-    BOOKING_CANCELLED: 'Đã hủy đơn hàng thành công',
+    CANNOT_BOOK_PAST: 'Không thể đặt lịch trong quá khứ. Vui lòng chọn thời gian trong tương lai.',
+    CANNOT_BOOK_TOO_FAR: 'Không thể đặt lịch quá xa trong tương lai. Tối đa 90 ngày.',
+    TIME_CONFLICT: 'Thời gian này đã được đặt hoặc quá gần với lịch hẹn khác. Vui lòng chọn thời gian cách xa ít nhất 30 phút.',
+    UNAUTHORIZED: 'Không có quyền truy cập',
+    INVALID_STATUS: 'Trạng thái không hợp lệ',
+    CANNOT_COMPLETE_UNCONFIRMED: 'Không thể hoàn thành đơn hàng chưa được xác nhận',
+    WORKER_ID_REQUIRED: 'workerId là bắt buộc',
+    BOOKING_NOT_AUTHORIZED: 'Không tìm thấy đơn hàng hoặc không có quyền',
+    CANNOT_CANCEL_STATUS: 'Không thể hủy đơn hàng với trạng thái hiện tại',
+    CANNOT_CANCEL_WITHIN_24H: 'Không thể hủy đơn hàng trong vòng 24 giờ trước giờ hẹn',
+    BOOKING_CANCELLED_SUCCESS: 'Hủy đơn hàng thành công',
+    SERVICE_DATE_REQUIRED: 'serviceId và date là bắt buộc',
+    SERVICE_NOT_EXISTS: 'Dịch vụ không tồn tại',
+    WORKERS_AVAILABLE: 'Có {count} thợ khả dụng trong thời gian này',
+    NO_WORKERS_AVAILABLE: 'Không có thợ nào khả dụng trong thời gian này. Vui lòng chọn thời gian khác.',
+    ONLY_CANCEL_OWN: 'Bạn chỉ có thể hủy đơn hàng của mình',
+    WORKER_ALREADY_ACCEPTED: 'Không thể hủy đơn hàng. Thợ đã chấp nhận đơn hàng này.',
     BOOKING_CONFIRMED: 'Đã xác nhận đơn hàng',
     BOOKING_COMPLETED: 'Đơn hàng đã hoàn thành',
     
@@ -120,12 +139,28 @@ const MESSAGES = {
     CANNOT_DELETE_BOOKED: 'Không thể xóa khung giờ đã được đặt',
     SLOT_DELETED: 'Đã xóa khung giờ thành công',
     SLOT_CREATED: 'Đã tạo khung giờ thành công',
+    SCHEDULE_UPDATED_SUCCESS: 'Cập nhật lịch rãnh thành công',
+    SLOT_ADDED_SUCCESS: 'Thêm khung giờ rãnh thành công',
+    BOOKING_CREATED_SUCCESS: 'Đặt lịch thành công',
+    SCHEDULE_UPDATED_AFTER_JOB: 'Cập nhật lịch rãnh sau khi hoàn thành việc thành công',
     NO_CURRENT_JOB: 'Không tìm thấy công việc hiện tại',
+    NO_CURRENT_JOB_MESSAGE: 'Hiện tại không có công việc nào',
     JOB_STARTED: 'Đã bắt đầu công việc',
     JOB_COMPLETED: 'Đã hoàn thành công việc',
+    JOB_COMPLETED_SUCCESS: 'Hoàn thành việc thành công. Trạng thái đã chuyển về sẵn sàng',
     BOOKING_ID_MISMATCH: 'Booking ID không khớp với công việc hiện tại',
+    BOOKING_ID_ESTIMATED_TIME_REQUIRED: 'Booking ID và thời gian dự kiến hoàn thành là bắt buộc',
     ESTIMATED_TIME_REQUIRED: 'Thời gian dự kiến hoàn thành là bắt buộc',
+    ESTIMATED_TIME_UPDATED: 'Cập nhật thời gian dự kiến hoàn thành thành công',
     NEW_ESTIMATED_TIME_REQUIRED: 'Thời gian dự kiến hoàn thành mới là bắt buộc',
+    NEW_ESTIMATED_TIME_UPDATED: 'Cập nhật thời gian dự kiến thành công',
+    BOOKING_NOT_FOUND_OR_NOT_YOURS: 'Không tìm thấy đơn hàng hoặc đơn hàng không thuộc về bạn',
+    COMPLETED_BOOKING_NOT_FOUND: 'Không tìm thấy đơn hàng hoàn thành của bạn',
+    INVALID_AVAILABILITY_DATA: 'Thiếu thông tin ngày hoặc khung giờ khả dụng',
+    INVALID_EXTENSION_DATA: 'Booking ID và số giờ gia hạn (1-8 giờ) là bắt buộc',
+    BOOKING_NOT_FOUND: 'Không tìm thấy booking',
+    NOT_YOUR_BOOKING: 'Bạn không có quyền với booking này',
+    CANNOT_EXTEND_BOOKING: 'Chỉ có thể gia hạn booking đang được xác nhận hoặc đang thực hiện',
   },
 
   // WALLET MESSAGES
@@ -147,9 +182,25 @@ const MESSAGES = {
   NOTIFICATION: {
     NOTIFICATION_NOT_FOUND: 'Không tìm thấy thông báo',
     NOTIFICATION_SENT: 'Đã gửi thông báo',
+    NOTIFICATION_SENT_SUCCESS: 'Đã gửi thông báo thành công',
+    NOTIFICATION_SENT_TO_CUSTOMERS: 'Đã gửi thông báo đến khách hàng',
+    NOTIFICATION_SENT_TO_WORKERS: 'Đã gửi thông báo đến thợ',
     NOTIFICATION_READ: 'Đã đánh dấu đã đọc',
     TITLE_REQUIRED: 'Tiêu đề là bắt buộc',
     MESSAGE_REQUIRED: 'Nội dung thông báo là bắt buộc',
+    USER_ID_REQUIRED: 'ID người dùng là bắt buộc',
+    MISSING_REQUIRED_FIELDS: 'Thiếu thông tin bắt buộc: userId, title, message',
+    MISSING_TITLE_MESSAGE: 'Thiếu thông tin bắt buộc: title, message',
+    NO_CUSTOMERS_FOUND: 'Không tìm thấy khách hàng nào',
+    NO_WORKERS_FOUND: 'Không tìm thấy thợ nào',
+    
+    // Push notification titles (for consistency)
+    PUSH_NEW_ORDER: 'Đơn hàng mới!',
+    PUSH_ORDER_CANCELLED: 'Đơn hàng đã bị hủy',
+    PUSH_WORKER_FOUND: 'Đã tìm thấy thợ!',
+    PUSH_NEW_JOB: 'Có việc mới!',
+    PUSH_EMERGENCY: 'KHẨN CẤP',
+    PUSH_JOB_TIMEOUT: 'Hết thời gian nhận việc',
   },
 
   // OTP MESSAGES
@@ -192,6 +243,33 @@ const MESSAGES = {
     REVIEW_DELETED: 'Đã xóa đánh giá',
     RATING_REQUIRED: 'Đánh giá sao là bắt buộc',
     SERVICE_REQUIRED: 'Dịch vụ là bắt buộc',
+  },
+
+  // MIDDLEWARE MESSAGES
+  MIDDLEWARE: {
+    // Auth
+    NO_TOKEN: 'Không có token xác thực',
+    TOKEN_INVALID: 'Token không hợp lệ',
+    TOKEN_EXPIRED: 'Token đã hết hạn',
+    ACCESS_DENIED: 'Từ chối truy cập',
+    ADMIN_ONLY: 'Chỉ quản trị viên mới có quyền',
+    WORKER_ONLY: 'Chỉ thợ mới có quyền',
+    CUSTOMER_ONLY: 'Chỉ khách hàng mới có quyền',
+    
+    // Upload
+    FILE_TOO_LARGE: 'File quá lớn. Kích thước tối đa là 2MB.',
+    FILE_TOO_LARGE_5MB: 'File quá lớn. Kích thước tối đa là 5MB.',
+    UNEXPECTED_FIELD: 'Trường không mong đợi. Sử dụng "avatar" làm tên trường.',
+    UPLOAD_ERROR: 'Lỗi upload',
+    UPLOAD_FAILED: 'Upload thất bại',
+    CLOUD_STORAGE_FAILED: 'Không thể upload file lên cloud storage',
+    
+    // Ownership
+    BOOKING_NOT_FOUND: 'Không tìm thấy đơn hàng',
+    NOT_YOUR_BOOKING: 'Từ chối truy cập: không phải đơn hàng của bạn',
+    NOT_ASSIGNED_TO_YOU: 'Từ chối truy cập: đơn hàng không được giao cho bạn',
+    SERVICE_NOT_FOUND: 'Không tìm thấy dịch vụ',
+    NOT_YOUR_SERVICE: 'Từ chối truy cập: không phải dịch vụ của bạn',
   },
 
   // COMMON MESSAGES

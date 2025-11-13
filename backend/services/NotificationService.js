@@ -96,7 +96,7 @@ class NotificationService {
     this.io.to(customerId.toString()).emit('worker_assigned', {
       type: 'worker_assigned',
       title: 'Đã tìm thấy thợ!',
-      message: `Thợ ${workerData.name} đã receive việc của bạn`,
+      message: `Thợ ${workerData.name} đã nhận việc của bạn`,
       data: {
         bookingId: bookingData._id,
         worker: {
@@ -147,7 +147,7 @@ class NotificationService {
     setTimeout(() => {
       this.io.to(workerId.toString()).emit('job_assignment_expired', {
         bookingId: bookingData._id,
-        message: 'Hết thời gian receive việc'
+        message: 'Hết thời gian nhận việc'
       });
     }, 300000);
   }
@@ -169,8 +169,8 @@ class NotificationService {
   // Notify about booking status changes
   notifyBookingStatusChange(userId, bookingData, statusChange) {
     const statusMessages = {
-      'assigned': 'Đã có thợ receive việc',
-      'confirmed': 'Thợ đã xác receive và đang đến',
+      'assigned': 'Đã có thợ nhận việc',
+      'confirmed': 'Thợ đã xác nhận và đang đến',
       'in_progress': 'Thợ đã bắt đầu thực hiện',
       'completed': 'Dịch vụ hoàn thành',
       'cancelled': 'Đơn hàng đã bị hủy'
@@ -196,7 +196,7 @@ class NotificationService {
     
     this.io.to(userId.toString()).emit('payment_status', {
       type: 'payment_status',
-      title: isSuccess ? 'Thanh toán successful' : 'Thanh toán thất bại',
+      title: isSuccess ? 'Thanh toán thành công' : 'Thanh toán thất bại',
       message: isSuccess ? 
         `Đã thanh toán ${paymentData.amount.toLocaleString()}đ` : 
         'Vui lòng thử lại hoặc chọn phương thức khác',

@@ -89,3 +89,4 @@ web/.firebase/
 # Documentation files (exclude MD files)
 *.md
 !README.md
+!docs/**/*.md

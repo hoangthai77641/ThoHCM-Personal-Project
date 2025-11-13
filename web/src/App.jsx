@@ -16,7 +16,6 @@ import ForgotPassword from "./pages/ForgotPassword";
 import OTPVerification from "./pages/OTPVerification";
 import ResetPassword from "./pages/ResetPassword";
 import NearbyWorkers from "./pages/NearbyWorkers";
-import TransportServices from "./pages/TransportServices";
 
 import ResponsiveNav from './components/ResponsiveNav'
 import api from './api'
@@ -142,7 +141,6 @@ function AppContent() {
           <Routes>
             <Route path="/" element={<Home/>} />
             <Route path="/service/:id" element={<ServiceDetail/>} />
-            <Route path="/transport-services" element={<TransportServices/>} />
             <Route path="/login" element={<Login/>} />
             <Route path="/register" element={<Register/>} />
             <Route path="/forgot-password" element={<ForgotPassword/>} />

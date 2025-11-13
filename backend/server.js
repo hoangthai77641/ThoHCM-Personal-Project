@@ -4,11 +4,25 @@ const http = require('http');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const compression = require('compression');
 const { Server } = require('socket.io');
 const { setupSecurity } = require('./middleware/security');
+const { initializeRedis, getRedisClient } = require('./config/redis');
 
 const app = express();
 const server = http.createServer(app);
+
+// Enable gzip compression for all responses (reduces bandwidth by 60-80%)
+app.use(compression({
+  level: 6, // Compression level (0-9, 6 is good balance)
+  threshold: 1024, // Only compress responses > 1KB
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  }
+}));
 
 // Secure CORS configuration
 const additionalOrigins = (process.env.ALLOWED_ORIGINS || '')
@@ -31,6 +45,17 @@ const allowedOrigins = Array.from(new Set([
   ...additionalOrigins,
 ]));
 
+// Initialize Redis (for caching and Socket.IO scaling)
+let redisClient = null;
+(async () => {
+  try {
+    redisClient = await initializeRedis();
+  } catch (error) {
+    console.warn('Redis initialization failed, continuing without cache:', error.message);
+  }
+})();
+
+// Socket.IO configuration
 const io = new Server(server, {
   cors: {
     // Allow listed web origins and also native/mobile clients without an Origin header
@@ -41,8 +66,40 @@ const io = new Server(server, {
     },
     methods: ['GET', 'POST'],
     credentials: true,
-  }
+  },
+  // Performance optimizations for 1000+ concurrent connections
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  upgradeTimeout: 30000,
+  maxHttpBufferSize: 1e6, // 1MB
+  transports: ['websocket', 'polling'],
+  allowEIO3: true
 });
+
+// Setup Socket.IO Redis Adapter for horizontal scaling
+(async () => {
+  const redis = getRedisClient();
+  if (redis) {
+    try {
+      const { createAdapter } = require('@socket.io/redis-adapter');
+      const { createClient } = require('redis');
+      
+      const pubClient = createClient({ 
+        socket: { 
+          host: process.env.REDIS_HOST || 'localhost',
+          port: parseInt(process.env.REDIS_PORT || '6379')
+        }
+      });
+      const subClient = pubClient.duplicate();
+      
+      await Promise.all([pubClient.connect(), subClient.connect()]);
+      io.adapter(createAdapter(pubClient, subClient));
+      console.log('✅ Socket.IO Redis adapter enabled - ready for horizontal scaling');
+    } catch (error) {
+      console.warn('⚠️  Socket.IO Redis adapter setup failed:', error.message);
+    }
+  }
+})();
 
 // Basic health endpoint (before security middleware)
 app.get('/api/health', (req, res) => {
@@ -350,7 +407,18 @@ if (!DB_NAME) {
 }
 DB_NAME = DB_NAME || 'thohcm';
 
-mongoose.connect(MONGODB_URI)
+// Optimized MongoDB connection for 1000+ concurrent users
+const mongooseOptions = {
+  maxPoolSize: 50,        // Increased from default 10 (supports more concurrent connections)
+  minPoolSize: 10,        // Keep 10 connections ready
+  socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+  serverSelectionTimeoutMS: 5000,
+  heartbeatFrequencyMS: 10000,
+  // Connection pool monitoring
+  monitorCommands: process.env.NODE_ENV === 'development',
+};
+
+mongoose.connect(MONGODB_URI, mongooseOptions)
   .then(() => {
     const conn = mongoose.connection;
     console.log('MongoDB connected', { db: conn.name, host: conn.host });

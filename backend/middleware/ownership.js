@@ -1,5 +1,6 @@
 const Booking = require('../models/Booking');
 const Service = require('../models/Service');
+const MSG = require('../constants/messages');
 
 // Middleware to check booking ownership
 const checkBookingOwnership = async (req, res, next) => {
@@ -10,7 +11,7 @@ const checkBookingOwnership = async (req, res, next) => {
 
     const booking = await Booking.findById(bookingId);
     if (!booking) {
-      return res.status(404).json({ message: 'Booking not found' });
+      return res.status(404).json({ message: MSG.MIDDLEWARE.BOOKING_NOT_FOUND });
     }
 
     // Admin can access all bookings
@@ -21,18 +22,18 @@ const checkBookingOwnership = async (req, res, next) => {
 
     // Customer can only access their own bookings
     if (userRole === 'customer' && booking.customer.toString() !== userId) {
-      return res.status(403).json({ message: 'Access denied: not your booking' });
+      return res.status(403).json({ message: MSG.MIDDLEWARE.NOT_YOUR_BOOKING });
     }
 
     // Worker can only access bookings assigned to them
     if (userRole === 'worker' && booking.worker.toString() !== userId) {
-      return res.status(403).json({ message: 'Access denied: not assigned to you' });
+      return res.status(403).json({ message: MSG.MIDDLEWARE.NOT_ASSIGNED_TO_YOU });
     }
 
     req.booking = booking;
     next();
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: MSG.COMMON.INTERNAL_ERROR });
   }
 };
 
@@ -45,7 +46,7 @@ const checkServiceOwnership = async (req, res, next) => {
 
     const service = await Service.findById(serviceId);
     if (!service) {
-      return res.status(404).json({ message: 'Service not found' });
+      return res.status(404).json({ message: MSG.MIDDLEWARE.SERVICE_NOT_FOUND });
     }
 
     // Admin can access all services
@@ -56,14 +57,14 @@ const checkServiceOwnership = async (req, res, next) => {
 
     // Worker can only access their own services
     if (userRole === 'worker' && service.worker.toString() !== userId) {
-      return res.status(403).json({ message: 'Access denied: not your service' });
+      return res.status(403).json({ message: MSG.MIDDLEWARE.NOT_YOUR_SERVICE });
     }
 
     // Customer can view all active services (handled in controller)
     req.service = service;
     next();
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: MSG.COMMON.INTERNAL_ERROR });
   }
 };
 

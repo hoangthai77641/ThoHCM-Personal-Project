@@ -1,6 +1,7 @@
 const WorkerSchedule = require('../models/WorkerSchedule');
 const User = require('../models/User');
 const Booking = require('../models/Booking');
+const MSG = require('../constants/messages');
 
 // Get lịch rãnh của thợ
 exports.getWorkerSchedule = async (req, res) => {
@@ -8,7 +9,7 @@ exports.getWorkerSchedule = async (req, res) => {
     const { workerId, date } = req.query;
     
     if (!workerId) {
-      return res.status(400).json({ message: 'Worker ID is required' });
+      return res.status(400).json({ message: MSG.SCHEDULE.WORKER_ID_REQUIRED });
     }
 
     let schedule = await WorkerSchedule.findOne({ worker: workerId })
@@ -133,13 +134,13 @@ exports.updateWorkerSchedule = async (req, res) => {
         
         if (startTime >= endTime) {
           return res.status(400).json({ 
-            message: 'Thời gian kết thúc phải sau thời gian bắt đầu' 
+            message: MSG.SCHEDULE.END_TIME_AFTER_START 
           });
         }
         
         if (startTime < new Date()) {
           return res.status(400).json({ 
-            message: 'Không thể create lịch cho thời gian đã qua' 
+            message: MSG.SCHEDULE.CANNOT_CREATE_PAST 
           });
         }
       }
@@ -166,7 +167,7 @@ exports.updateWorkerSchedule = async (req, res) => {
     await schedule.save();
 
     res.json({ 
-      message: 'Cập nhật lịch rãnh successful',
+      message: MSG.SCHEDULE.SCHEDULE_UPDATED_SUCCESS,
       schedule 
     });
   } catch (error) {
@@ -181,18 +182,18 @@ exports.addAvailableSlot = async (req, res) => {
     const { startTime, endTime, note } = req.body;
 
     if (!startTime || !endTime) {
-      return res.status(400).json({ message: 'Thời gian bắt đầu và kết thúc là bắt buộc' });
+      return res.status(400).json({ message: MSG.SCHEDULE.TIME_REQUIRED });
     }
 
     const start = new Date(startTime);
     const end = new Date(endTime);
 
     if (start >= end) {
-      return res.status(400).json({ message: 'Thời gian kết thúc phải sau thời gian bắt đầu' });
+      return res.status(400).json({ message: MSG.SCHEDULE.END_TIME_AFTER_START });
     }
 
     if (start < new Date()) {
-      return res.status(400).json({ message: 'Không thể create lịch cho thời gian đã qua' });
+      return res.status(400).json({ message: MSG.SCHEDULE.CANNOT_CREATE_PAST });
     }
 
     let schedule = await WorkerSchedule.findOne({ worker: workerId });
@@ -207,7 +208,7 @@ exports.addAvailableSlot = async (req, res) => {
     );
 
     if (isConflict) {
-      return res.status(409).json({ message: 'Khung giờ này đã trùng với lịch hiện có' });
+      return res.status(409).json({ message: MSG.SCHEDULE.TIME_CONFLICT });
     }
 
     schedule.availableSlots.push({
@@ -221,7 +222,7 @@ exports.addAvailableSlot = async (req, res) => {
     await schedule.save();
 
     res.json({ 
-      message: 'Thêm khung giờ rãnh successful',
+      message: MSG.SCHEDULE.SLOT_ADDED_SUCCESS,
       newSlot: schedule.availableSlots[schedule.availableSlots.length - 1]
     });
   } catch (error) {
@@ -238,7 +239,7 @@ exports.removeAvailableSlot = async (req, res) => {
     const schedule = await WorkerSchedule.findOne({ worker: workerId });
     
     if (!schedule) {
-      return res.status(404).json({ message: 'Không tìm thấy lịch làm việc' });
+      return res.status(404).json({ message: MSG.SCHEDULE.SCHEDULE_NOT_FOUND });
     }
 
     const slotIndex = schedule.availableSlots.findIndex(
@@ -246,21 +247,21 @@ exports.removeAvailableSlot = async (req, res) => {
     );
 
     if (slotIndex === -1) {
-      return res.status(404).json({ message: 'Không tìm thấy khung giờ' });
+      return res.status(404).json({ message: MSG.SCHEDULE.SLOT_NOT_FOUND });
     }
 
     const slot = schedule.availableSlots[slotIndex];
 
-    // Không cho phép delete slot đã được đặt
+    // Không cho phép xóa slot đã được đặt
     if (slot.isBooked) {
-      return res.status(400).json({ message: 'Không thể delete khung giờ đã được đặt' });
+      return res.status(400).json({ message: MSG.SCHEDULE.CANNOT_DELETE_BOOKED });
     }
 
     schedule.availableSlots.splice(slotIndex, 1);
     schedule.lastUpdated = new Date();
     await schedule.save();
 
-    res.json({ message: 'Xóa khung giờ rãnh successful' });
+    res.json({ message: MSG.SCHEDULE.SLOT_DELETED });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -275,21 +276,21 @@ exports.bookTimeSlot = async (req, res) => {
     const schedule = await WorkerSchedule.findOne({ worker: workerId });
     
     if (!schedule) {
-      return res.status(404).json({ message: 'Không tìm thấy lịch làm việc của thợ' });
+      return res.status(404).json({ message: MSG.SCHEDULE.SCHEDULE_NOT_FOUND });
     }
 
     const slot = schedule.availableSlots.id(slotId);
     
     if (!slot) {
-      return res.status(404).json({ message: 'Không tìm thấy khung giờ' });
+      return res.status(404).json({ message: MSG.SCHEDULE.SLOT_NOT_FOUND });
     }
 
     if (slot.isBooked) {
-      return res.status(409).json({ message: 'Khung giờ này đã được đặt' });
+      return res.status(409).json({ message: MSG.SCHEDULE.SLOT_ALREADY_BOOKED });
     }
 
     if (slot.startTime < new Date()) {
-      return res.status(400).json({ message: 'Không thể đặt lịch cho thời gian đã qua' });
+      return res.status(400).json({ message: MSG.SCHEDULE.CANNOT_BOOK_PAST });
     }
 
     // Create booking mới
@@ -313,7 +314,7 @@ exports.bookTimeSlot = async (req, res) => {
     await schedule.save();
 
     res.json({ 
-      message: 'Đặt lịch successful',
+      message: MSG.SCHEDULE.BOOKING_CREATED_SUCCESS,
       booking: booking._id,
       slot: {
         startTime: slot.startTime,
@@ -325,7 +326,7 @@ exports.bookTimeSlot = async (req, res) => {
   }
 };
 
-// Thợ update trạng thái sau khi hoàn successful việc
+// Thợ update trạng thái sau khi hoàn thành việc
 exports.updateStatusAfterCompletion = async (req, res) => {
   try {
     const workerId = req.user.id;
@@ -340,7 +341,7 @@ exports.updateStatusAfterCompletion = async (req, res) => {
 
     if (!booking) {
       return res.status(404).json({ 
-        message: 'Không tìm thấy đơn hàng hoàn thành của bạn' 
+        message: MSG.SCHEDULE.COMPLETED_BOOKING_NOT_FOUND 
       });
     }
 
@@ -350,7 +351,7 @@ exports.updateStatusAfterCompletion = async (req, res) => {
       schedule = await WorkerSchedule.createDefaultSchedule(workerId);
     }
 
-    // Add các khung giờ rãnh mới sau khi hoàn successful việc
+    // Add các khung giờ rãnh mới sau khi hoàn thành việc
     if (nextAvailableSlots && nextAvailableSlots.length > 0) {
       for (const newSlot of nextAvailableSlots) {
         const start = new Date(newSlot.startTime);
@@ -374,7 +375,7 @@ exports.updateStatusAfterCompletion = async (req, res) => {
           schedule.availableSlots.push({
             startTime: start,
             endTime: end,
-            note: newSlot.note || 'Rãnh sau khi hoàn successful việc',
+            note: newSlot.note || 'Rãnh sau khi hoàn thành việc',
             isBooked: false
           });
         }
@@ -388,7 +389,7 @@ exports.updateStatusAfterCompletion = async (req, res) => {
     await schedule.save();
 
     res.json({ 
-      message: 'Cập nhật lịch rãnh sau hoàn successful việc successful',
+      message: MSG.SCHEDULE.SCHEDULE_UPDATED_AFTER_JOB,
       newSlotsAdded: nextAvailableSlots ? nextAvailableSlots.length : 0
     });
   } catch (error) {
@@ -396,7 +397,7 @@ exports.updateStatusAfterCompletion = async (req, res) => {
   }
 };
 
-// Thợ update thời gian dự kiến hoàn thành khi receive đơn
+// Thợ update thời gian dự kiến hoàn thành khi nhận đơn
 exports.updateEstimatedCompletion = async (req, res) => {
   try {
     const workerId = req.user.id;
@@ -404,7 +405,7 @@ exports.updateEstimatedCompletion = async (req, res) => {
 
     if (!bookingId || !estimatedCompletionTime) {
       return res.status(400).json({ 
-        message: 'Booking ID và thời gian dự kiến hoàn thành là bắt buộc' 
+        message: MSG.SCHEDULE.BOOKING_ID_ESTIMATED_TIME_REQUIRED 
       });
     }
 
@@ -418,7 +419,7 @@ exports.updateEstimatedCompletion = async (req, res) => {
 
     if (!booking) {
       return res.status(404).json({ 
-        message: 'Không tìm thấy đơn hàng hoặc đơn hàng không thuộc về bạn' 
+        message: MSG.SCHEDULE.BOOKING_NOT_FOUND_OR_NOT_YOURS 
       });
     }
 
@@ -428,7 +429,7 @@ exports.updateEstimatedCompletion = async (req, res) => {
       schedule = await WorkerSchedule.createDefaultSchedule(workerId);
     }
 
-    // Update công việc hiện tại và create lịch rãnh
+    // Update công việc hiện tại và tạo lịch rãnh
     schedule.updateCurrentJob(
       bookingId, 
       estimatedCompletionTime, 
@@ -439,7 +440,7 @@ exports.updateEstimatedCompletion = async (req, res) => {
     await schedule.save();
 
     res.json({ 
-      message: 'Cập nhật thời gian dự kiến hoàn thành successful',
+      message: MSG.SCHEDULE.ESTIMATED_TIME_UPDATED,
       estimatedCompletion: estimatedCompletionTime,
       newAvailableSlots: schedule.availableSlots.filter(slot => 
         !slot.isBooked && slot.startTime > new Date(estimatedCompletionTime)
@@ -458,7 +459,7 @@ exports.updateEstimatedTime = async (req, res) => {
 
     if (!newEstimatedCompletionTime) {
       return res.status(400).json({ 
-        message: 'Thời gian dự kiến hoàn thành mới là bắt buộc' 
+        message: MSG.SCHEDULE.NEW_ESTIMATED_TIME_REQUIRED 
       });
     }
 
@@ -466,21 +467,21 @@ exports.updateEstimatedTime = async (req, res) => {
     
     if (!schedule || !schedule.currentJob.booking) {
       return res.status(404).json({ 
-        message: 'Không tìm thấy công việc hiện tại' 
+        message: MSG.SCHEDULE.NO_CURRENT_JOB 
       });
     }
 
     // Update thời gian dự kiến mới
     schedule.currentJob.estimatedCompletionTime = new Date(newEstimatedCompletionTime);
     
-    // Create lại lịch rãnh với thời gian mới
+    // Tạo lại lịch rãnh với thời gian mới
     schedule.generateSlotsAfterCompletion();
     schedule.lastUpdated = new Date();
     
     await schedule.save();
 
     res.json({ 
-      message: 'Cập nhật thời gian dự kiến successful',
+      message: MSG.SCHEDULE.NEW_ESTIMATED_TIME_UPDATED,
       newEstimatedTime: newEstimatedCompletionTime,
       updatedSlots: schedule.availableSlots.filter(slot => 
         !slot.isBooked && slot.startTime > new Date()
@@ -491,7 +492,7 @@ exports.updateEstimatedTime = async (req, res) => {
   }
 };
 
-// Thợ hoàn successful việc hiện tại
+// Thợ hoàn thành việc hiện tại
 exports.completeCurrentJob = async (req, res) => {
   try {
     const workerId = req.user.id;
@@ -501,22 +502,22 @@ exports.completeCurrentJob = async (req, res) => {
     
     if (!schedule || !schedule.currentJob.booking) {
       return res.status(404).json({ 
-        message: 'Không tìm thấy công việc hiện tại' 
+        message: MSG.SCHEDULE.NO_CURRENT_JOB 
       });
     }
 
     if (bookingId && schedule.currentJob.booking.toString() !== bookingId) {
       return res.status(400).json({ 
-        message: 'Booking ID không khớp với công việc hiện tại' 
+        message: MSG.SCHEDULE.BOOKING_ID_MISMATCH 
       });
     }
 
-    // Hoàn successful việc
+    // Hoàn thành việc
     schedule.completeCurrentJob();
     await schedule.save();
 
     res.json({ 
-      message: 'Hoàn successful việc successful. Trạng thái đã chuyển về sẵn sàng',
+      message: MSG.SCHEDULE.JOB_COMPLETED_SUCCESS,
       status: 'available'
     });
   } catch (error) {
@@ -533,14 +534,14 @@ exports.getCurrentJob = async (req, res) => {
       .populate('currentJob.booking', 'customer service date status address note');
 
     if (!schedule) {
-      return res.status(404).json({ message: 'Không tìm thấy lịch làm việc' });
+      return res.status(404).json({ message: MSG.SCHEDULE.SCHEDULE_NOT_FOUND });
     }
 
     if (!schedule.currentJob.booking) {
       return res.json({ 
         hasCurrentJob: false,
         status: schedule.currentStatus,
-        message: 'Hiện tại không có công việc nào'
+        message: MSG.SCHEDULE.NO_CURRENT_JOB_MESSAGE
       });
     }
 
@@ -557,7 +558,7 @@ exports.getCurrentJob = async (req, res) => {
   }
 };
 
-// Tự động create lịch rãnh cho các ngày tới
+// Tự động tạo lịch rãnh cho các ngày tới
 exports.generateScheduleForDays = async (req, res) => {
   try {
     const workerId = req.user.id;
@@ -573,7 +574,7 @@ exports.generateScheduleForDays = async (req, res) => {
     }
 
     res.json({ 
-      message: `Tự động create lịch rãnh cho ${days} ngày tới successful`,
+      message: `Tự động tạo lịch rãnh cho ${days} ngày tới thành công`,
       schedule 
     });
   } catch (error) {
@@ -581,7 +582,7 @@ exports.generateScheduleForDays = async (req, res) => {
   }
 };
 
-// Thợ update lịch khả dụng sau khi hoàn successful việc
+// Thợ update lịch khả dụng sau khi hoàn thành booking
 exports.updateAvailabilityAfterBooking = async (req, res) => {
   try {
     const workerId = req.user.id;
@@ -590,15 +591,15 @@ exports.updateAvailabilityAfterBooking = async (req, res) => {
     const schedule = await WorkerSchedule.findOne({ worker: workerId });
     
     if (!schedule) {
-      return res.status(404).json({ message: 'Không tìm thấy lịch làm việc' });
+      return res.status(404).json({ message: MSG.SCHEDULE.SCHEDULE_NOT_FOUND });
     }
 
-    // Update trạng thái và create lịch mới
+    // Update trạng thái và tạo lịch mới
     schedule.updateAvailabilityAfterBooking(completedBookingTime, additionalDays);
     await schedule.save();
 
     res.json({ 
-      message: 'Cập nhật lịch khả dụng successful',
+      message: MSG.SCHEDULE.SCHEDULE_UPDATED_SUCCESS,
       status: schedule.currentStatus,
       availableSlots: schedule.availableSlots.filter(slot => 
         !slot.isBooked && slot.startTime > new Date()
@@ -617,7 +618,7 @@ exports.updateCustomAvailability = async (req, res) => {
 
     if (!date || !availableHours || !Array.isArray(availableHours)) {
       return res.status(400).json({ 
-        message: 'Thiếu thông tin ngày hoặc khung giờ khả dụng' 
+        message: MSG.SCHEDULE.INVALID_AVAILABILITY_DATA 
       });
     }
 
@@ -633,7 +634,7 @@ exports.updateCustomAvailability = async (req, res) => {
     const schedule = await WorkerSchedule.findOne({ worker: workerId });
     
     if (!schedule) {
-      return res.status(404).json({ message: 'Không tìm thấy lịch làm việc' });
+      return res.status(404).json({ message: MSG.SCHEDULE.SCHEDULE_NOT_FOUND });
     }
 
     // Update lịch tùy chỉnh
@@ -645,7 +646,7 @@ exports.updateCustomAvailability = async (req, res) => {
     const updatedSlots = schedule.getAvailableSlotsForDate(targetDate);
 
     res.json({ 
-      message: 'Cập nhật khung giờ khả dụng successful',
+      message: MSG.SCHEDULE.SCHEDULE_UPDATED_SUCCESS,
       date: targetDate,
       updatedSlots: updatedSlots
     });
@@ -683,25 +684,25 @@ exports.extendWorkTime = async (req, res) => {
 
     if (!bookingId || !additionalHours || additionalHours < 1 || additionalHours > 8) {
       return res.status(400).json({ 
-        message: 'Booking ID và số giờ gia hạn (1-8 giờ) là bắt buộc' 
+        message: MSG.SCHEDULE.INVALID_EXTENSION_DATA 
       });
     }
 
     // Find booking
     const booking = await Booking.findById(bookingId).populate('worker');
     if (!booking) {
-      return res.status(404).json({ message: 'Không tìm thấy booking' });
+      return res.status(404).json({ message: MSG.SCHEDULE.BOOKING_NOT_FOUND });
     }
 
     // Check booking thuộc về thợ này
     if (booking.worker._id.toString() !== workerId) {
-      return res.status(403).json({ message: 'Bạn không có quyền với booking này' });
+      return res.status(403).json({ message: MSG.SCHEDULE.NOT_YOUR_BOOKING });
     }
 
     // Check booking đang trong trạng thái có thể gia hạn
     if (!['confirmed', 'in_progress'].includes(booking.status)) {
       return res.status(400).json({ 
-        message: 'Chỉ có thể gia hạn booking đang được xác receive hoặc đang thực hiện' 
+        message: MSG.SCHEDULE.CANNOT_EXTEND_BOOKING 
       });
     }
 

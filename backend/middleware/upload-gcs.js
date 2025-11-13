@@ -1,6 +1,7 @@
 const { Storage } = require('@google-cloud/storage');
 const multer = require('multer');
 const path = require('path');
+const MSG = require('../constants/messages');
 
 // Initialize Google Cloud Storage
 const storage = new Storage();
@@ -207,7 +208,7 @@ const uploadBannerMiddleware = (req, res, next) => {
   bannerUpload.single('image')(req, res, async (err) => {
     if (err) {
       console.error('Multer error:', err);
-      return res.status(400).json({ message: err.message });
+      return res.status(400).json({ message: MSG.MIDDLEWARE.UPLOAD_ERROR });
     }
     
     if (!req.file) {
@@ -222,7 +223,7 @@ const uploadBannerMiddleware = (req, res, next) => {
       next();
     } catch (error) {
       console.error('GCS upload error:', error);
-      return res.status(500).json({ message: 'Failed to upload image to cloud storage', error: error.message });
+      return res.status(500).json({ message: MSG.MIDDLEWARE.CLOUD_STORAGE_FAILED });
     }
   });
 };
@@ -232,7 +233,7 @@ const uploadAvatarMiddleware = (req, res, next) => {
   avatarUpload.single('avatar')(req, res, async (err) => {
     if (err) {
       console.error('Multer error:', err);
-      return res.status(400).json({ message: err.message });
+      return res.status(400).json({ message: MSG.MIDDLEWARE.UPLOAD_ERROR });
     }
     
     if (!req.file) {
@@ -247,7 +248,7 @@ const uploadAvatarMiddleware = (req, res, next) => {
       next();
     } catch (error) {
       console.error('GCS upload error:', error);
-      return res.status(500).json({ message: 'Failed to upload avatar to cloud storage', error: error.message });
+      return res.status(500).json({ message: MSG.MIDDLEWARE.CLOUD_STORAGE_FAILED });
     }
   });
 };

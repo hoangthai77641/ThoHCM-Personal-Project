@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const NotificationService = require('../services/NotificationService');
+const MSG = require('../constants/messages');
 
 class NotificationController {
   constructor() {
@@ -18,7 +19,7 @@ class NotificationController {
       if (!userId || !title || !message) {
         return res.status(400).json({
           success: false,
-          message: 'Missing required fields: userId, title, message'
+          message: MSG.NOTIFICATION.MISSING_REQUIRED_FIELDS
         });
       }
 
@@ -27,7 +28,7 @@ class NotificationController {
       if (!user) {
         return res.status(404).json({
           success: false,
-          message: 'User not found'
+          message: MSG.USER.USER_NOT_FOUND
         });
       }
 
@@ -41,7 +42,7 @@ class NotificationController {
 
       res.json({
         success: true,
-        message: 'Notification sent successfully',
+        message: MSG.NOTIFICATION.NOTIFICATION_SENT_SUCCESS,
         recipient: {
           id: user._id,
           name: user.name,
@@ -53,7 +54,7 @@ class NotificationController {
       console.error('Error sending notification to user:', error);
       res.status(500).json({
         success: false,
-        message: 'Internal server error'
+        message: MSG.COMMON.INTERNAL_ERROR
       });
     }
   };
@@ -66,7 +67,7 @@ class NotificationController {
       if (!title || !message) {
         return res.status(400).json({
           success: false,
-          message: 'Missing required fields: title, message'
+          message: MSG.NOTIFICATION.MISSING_TITLE_MESSAGE
         });
       }
 
@@ -76,7 +77,7 @@ class NotificationController {
       if (customers.length === 0) {
         return res.status(404).json({
           success: false,
-          message: 'No customers found'
+          message: MSG.NOTIFICATION.NO_CUSTOMERS_FOUND
         });
       }
 
@@ -91,7 +92,7 @@ class NotificationController {
 
       res.json({
         success: true,
-        message: `Notification sent to ${customers.length} customers`,
+        message: `${MSG.NOTIFICATION.NOTIFICATION_SENT_TO_CUSTOMERS}: ${customers.length}`,
         recipients: customers.length,
         recipientType: 'customers'
       });
@@ -100,7 +101,7 @@ class NotificationController {
       console.error('Error sending notification to customers:', error);
       res.status(500).json({
         success: false,
-        message: 'Internal server error'
+        message: MSG.COMMON.INTERNAL_ERROR
       });
     }
   };
@@ -113,7 +114,7 @@ class NotificationController {
       if (!title || !message) {
         return res.status(400).json({
           success: false,
-          message: 'Missing required fields: title, message'
+          message: MSG.NOTIFICATION.MISSING_TITLE_MESSAGE
         });
       }
 
@@ -123,7 +124,7 @@ class NotificationController {
       if (workers.length === 0) {
         return res.status(404).json({
           success: false,
-          message: 'No workers found'
+          message: MSG.NOTIFICATION.NO_WORKERS_FOUND
         });
       }
 
@@ -138,7 +139,7 @@ class NotificationController {
 
       res.json({
         success: true,
-        message: `Notification sent to ${workers.length} workers`,
+        message: `${MSG.NOTIFICATION.NOTIFICATION_SENT_TO_WORKERS}: ${workers.length}`,
         recipients: workers.length,
         recipientType: 'workers'
       });
@@ -147,7 +148,7 @@ class NotificationController {
       console.error('Error sending notification to workers:', error);
       res.status(500).json({
         success: false,
-        message: 'Internal server error'
+        message: MSG.COMMON.INTERNAL_ERROR
       });
     }
   };
@@ -160,7 +161,7 @@ class NotificationController {
       if (!title || !message) {
         return res.status(400).json({
           success: false,
-          message: 'Missing required fields: title, message'
+          message: MSG.NOTIFICATION.MISSING_TITLE_MESSAGE
         });
       }
 
@@ -170,7 +171,7 @@ class NotificationController {
       if (users.length === 0) {
         return res.status(404).json({
           success: false,
-          message: 'No users found'
+          message: MSG.USER.USER_NOT_FOUND
         });
       }
 
@@ -185,7 +186,7 @@ class NotificationController {
 
       res.json({
         success: true,
-        message: `Notification sent to ${users.length} users`,
+        message: `${MSG.NOTIFICATION.NOTIFICATION_SENT}: ${users.length} người dùng`,
         recipients: users.length,
         recipientType: 'all_users',
         breakdown: {
@@ -199,7 +200,7 @@ class NotificationController {
       console.error('Error sending notification to all users:', error);
       res.status(500).json({
         success: false,
-        message: 'Internal server error'
+        message: MSG.COMMON.INTERNAL_ERROR
       });
     }
   };
@@ -220,7 +221,7 @@ class NotificationController {
       if (!title || !message) {
         return res.status(400).json({
           success: false,
-          message: 'Missing required fields: title, message'
+          message: MSG.NOTIFICATION.MISSING_TITLE_MESSAGE
         });
       }
 
@@ -231,7 +232,7 @@ class NotificationController {
           if (userIds.length === 0) {
             return res.status(400).json({
               success: false,
-              message: 'userIds is required for specific targeting'
+              message: MSG.NOTIFICATION.USER_ID_REQUIRED
             });
           }
           targetUsers = await User.find({ _id: { $in: userIds } }, '_id name email role');
@@ -275,14 +276,14 @@ class NotificationController {
         default:
           return res.status(400).json({
             success: false,
-            message: 'Invalid targetType'
+            message: MSG.COMMON.INVALID_INPUT
           });
       }
 
       if (targetUsers.length === 0) {
         return res.status(404).json({
           success: false,
-          message: 'No target users found'
+          message: MSG.USER.USER_NOT_FOUND
         });
       }
 
@@ -297,7 +298,7 @@ class NotificationController {
 
       res.json({
         success: true,
-        message: `Notification sent to ${targetUsers.length} users`,
+        message: `${MSG.NOTIFICATION.NOTIFICATION_SENT}: ${targetUsers.length} người dùng`,
         recipients: targetUsers.length,
         targetType,
         breakdown: {
@@ -311,7 +312,7 @@ class NotificationController {
       console.error('Error sending custom notification:', error);
       res.status(500).json({
         success: false,
-        message: 'Internal server error'
+        message: MSG.COMMON.INTERNAL_ERROR
       });
     }
   };
@@ -325,7 +326,7 @@ class NotificationController {
       if (!userId) {
         return res.status(400).json({
           success: false,
-          message: 'User ID is required'
+          message: MSG.NOTIFICATION.USER_ID_REQUIRED
         });
       }
 
@@ -351,7 +352,7 @@ class NotificationController {
       console.error('Error getting user notifications:', error);
       res.status(500).json({
         success: false,
-        message: 'Internal server error'
+        message: MSG.COMMON.INTERNAL_ERROR
       });
     }
   };
@@ -372,7 +373,7 @@ class NotificationController {
       if (!notification) {
         return res.status(404).json({
           success: false,
-          message: 'Notification not found'
+          message: MSG.NOTIFICATION.NOTIFICATION_NOT_FOUND
         });
       }
 
@@ -380,7 +381,7 @@ class NotificationController {
 
       res.json({
         success: true,
-        message: 'Notification marked as read',
+        message: MSG.NOTIFICATION.NOTIFICATION_READ,
         notification: {
           id: notification._id,
           isRead: notification.isRead,
@@ -392,7 +393,7 @@ class NotificationController {
       console.error('Error marking notification as read:', error);
       res.status(500).json({
         success: false,
-        message: 'Internal server error'
+        message: MSG.COMMON.INTERNAL_ERROR
       });
     }
   };
@@ -408,7 +409,7 @@ class NotificationController {
 
       res.json({
         success: true,
-        message: 'All notifications marked as read',
+        message: MSG.NOTIFICATION.NOTIFICATION_READ,
         modifiedCount: result.modifiedCount
       });
 
@@ -416,7 +417,7 @@ class NotificationController {
       console.error('Error marking all notifications as read:', error);
       res.status(500).json({
         success: false,
-        message: 'Internal server error'
+        message: MSG.COMMON.INTERNAL_ERROR
       });
     }
   };
@@ -437,13 +438,13 @@ class NotificationController {
       if (!result) {
         return res.status(404).json({
           success: false,
-          message: 'Notification not found'
+          message: MSG.NOTIFICATION.NOTIFICATION_NOT_FOUND
         });
       }
 
       res.json({
         success: true,
-        message: 'Notification deleted',
+        message: MSG.COMMON.DELETED,
         deletedNotification: {
           id: result._id,
           title: result.title
@@ -454,7 +455,7 @@ class NotificationController {
       console.error('Error deleting notification:', error);
       res.status(500).json({
         success: false,
-        message: 'Internal server error'
+        message: MSG.COMMON.INTERNAL_ERROR
       });
     }
   };
