@@ -1,4 +1,4 @@
-y# PowerShell script for Windows deployment - 1000+ users setup
+# PowerShell script for Windows deployment - 1000+ users setup
 
 Write-Host "🚀 ThoHCM - Setup for 1000+ Concurrent Users" -ForegroundColor Cyan
 Write-Host "==============================================" -ForegroundColor Cyan
