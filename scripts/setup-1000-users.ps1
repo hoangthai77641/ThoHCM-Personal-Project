@@ -1,4 +1,4 @@
-# PowerShell script for Windows deployment - 1000+ users setup
+y# PowerShell script for Windows deployment - 1000+ users setup
 
 Write-Host "🚀 ThoHCM - Setup for 1000+ Concurrent Users" -ForegroundColor Cyan
 Write-Host "==============================================" -ForegroundColor Cyan
@@ -54,6 +54,28 @@ $createVPC = Read-Host "🌐 Create VPC Connector? (y/n)"
 if ($createVPC -eq "y" -or $createVPC -eq "Y") {
     Write-Host "Creating VPC Connector..." -ForegroundColor Yellow
     
+    # Check if connector already exists and delete if failed
+    $existingConnector = gcloud compute networks vpc-access connectors describe $VPC_CONNECTOR `
+        --region=$REGION 2>&1
+    
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "⚠️  VPC Connector already exists, checking status..." -ForegroundColor Yellow
+        
+        # Check if it's in ERROR state
+        if ($existingConnector -match "state: ERROR") {
+            Write-Host "🗑️  Deleting failed VPC Connector..." -ForegroundColor Yellow
+            gcloud compute networks vpc-access connectors delete $VPC_CONNECTOR `
+                --region=$REGION `
+                --quiet
+            
+            Start-Sleep -Seconds 10
+        } else {
+            Write-Host "✅ VPC Connector already exists and is healthy" -ForegroundColor Green
+            return
+        }
+    }
+    
+    # Create new connector
     gcloud compute networks vpc-access connectors create $VPC_CONNECTOR `
         --region=$REGION `
         --range=10.8.0.0/28 `
@@ -62,7 +84,22 @@ if ($createVPC -eq "y" -or $createVPC -eq "Y") {
     if ($LASTEXITCODE -eq 0) {
         Write-Host "✅ VPC Connector created" -ForegroundColor Green
     } else {
-        Write-Host "⚠️  VPC Connector creation failed or already exists" -ForegroundColor Yellow
+        Write-Host "⚠️  VPC Connector creation failed" -ForegroundColor Yellow
+        Write-Host "   Trying alternative IP range..." -ForegroundColor Gray
+        
+        # Try different IP range
+        gcloud compute networks vpc-access connectors create $VPC_CONNECTOR `
+            --region=$REGION `
+            --range=10.9.0.0/28 `
+            --network=default
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "✅ VPC Connector created with alternative range" -ForegroundColor Green
+        } else {
+            Write-Host "❌ VPC Connector creation failed" -ForegroundColor Red
+            Write-Host "   You may need to create it manually in Cloud Console" -ForegroundColor Gray
+            Write-Host "   https://console.cloud.google.com/networking/connectors/list?project=$PROJECT_ID" -ForegroundColor Cyan
+        }
     }
 }
 
@@ -77,28 +114,85 @@ if ($installDeps -eq "y" -or $installDeps -eq "Y") {
     Write-Host "✅ Dependencies installed" -ForegroundColor Green
 }
 
+# Get environment variables for deployment
+Write-Host ""
+Write-Host "🔑 Environment Variables Setup" -ForegroundColor Cyan
+Write-Host "--------------------------------" -ForegroundColor Cyan
+Write-Host ""
+
+# Get MongoDB URI
+Write-Host "📝 Enter MongoDB URI:" -ForegroundColor Yellow
+Write-Host "   (e.g., mongodb+srv://user:pass@cluster.mongodb.net/thohcm)" -ForegroundColor Gray
+$MONGODB_URI = Read-Host "MongoDB URI"
+
+if ([string]::IsNullOrWhiteSpace($MONGODB_URI)) {
+    Write-Host "❌ MongoDB URI is required!" -ForegroundColor Red
+    exit 1
+}
+
+# Get JWT Secret
+Write-Host ""
+Write-Host "📝 Enter JWT Secret (minimum 32 characters):" -ForegroundColor Yellow
+Write-Host "   (Generate with: openssl rand -base64 32)" -ForegroundColor Gray
+$JWT_SECRET = Read-Host "JWT Secret"
+
+if ([string]::IsNullOrWhiteSpace($JWT_SECRET)) {
+    Write-Host "❌ JWT Secret is required!" -ForegroundColor Red
+    exit 1
+}
+
+if ($JWT_SECRET.Length -lt 32) {
+    Write-Host "⚠️  Warning: JWT Secret should be at least 32 characters" -ForegroundColor Yellow
+}
+
+# Get Redis Host (if created)
+$REDIS_HOST = "10.106.178.204"  # Default from creation, will update if needed
+Write-Host ""
+Write-Host "📝 Redis Host (press Enter to use default: $REDIS_HOST):" -ForegroundColor Yellow
+$redisInput = Read-Host "Redis Host"
+if (![string]::IsNullOrWhiteSpace($redisInput)) {
+    $REDIS_HOST = $redisInput
+}
+
 # Build and Deploy
 Write-Host ""
 $deploy = Read-Host "🏗️  Build and deploy to Cloud Run? (y/n)"
 if ($deploy -eq "y" -or $deploy -eq "Y") {
     Write-Host "Building application..." -ForegroundColor Yellow
+    Write-Host "This may take 5-10 minutes..." -ForegroundColor Gray
+    Write-Host ""
     
-    # Build using Cloud Build
-    gcloud builds submit --config=config/cloudbuild.yaml
+    # Build using Cloud Build with substitutions
+    gcloud builds submit `
+        --config=config/cloudbuild.yaml `
+        --substitutions="_MONGODB_URI=$MONGODB_URI,_JWT_SECRET=$JWT_SECRET"
     
     if ($LASTEXITCODE -eq 0) {
         Write-Host "✅ Build complete!" -ForegroundColor Green
         
-        # Update service with VPC connector
-        Write-Host "🔗 Connecting to VPC..." -ForegroundColor Yellow
+        # Update service with VPC connector and Redis
+        Write-Host "🔗 Connecting to VPC and setting environment..." -ForegroundColor Yellow
+        
         gcloud run services update $SERVICE_NAME `
             --region=$REGION `
             --vpc-connector=$VPC_CONNECTOR `
-            --vpc-egress=private-ranges-only
+            --vpc-egress=private-ranges-only `
+            --set-env-vars="REDIS_HOST=$REDIS_HOST,REDIS_PORT=6379" `
+            --update-env-vars="MONGODB_URI=$MONGODB_URI,JWT_SECRET=$JWT_SECRET"
         
-        Write-Host "✅ Deployment complete!" -ForegroundColor Green
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "✅ Deployment complete!" -ForegroundColor Green
+        } else {
+            Write-Host "⚠️  VPC connection failed, but service is deployed" -ForegroundColor Yellow
+            Write-Host "   You may need to configure VPC manually in Cloud Console" -ForegroundColor Gray
+        }
     } else {
         Write-Host "❌ Build failed" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "💡 Common issues:" -ForegroundColor Yellow
+        Write-Host "   - Check MongoDB URI is correct" -ForegroundColor Gray
+        Write-Host "   - Check Dockerfile in backend/ directory" -ForegroundColor Gray
+        Write-Host "   - View logs: https://console.cloud.google.com/cloud-build/builds" -ForegroundColor Gray
         exit 1
     }
 }
