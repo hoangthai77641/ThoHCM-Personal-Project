@@ -89,49 +89,40 @@
 
 ## ⚡ TỰ ĐỘNG CẬP NHẬT (IN-APP UPDATE)
 
-Để app tự động kiểm tra và cài đặt bản mới, thêm vào code:
+⚠️ **LƯU Ý**: In-app update hiện tại bị tạm thời disable do conflict của package `firebase_app_distribution` với Android build system.
 
-### Trong `pubspec.yaml`:
+**Giải pháp hiện tại**: Testers nhận email từ Firebase App Distribution và tải APK thủ công.
+
+**Cách hoạt động**:
+1. Push code → GitHub Actions build APK
+2. Upload lên Firebase App Distribution  
+3. Firebase gửi email cho testers
+4. Testers click link → Download → Install
+
+### ~~Trong `pubspec.yaml`:~~ (Tạm thời disable)
 ```yaml
 dependencies:
-  firebase_app_distribution: ^0.1.0  # Thêm package
+  # firebase_app_distribution: ^1.1.1  # Removed due to build conflicts
 ```
 
-### Trong main app:
+### ~~Trong main app:~~ (Sẽ được bật lại sau khi fix)
 ```dart
-import 'package:firebase_app_distribution/firebase_app_distribution.dart';
+// Code đã được comment out trong main.dart
+// import 'package:firebase_app_distribution/firebase_app_distribution.dart';
 
 // Kiểm tra update khi mở app
 void checkForUpdate() async {
-  final appDistribution = FirebaseAppDistribution.instance;
+  // Tạm thời disable
+  // final appDistribution = FirebaseAppDistribution.instance;
   
   try {
     // Check if update available
-    final result = await appDistribution.checkForUpdate();
+    // final result = await appDistribution.checkForUpdate();
     
-    if (result.hasUpdate) {
+    // if (result.hasUpdate) {
       // Show update dialog
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Có phiên bản mới!'),
-          content: Text('Phiên bản ${result.version} đã sẵn sàng'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Để sau'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                // Download and install
-                await appDistribution.updateApp();
-              },
-              child: Text('Cập nhật ngay'),
-            ),
-          ],
-        ),
-      );
-    }
+      // ... (code omitted)
+    // }
   } catch (e) {
     print('Error checking update: $e');
   }

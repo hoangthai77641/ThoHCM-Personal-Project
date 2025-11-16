@@ -22,7 +22,7 @@ import 'core/services/firebase_messaging_service.dart';
 import 'core/providers/work_mode_provider.dart';
 import 'core/providers/socket_provider.dart';
 import 'features/wallet/wallet_provider.dart';
-import 'services/app_update_service.dart'; // Auto update service
+// import 'services/app_update_service.dart'; // Removed due to firebase_app_distribution conflicts
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -117,8 +117,9 @@ class _RootDeciderState extends State<_RootDecider> {
     if (!mounted) return;
     
     if (ok) {
+      // TODO: Re-enable when firebase_app_distribution is fixed
       // Kiểm tra update sau khi đăng nhập thành công
-      AppUpdateService.checkForUpdate(context);
+      // AppUpdateService.checkForUpdate(context);
       
       Navigator.of(
         context,

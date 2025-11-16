@@ -32,6 +32,13 @@ jobs:
         cd mobile/worker_app
         flutter pub get
         
+    - name: Remove firebase_app_distribution from pubspec
+      run: |
+        cd mobile/worker_app
+        # Temporarily remove firebase_app_distribution for build
+        sed -i '/firebase_app_distribution:/d' pubspec.yaml
+        flutter pub get
+        
     - name: Build APK
       run: |
         cd mobile/worker_app
