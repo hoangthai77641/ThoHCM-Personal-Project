@@ -1,0 +1,7 @@
+🚀 What's new:
+- Fixed login issues
+- Improved chat performance
+- Added booking filter feature
+- UI/UX optimization
+
+📱 Update now for better experience!
