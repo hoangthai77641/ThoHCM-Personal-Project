@@ -66,6 +66,9 @@ backend/storage/services/*
 !backend/storage/banners/.gitkeep
 !backend/storage/services/.gitkeep
 
+# Test files (optional - uncomment to ignore)
+# backend/tests/
+
 # Flutter
 mobile/worker_app/build/
 mobile/worker_app/.dart_tool/

@@ -22,6 +22,7 @@ import 'core/services/firebase_messaging_service.dart';
 import 'core/providers/work_mode_provider.dart';
 import 'core/providers/socket_provider.dart';
 import 'features/wallet/wallet_provider.dart';
+import 'services/app_update_service.dart'; // Auto update service
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -114,7 +115,11 @@ class _RootDeciderState extends State<_RootDecider> {
 
     final ok = await auth.tryRestoreSession();
     if (!mounted) return;
+    
     if (ok) {
+      // Kiểm tra update sau khi đăng nhập thành công
+      AppUpdateService.checkForUpdate(context);
+      
       Navigator.of(
         context,
       ).pushReplacement(MaterialPageRoute(builder: (_) => const HomeShell()));

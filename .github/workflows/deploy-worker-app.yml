@@ -1,0 +1,51 @@
+name: Deploy Worker App to Firebase App Distribution
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'mobile/worker_app/**'
+  workflow_dispatch:
+
+jobs:
+  build-and-distribute:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+        
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.35.4'
+        channel: 'stable'
+        
+    - name: Get dependencies
+      run: |
+        cd mobile/worker_app
+        flutter pub get
+        
+    - name: Build APK
+      run: |
+        cd mobile/worker_app
+        flutter build apk --release
+        
+    - name: Upload to Firebase App Distribution
+      uses: wzieba/Firebase-Distribution-Github-Action@v1
+      with:
+        appId: ${{ secrets.FIREBASE_WORKER_APP_ID }}
+        serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        groups: testers
+        file: mobile/worker_app/build/app/outputs/flutter-apk/app-release.apk
+        releaseNotes: |
+          🚀 Auto-deployed from commit: ${{ github.sha }}
+          📝 Changes: ${{ github.event.head_commit.message }}
+          👤 By: ${{ github.actor }}
+          🕒 Time: ${{ github.event.head_commit.timestamp }}
