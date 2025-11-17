@@ -440,22 +440,22 @@ version: 1.1.0+4  # Tăng build number
 ## ✅ CHECKLIST HOÀN THÀNH
 
 ### Google Cloud:
-- [ ] Tạo Service Account
-- [ ] Download JSON key
-- [ ] Enable Play Android Developer API
+- [x] Tạo Service Account
+- [x] Download JSON key
+- [x] Enable Play Android Developer API
 
 ### Google Play Console:
-- [ ] Link Service Account
-- [ ] Grant permissions (Releases, Testing tracks)
-- [ ] Verify app đã có Internal testing track
+- [x] Link Service Account
+- [x] Grant permissions (Releases, Testing tracks)
+- [x] Verify app đã có Internal testing track
 
 ### GitHub Secrets:
-- [ ] GOOGLE_SERVICES_JSON
-- [ ] ANDROID_KEYSTORE_BASE64
-- [ ] KEYSTORE_PASSWORD
-- [ ] KEY_PASSWORD
-- [ ] KEY_ALIAS
-- [ ] PLAYSTORE_SERVICE_ACCOUNT_JSON
+- [x] GOOGLE_SERVICES_JSON
+- [x] ANDROID_KEYSTORE_BASE64
+- [x] KEYSTORE_PASSWORD
+- [x] KEY_PASSWORD
+- [x] KEY_ALIAS
+- [x] PLAYSTORE_SERVICE_ACCOUNT_JSON
 
 ### Code:
 - [ ] Tạo whatsnew/ directory

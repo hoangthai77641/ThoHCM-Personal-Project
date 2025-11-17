@@ -115,12 +115,12 @@ class _RootDeciderState extends State<_RootDecider> {
 
     final ok = await auth.tryRestoreSession();
     if (!mounted) return;
-    
+
     if (ok) {
       // TODO: Re-enable when firebase_app_distribution is fixed
       // Kiểm tra update sau khi đăng nhập thành công
       // AppUpdateService.checkForUpdate(context);
-      
+
       Navigator.of(
         context,
       ).pushReplacement(MaterialPageRoute(builder: (_) => const HomeShell()));
