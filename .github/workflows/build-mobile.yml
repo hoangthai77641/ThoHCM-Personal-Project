@@ -46,6 +46,12 @@ jobs:
       working-directory: mobile/worker_app
       run: flutter pub get
       
+    - name: 🔐 Decode google-services.json (for Android builds)
+      run: |
+        mkdir -p mobile/worker_app/android/app
+        # Write google-services.json from secret (base64 encoded)
+        echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 -d > mobile/worker_app/android/app/google-services.json
+      
     - name: 🔍 Analyze Code (non-fatal)
       working-directory: mobile/worker_app
       run: flutter analyze --no-fatal-infos --no-fatal-warnings
