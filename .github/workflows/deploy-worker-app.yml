@@ -1,10 +1,7 @@
 name: Deploy Worker App to Firebase App Distribution
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'mobile/worker_app/**'
+  # Manual trigger only to avoid extra builds on every push
   workflow_dispatch:
 
 jobs:
@@ -64,6 +61,6 @@ jobs:
         file: mobile/worker_app/build/app/outputs/flutter-apk/app-release.apk
         releaseNotes: |
           🚀 Auto-deployed from commit: ${{ github.sha }}
-          📝 Changes: ${{ github.event.head_commit.message }}
+          🧭 Event: ${{ github.event_name }}
           👤 By: ${{ github.actor }}
-          🕒 Time: ${{ github.event.head_commit.timestamp }}
+          🧾 Run ID: ${{ github.run_id }}
