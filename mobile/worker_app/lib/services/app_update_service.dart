@@ -1,22 +1,54 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
+import 'package:in_app_update/in_app_update.dart';
 
-/// Service kiểm tra và cập nhật app tự động
-/// Note: Firebase App Distribution đã bị vô hiệu hóa vì app được deploy qua Play Store
-/// Play Store tự động quản lý updates cho người dùng
+/// Play Store In‑App Update integration
 class AppUpdateService {
-  /// Kiểm tra update khi mở app
-  /// Returns immediately - Play Store handles automatic updates
+  /// Check for updates and prompt user (Flexible update)
   static Future<void> checkForUpdate(BuildContext context) async {
-    // Play Store handles app updates automatically
-    // No manual update check needed
-    return;
+    if (!Platform.isAndroid) return; // In‑app update only on Android
+
+    try {
+      final info = await InAppUpdate.checkForUpdate();
+      if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+        // Prefer flexible update for a smoother UX in internal testing
+        await InAppUpdate.startFlexibleUpdate();
+        if (!context.mounted) return;
+
+        await InAppUpdate.completeFlexibleUpdate();
+        if (!context.mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Ứng dụng đã được cập nhật. Khởi động lại để áp dụng.')),
+        );
+      }
+    } catch (e) {
+      // Non‑fatal: just log visually for testers
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Không thể kiểm tra cập nhật: $e')),
+        );
+      }
+    }
   }
 
-  /// Background check (gọi định kỳ)
-  /// Returns immediately - Play Store handles automatic updates
+  /// Silent background check that shows a small prompt if available
   static Future<void> silentCheckForUpdate(BuildContext context) async {
-    // Play Store handles app updates automatically
-    // No manual update check needed
-    return;
+    if (!Platform.isAndroid) return;
+    try {
+      final info = await InAppUpdate.checkForUpdate();
+      if (info.updateAvailability == UpdateAvailability.updateAvailable && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Có bản cập nhật mới.'),
+            action: SnackBarAction(
+              label: 'Cập nhật',
+              onPressed: () => checkForUpdate(context),
+            ),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } catch (_) {/* ignore */}
   }
 }

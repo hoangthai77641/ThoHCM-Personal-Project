@@ -55,6 +55,7 @@ dependencies:
   firebase_analytics: ^10.7.4
   firebase_auth: ^4.15.3
   cloud_firestore: ^4.13.6
+  in_app_update: ^4.2.3
   # firebase_app_distribution: ^1.1.1  # Removed due to build conflicts
 
 dev_dependencies:
