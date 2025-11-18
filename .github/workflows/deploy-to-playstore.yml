@@ -71,7 +71,7 @@ jobs:
         serviceAccountJsonPlainText: ${{ secrets.PLAYSTORE_SERVICE_ACCOUNT_JSON }}
         packageName: com.thohcm.workerapp
         releaseFiles: mobile/worker_app/build/app/outputs/bundle/release/app-release.aab
-        track: internal  # internal, alpha, beta, production
+        track: alpha  # closed testing (alpha). Options: internal, alpha, beta, production
         status: completed  # completed = auto publish
         inAppUpdatePriority: 5  # 0-5, higher = more urgent
         whatsNewDirectory: mobile/worker_app/whatsnew/  # Release notes
