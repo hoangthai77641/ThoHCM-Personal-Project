@@ -26,11 +26,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Setup Java
+    - name: Setup Java (Temurin 17.0.11 pinned)
       uses: actions/setup-java@v4
       with:
-        distribution: 'zulu'
-        java-version: '17'
+        distribution: 'temurin'
+        java-version: '17.0.11'
         
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
