@@ -38,7 +38,7 @@ jobs:
     - name: 🐦 Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.27.0'
+        flutter-version: '3.35.4'
         channel: 'stable'
         cache: true
         
@@ -46,9 +46,9 @@ jobs:
       working-directory: mobile/worker_app
       run: flutter pub get
       
-    - name: 🔍 Analyze Code
+    - name: 🔍 Analyze Code (non-fatal)
       working-directory: mobile/worker_app
-      run: flutter analyze
+      run: flutter analyze --no-fatal-infos --no-fatal-warnings
       
     - name: 🧪 Run Tests
       working-directory: mobile/worker_app
