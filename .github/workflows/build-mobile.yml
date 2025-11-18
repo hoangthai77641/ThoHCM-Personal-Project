@@ -50,9 +50,15 @@ jobs:
       working-directory: mobile/worker_app
       run: flutter analyze --no-fatal-infos --no-fatal-warnings
       
-    - name: 🧪 Run Tests
+    - name: 🧪 Run Tests (if present)
       working-directory: mobile/worker_app
-      run: flutter test
+      run: |
+        if [ -d test ]; then
+          echo "Running flutter tests..."
+          flutter test
+        else
+          echo "No test/ directory found. Skipping tests."
+        fi
       
     - name: 🔨 Build Debug APK
       if: github.event.inputs.build_type == 'debug' || github.event_name != 'workflow_dispatch'
