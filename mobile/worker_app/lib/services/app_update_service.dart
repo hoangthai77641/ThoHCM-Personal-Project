@@ -19,7 +19,9 @@ class AppUpdateService {
         if (!context.mounted) return;
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ứng dụng đã được cập nhật. Khởi động lại để áp dụng.')),
+          const SnackBar(
+              content:
+                  Text('Ứng dụng đã được cập nhật. Khởi động lại để áp dụng.')),
         );
       }
     } catch (e) {
@@ -37,7 +39,8 @@ class AppUpdateService {
     if (!Platform.isAndroid) return;
     try {
       final info = await InAppUpdate.checkForUpdate();
-      if (info.updateAvailability == UpdateAvailability.updateAvailable && context.mounted) {
+      if (info.updateAvailability == UpdateAvailability.updateAvailable &&
+          context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Có bản cập nhật mới.'),
