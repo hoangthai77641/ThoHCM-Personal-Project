@@ -3,10 +3,23 @@ name: Deploy Worker App to Firebase App Distribution
 on:
   # Manual trigger only to avoid extra builds on every push
   workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type YES to confirm deploying to Firebase App Distribution'
+        required: true
+        default: 'NO'
+      notes:
+        description: 'Optional release notes (appended)'
+        required: false
+        default: ''
 
 jobs:
   build-and-distribute:
+    # Only allow the repository owner to run this job
+    if: github.actor == github.repository_owner && inputs.confirm == 'YES'
     runs-on: ubuntu-latest
+    environment:
+      name: firebase-distribution
     
     steps:
     - name: Checkout code
@@ -64,3 +77,4 @@ jobs:
           🧭 Event: ${{ github.event_name }}
           👤 By: ${{ github.actor }}
           🧾 Run ID: ${{ github.run_id }}
+          📝 Notes: ${{ inputs.notes }}
