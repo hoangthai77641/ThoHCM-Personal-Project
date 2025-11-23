@@ -219,17 +219,21 @@ npm run seed
 npm run dev
 ```
 
-### Web Client Setup
+### Frontend Setup (Customer & Admin)
 
 ```bash
-cd ../web
-
-# Install dependencies
+# Customer (seed)
+cd able-pro-material-react-ts-9.2.2/seed
 npm install
+npm run dev
 
-# Start development server
+# Admin (full-version)
+cd ../full-version
+npm install
 npm run dev
 ```
+
+See `docs/deployment/FRONTEND_MULTI_SITE_HOSTING.md` for multi-site hosting deployment.
 
 ### Mobile App Setup
 
@@ -328,12 +332,11 @@ npm run build
 npm start
 ```
 
-### Web Deployment
+### Frontend Deployment (Firebase Multi-Site)
+Refer to `docs/deployment/FRONTEND_MULTI_SITE_HOSTING.md`.
+Key command after builds:
 ```bash
-# Build for production
-npm run build
-
-# Deploy dist/ folder to your hosting service
+firebase deploy --only hosting:customer,hosting:admin --project thohcm-frontend
 ```
 
 ### Mobile App Deployment
