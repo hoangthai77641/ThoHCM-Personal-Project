@@ -1,7 +1,7 @@
 import { ReactElement } from 'react';
 
 // third-party
-import firebase from 'firebase/compat/app';
+import firebase from 'firebase/compat/app'; // using compat; limit type surface
 
 // ==============================|| TYPES - AUTH  ||============================== //
 
@@ -37,11 +37,11 @@ export type FirebaseContextType = {
   user?: UserProfile | null | undefined;
   logout: () => Promise<void>;
   login: () => void;
-  firebaseRegister: (email: string, password: string) => Promise<firebase.auth.UserCredential>;
-  firebaseEmailPasswordSignIn: (email: string, password: string) => Promise<firebase.auth.UserCredential>;
-  firebaseGoogleSignIn: () => Promise<firebase.auth.UserCredential>;
-  firebaseTwitterSignIn: () => Promise<firebase.auth.UserCredential>;
-  firebaseFacebookSignIn: () => Promise<firebase.auth.UserCredential>;
+  firebaseRegister: (email: string, password: string) => Promise<any>;
+  firebaseEmailPasswordSignIn: (email: string, password: string) => Promise<any>;
+  firebaseGoogleSignIn: () => Promise<any>;
+  firebaseTwitterSignIn: () => Promise<any>;
+  firebaseFacebookSignIn: () => Promise<any>;
   resetPassword: (email: string) => Promise<void>;
   updateProfile: VoidFunction;
 };

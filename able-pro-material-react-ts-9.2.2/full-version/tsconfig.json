@@ -17,7 +17,7 @@
     "jsx": "react-jsx",
     "baseUrl": "src"
   },
-  "exclude": ["node_modules"],
+  "exclude": ["node_modules", "src/**/__tests__"],
   "include": ["src", "**/*.ts", "**/*.tsx", "src/**/*", "vite.config.mts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

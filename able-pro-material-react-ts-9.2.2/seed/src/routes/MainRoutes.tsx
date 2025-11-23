@@ -4,8 +4,6 @@ import { lazy } from 'react';
 import Loadable from 'components/Loadable';
 import DashboardLayout from 'layout/Dashboard';
 import ProtectedRoute from 'components/auth/ProtectedRoute';
-import Loadable from 'components/Loadable';
-import { lazy } from 'react';
 const ServiceCatalog = Loadable(lazy(() => import('pages/services/ServiceCatalog')));
 const BookingList = Loadable(lazy(() => import('pages/bookings/BookingList')));
 const NotificationCenter = Loadable(lazy(() => import('pages/notifications/NotificationCenter')));

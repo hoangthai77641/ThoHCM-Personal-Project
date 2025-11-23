@@ -25,6 +25,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: [
         // { find: '', replacement: path.resolve(__dirname, 'src') },
+        { find: 'iconsax-react', replacement: 'node_modules/iconsax-react/dist/cjs/index.js' }
         // {
         //   find: /^~(.+)/,
         //   replacement: path.join(process.cwd(), 'node_modules/$1')

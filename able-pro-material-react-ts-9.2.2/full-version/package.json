@@ -96,6 +96,7 @@
     "simplebar": "^6.2.5",
     "simplebar-react": "^3.2.4",
     "slick-carousel": "^1.8.1",
+    "socket.io-client": "^4.7.5",
     "stylis-plugin-rtl": "^2.1.1",
     "swr": "^2.2.5",
     "use-places-autocomplete": "^4.0.1",
@@ -136,6 +137,7 @@
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.2",
+    "@testing-library/user-event": "^14.5.2",
     "@types/autosuggest-highlight": "^3.2.3",
     "@types/chance": "^1.1.6",
     "@types/jest": "^29.5.12",
@@ -153,6 +155,7 @@
     "@types/react-window": "^1.8.8",
     "@types/uuid": "^9.0.8",
     "@types/webpack-env": "^1.18.4",
+    "@vitest/coverage-v8": "^2.0.0",
     "env-cmd": "^10.1.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
@@ -164,14 +167,12 @@
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "immutable": "^4.3.5",
+    "jsdom": "^24.0.0",
     "prettier": "^3.2.5",
     "prettier-eslint-cli": "^8.0.1",
     "react-error-overlay": "6.0.11",
     "typescript": "5.1.6",
-    "vitest": "^2.0.0",
-    "@vitest/coverage-v8": "^2.0.0",
-    "jsdom": "^24.0.0",
-    "@testing-library/user-event": "^14.5.2"
+    "vitest": "^2.0.0"
   },
   "packageManager": "yarn@4.1.0"
 }
