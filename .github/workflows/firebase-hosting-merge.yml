@@ -50,6 +50,31 @@ jobs:
             npm ci || npm install
           fi
 
+      - name: Generate admin .env for build
+        working-directory: ./able-pro-material-react-ts-9.2.2/full-version
+        run: |
+          echo "Generating .env for admin build (CI)"
+          : > .env
+          echo "VITE_APP_API_URL=${VITE_APP_API_URL:-}" >> .env
+          echo "VITE_SOCKET_URL=${VITE_SOCKET_URL:-}" >> .env
+          echo "VITE_APP_BASE_NAME=${VITE_APP_BASE_NAME:-/}" >> .env
+          echo "VITE_APP_GOOGLE_MAPS_API_KEY=${VITE_APP_GOOGLE_MAPS_API_KEY:-}" >> .env
+          echo "VITE_API_BASE_URL=${VITE_API_BASE_URL:-}" >> .env
+          echo "VITE_APP_MAPBOX_ACCESS_TOKEN=${VITE_APP_MAPBOX_ACCESS_TOKEN:-}" >> .env
+          echo "VITE_APP_VERSION=${VITE_APP_VERSION:-ci}" >> .env
+          echo "VITE_APP_AUTH0_CLIENT_ID=${VITE_APP_AUTH0_CLIENT_ID:-}" >> .env
+          echo "VITE_APP_AUTH0_DOMAIN=${VITE_APP_AUTH0_DOMAIN:-}" >> .env
+          echo "VITE_APP_FIREBASE_API_KEY=${VITE_APP_FIREBASE_API_KEY:-}" >> .env
+          echo "VITE_APP_FIREBASE_AUTH_DOMAIN=${VITE_APP_FIREBASE_AUTH_DOMAIN:-}" >> .env
+          echo "VITE_APP_FIREBASE_PROJECT_ID=${VITE_APP_FIREBASE_PROJECT_ID:-}" >> .env
+          echo "VITE_APP_FIREBASE_STORAGE_BUCKET=${VITE_APP_FIREBASE_STORAGE_BUCKET:-}" >> .env
+          echo "VITE_APP_FIREBASE_MESSAGING_SENDER_ID=${VITE_APP_FIREBASE_MESSAGING_SENDER_ID:-}" >> .env
+          echo "VITE_APP_FIREBASE_APP_ID=${VITE_APP_FIREBASE_APP_ID:-}" >> .env
+          echo "VITE_APP_FIREBASE_MEASUREMENT_ID=${VITE_APP_FIREBASE_MEASUREMENT_ID:-}" >> .env
+          echo "VITE_APP_AWS_POOL_ID=${VITE_APP_AWS_POOL_ID:-}" >> .env
+          echo "VITE_APP_AWS_APP_CLIENT_ID=${VITE_APP_AWS_APP_CLIENT_ID:-}" >> .env
+          echo ".env created with placeholder values"
+
       - name: Build admin (full-version)
         working-directory: ./able-pro-material-react-ts-9.2.2/full-version
         run: |
