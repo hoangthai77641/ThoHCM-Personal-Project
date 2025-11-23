@@ -110,17 +110,19 @@ exports.login = async (req, res) => {
       throw new Error('JWT_SECRET environment variable is required');
     }
     
+    // Legacy login endpoint (deprecated): issue long-lived token (will be removed). Prefer /api/auth/login
     const token = jwt.sign(
       { id: user._id, role: user.role, name: user.name },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: '1h' } // shortened legacy token expiry
     );
 
-  const sanitized = user.toObject({ versionKey: false });
+    const sanitized = user.toObject({ versionKey: false });
     delete sanitized.password;
     delete sanitized.resetOTP;
     sanitized.id = sanitized._id;
 
+    res.setHeader('X-Deprecated-Auth', 'Use /api/auth/login for cookie-based tokens');
     res.json({ token, user: sanitized });
   } catch (err) {
     res.status(400).json({ error: err.message });

@@ -8,7 +8,11 @@ module.exports = function (roles = []) {
   }
   return (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    let token = authHeader && authHeader.split(' ')[1];
+    // Fallback: allow cookie-based access token if Authorization header absent
+    if (!token && req.cookies && req.cookies['access_token']) {
+      token = req.cookies['access_token'];
+    }
     if (!token) return res.status(401).json({ message: MSG.MIDDLEWARE.NO_TOKEN });
     try {
       // Verify JWT with strong secret requirement

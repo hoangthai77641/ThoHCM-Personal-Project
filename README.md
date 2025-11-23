@@ -1,7 +1,8 @@
 # 🔧 Thợ HCM - Home Repair Service Platform
 
 <div align="center">
-  <img src="web/public/icons/icon-192x192.png" alt="Thợ HCM Logo" width="120" height="120">
+  <!-- Legacy web app removed. Logo asset relocated to new templates public folders. -->
+  <img src="able-pro-material-react-ts-9.2.2/seed/public/favicon.png" alt="Thợ HCM Logo" width="120" height="120">
   
   **Professional Home Repair Services in Ho Chi Minh City**
   
@@ -15,6 +16,58 @@
 ## 📖 Overview
 
 Thợ HCM is a comprehensive digital platform that connects customers with skilled technicians for electrical and refrigeration repair services in Ho Chi Minh City. Built with modern technologies, it provides seamless booking, real-time tracking, and efficient service management.
+
+## 🌐 Frontend Migration (Able Pro React TS)
+
+The legacy `web/` React client has been replaced and the folder removed in favor of the Able Pro Material React TypeScript templates:
+
+- **Customer Web (Client)**: `able-pro-material-react-ts-9.2.2/seed` – lightweight version for end-users.
+- **Admin Dashboard**: `able-pro-material-react-ts-9.2.2/full-version` – full feature set for internal management.
+
+### Development
+
+Open two terminals and run:
+
+```pwsh
+# Customer site
+cd able-pro-material-react-ts-9.2.2/seed
+yarn install
+yarn start
+
+# Admin dashboard
+cd ../full-version
+yarn install
+yarn start
+```
+
+If you prefer npm, you may convert, but Yarn 4 (plug'n'play) is recommended for these workspaces.
+
+### API Integration
+
+Configure backend API base URL and Firebase in each app via `.env` and any custom service files (e.g. `src/services` once added). Add variables like:
+
+```
+VITE_API_BASE_URL=http://localhost:8080
+VITE_SOCKET_URL=http://localhost:8080
+VITE_FIREBASE_API_KEY=...
+```
+
+### Localization
+
+Default language has been switched to Vietnamese (`vi`). Add translation message catalogs under `src/locales` (create folder) in both client and admin if not present. Fallback remains English.
+
+### Deprecation
+
+The old `web/` folder has been removed (see prior commit history for reference). Any remaining documentation references to `web/` are historical and will be cleaned progressively.
+
+### Next Steps
+
+1. Implement authentication flows against existing backend JWT endpoints.
+2. Wire real-time Socket.IO notifications (use `VITE_SOCKET_URL`).
+3. Map existing booking/service pages into corresponding Able Pro routes.
+4. Introduce RBAC: restrict admin routes to `role=admin`.
+5. Migrate any custom assets from `web/public` into the new apps' `public` folders.
+
 
 ### 🎯 Key Features
 
@@ -48,7 +101,7 @@ thohcm/
 │   ├── FirebaseConfigObject.txt # Firebase config
 │   └── thohcm-application-*.json # GCP service account
 ├── 🖥️ backend/                 # Node.js API server
-├── 🌐 web/                     # React web application
+├── (removed) web/              # Legacy React web application (deleted)
 ├── 📱 mobile/                  # Flutter mobile app
 └── 📄 README.md                # This file
 ```
@@ -119,7 +172,7 @@ thohcm/
 │   ├── services/           # Business logic
 │   ├── utils/              # Utility functions
 │   └── uploads/            # File storage
-├── web/                    # React web application
+├── (removed) web/          # Legacy React application (deleted)
 │   ├── src/
 │   │   ├── components/     # React components
 │   │   ├── pages/          # Page components

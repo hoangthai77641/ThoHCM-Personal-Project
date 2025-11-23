@@ -8,6 +8,7 @@ const compression = require('compression');
 const { Server } = require('socket.io');
 const { setupSecurity } = require('./middleware/security');
 const { initializeRedis, getRedisClient } = require('./config/redis');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 const server = http.createServer(app);
@@ -141,6 +142,8 @@ app.use((req, res, next) => {
 // Body parsing with size limits
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Parse cookies for auth (access & refresh tokens)
+app.use(cookieParser());
 
 // Secure static file serving with rate limiting
 const path = require('path');
@@ -227,6 +230,7 @@ const bannerRoutes = require('./routes/bannerRoutes');
 const workerScheduleRoutes = require('./routes/workerScheduleRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const walletRoutes = require('./routes/walletRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 // Simple test route
 app.get('/', (req, res) => {
@@ -235,6 +239,7 @@ app.get('/', (req, res) => {
 
 // API routes
 app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes); // New cookie-based auth endpoints
 app.use('/api/services', serviceRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/reviews', reviewRoutes);

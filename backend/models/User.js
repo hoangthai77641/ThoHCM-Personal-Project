@@ -28,6 +28,8 @@ userSchema.add({
   walletStatus: { type: String, enum: ['positive', 'negative'], default: 'positive' },
   // FCM token for push notifications
   fcmToken: { type: String }
+  // Token version for refresh token invalidation/rotation (increment to revoke all existing refresh tokens)
+  , tokenVersion: { type: Number, default: 0 }
 });
 
 // Compound unique indexes for flexible validation
