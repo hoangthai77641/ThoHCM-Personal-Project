@@ -35,13 +35,24 @@ jobs:
       - name: Install admin dependencies
         working-directory: ./able-pro-material-react-ts-9.2.2/full-version
         run: |
-          corepack enable
-          if (Test-Path yarn.lock) { yarn install --immutable } else { npm ci || npm install }
+          if [ -f yarn.lock ]; then
+            echo "Using Yarn for admin build"
+            corepack enable
+            yarn set version stable
+            yarn install --immutable || yarn install
+          else
+            echo "Using npm for admin build"
+            npm ci || npm install
+          fi
 
       - name: Build admin (full-version)
         working-directory: ./able-pro-material-react-ts-9.2.2/full-version
         run: |
-          if (Test-Path yarn.lock) { yarn build } else { npm run build }
+          if [ -f yarn.lock ]; then
+            yarn build
+          else
+            npm run build
+          fi
 
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
