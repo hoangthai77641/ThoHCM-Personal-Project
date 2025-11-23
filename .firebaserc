@@ -5,9 +5,14 @@
   "targets": {
     "thohcm-frontend": {
       "hosting": {
-        "customer": ["thohcm-customer"],
-        "admin": ["thohcm-admin"]
+        "customer": [
+          "thohcm-customer"
+        ],
+        "admin": [
+          "thohcm-admin"
+        ]
       }
     }
-  }
+  },
+  "etags": {}
 }

@@ -46,10 +46,25 @@ build/
 ehthumbs.db
 Thumbs.db
 
-# Google Cloud credentials
-*.json
+# Google Cloud credentials and sensitive JSON
+# Previously a blanket *.json ignore blocked necessary frontend locale and config files.
+# Keep specific sensitive patterns ignored instead of all JSON files.
+config/thohcm-application-*.json
+config/firebase-admin-sdk.json
+config/firebase-thohcm-frontend-key.json
+thohcm-application-*.json
+service-account-*.json
+firebase-*key.json
+
+# Allow required project JSON (locales, firebase config, etc.)
 !package*.json
 !tsconfig*.json
+!web/firebase.json
+!able-pro-material-react-ts-9.2.2/seed/src/utils/locales/*.json
+!able-pro-material-react-ts-9.2.2/full-version/src/utils/locales/*.json
+
+# Ignore backend firebase admin credential JSON
+backend/config/*.json
 
 # Sensitive configuration files  
 config/thohcm-application-*.json

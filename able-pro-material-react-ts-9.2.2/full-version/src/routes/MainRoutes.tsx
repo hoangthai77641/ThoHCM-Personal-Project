@@ -10,8 +10,6 @@ import SimpleLayout from 'layout/Simple';
 
 import { SimpleLayoutType } from 'config';
 import { loader as productsLoader, productLoader } from 'api/products';
-import Loadable from 'components/Loadable';
-import { lazy } from 'react';
 const ServicesList = Loadable(lazy(() => import('pages/admin/services/ServiceList')));
 const BookingList = Loadable(lazy(() => import('pages/admin/bookings/BookingList')));
 const NotificationCenter = Loadable(lazy(() => import('pages/admin/notifications/NotificationCenter')));
