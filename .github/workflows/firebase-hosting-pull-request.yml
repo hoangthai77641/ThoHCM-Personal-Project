@@ -41,10 +41,14 @@ jobs:
         working-directory: ./able-pro-material-react-ts-9.2.2/full-version
         run: |
           if [ -f yarn.lock ]; then
-            echo "Using Yarn for admin build"
+            echo "Using pinned Yarn 4.1.0 for admin build"
             corepack enable
-            yarn set version stable
-            yarn install --immutable || yarn install
+            corepack prepare yarn@4.1.0 --activate
+            yarn --version
+            if ! yarn install --immutable; then
+              echo "Immutable install failed (lock mismatch). Falling back to non-immutable install." >&2
+              yarn install
+            fi
           else
             echo "Using npm for admin build"
             npm ci || npm install
