@@ -78,8 +78,7 @@ export default function AdminLayout({ children, user, onLogout }) {
 
   // Menu items for admin sidebar
   const menuItems = [
-    { text: 'Trang chủ', path: '/', icon: <HomeIcon /> },
-    { text: 'Dashboard', path: '/admin', icon: <DashboardIcon /> },
+    { text: 'Tổng Quan', path: '/admin', icon: <DashboardIcon /> },
     ...(isAdmin ? [
       { text: 'Người dùng', path: '/users', icon: <PeopleIcon /> },
       { text: 'Quản trị viên', path: '/administrators', icon: <AdminIcon /> },
