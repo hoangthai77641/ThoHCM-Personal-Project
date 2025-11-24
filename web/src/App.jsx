@@ -12,6 +12,9 @@ import Users from './pages/Users'
 import AdministratorManagement from './pages/AdministratorManagement'
 import ServiceDetail from './pages/ServiceDetail'
 import BannerManagement from './pages/BannerManagement'
+import NotificationsPage from './pages/NotificationsPage'
+import WalletManagementPage from './pages/WalletManagementPage'
+import QRDepositPage from './pages/QRDepositPage'
 import ForgotPassword from "./pages/ForgotPassword";
 import OTPVerification from "./pages/OTPVerification";
 import ResetPassword from "./pages/ResetPassword";
@@ -28,7 +31,7 @@ function AppContent() {
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || 'null'))
   
   // Check if current route is an admin route
-  const isAdminRoute = ['/admin', '/users', '/administrators', '/banners'].some(
+  const isAdminRoute = ['/admin', '/users', '/administrators', '/banners', '/notifications', '/wallet', '/qr-deposit'].some(
     route => location.pathname.startsWith(route)
   )
   
@@ -148,6 +151,9 @@ function AppContent() {
           <Route path="/users" element={<Users/>} />
           <Route path="/administrators" element={<AdministratorManagement/>} />
           <Route path="/banners" element={<BannerManagement/>} />
+          <Route path="/notifications" element={<NotificationsPage/>} />
+          <Route path="/wallet" element={<WalletManagementPage/>} />
+          <Route path="/qr-deposit" element={<QRDepositPage/>} />
         </Routes>
       </AdminLayout>
     )

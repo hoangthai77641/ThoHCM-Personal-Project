@@ -30,6 +30,9 @@ import {
   AccountCircle as AccountCircleIcon,
   Logout as LogoutIcon,
   Home as HomeIcon,
+  Notifications as NotificationsIcon,
+  AccountBalance as WalletIcon,
+  QrCode as QrCodeIcon,
 } from '@mui/icons-material';
 import logo from '../assets/logo.png';
 import NotificationSystem from './NotificationSystem';
@@ -81,6 +84,9 @@ export default function AdminLayout({ children, user, onLogout }) {
       { text: 'Người dùng', path: '/users', icon: <PeopleIcon /> },
       { text: 'Quản trị viên', path: '/administrators', icon: <AdminIcon /> },
       { text: 'Banner & Thông báo', path: '/banners', icon: <CampaignIcon /> },
+      { text: 'Thông báo', path: '/notifications', icon: <NotificationsIcon /> },
+      { text: 'Quản lý Ví', path: '/wallet', icon: <WalletIcon /> },
+      { text: 'Nạp tiền QR', path: '/qr-deposit', icon: <QrCodeIcon /> },
     ] : []),
   ];
 
