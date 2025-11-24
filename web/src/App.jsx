@@ -14,7 +14,6 @@ import ServiceDetail from './pages/ServiceDetail'
 import BannerManagement from './pages/BannerManagement'
 import NotificationsPage from './pages/NotificationsPage'
 import WalletManagementPage from './pages/WalletManagementPage'
-import QRDepositPage from './pages/QRDepositPage'
 import ForgotPassword from "./pages/ForgotPassword";
 import OTPVerification from "./pages/OTPVerification";
 import ResetPassword from "./pages/ResetPassword";
