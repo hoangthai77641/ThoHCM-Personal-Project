@@ -173,49 +173,21 @@ export default function AdminDashboard(){
       <div className="dashboard-header">
         <h1>Bảng điều khiển Admin</h1>
         <div className="dashboard-actions">
-          <div className="tab-navigation">
-            <button 
-              className={`tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-              onClick={() => setActiveTab('dashboard')}
+          <div className="period-selector">
+            <select 
+              value={selectedPeriod} 
+              onChange={e => setSelectedPeriod(e.target.value)}
+              className="period-select"
             >
-              📊 Dashboard
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'notifications' ? 'active' : ''}`}
-              onClick={() => setActiveTab('notifications')}
-            >
-              📢 Thông báo
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'wallet' ? 'active' : ''}`}
-              onClick={() => setActiveTab('wallet')}
-            >
-              💰 Quản lý Ví
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'manual-deposits' ? 'active' : ''}`}
-              onClick={() => setActiveTab('manual-deposits')}
-            >
-              🏦 Nạp tiền QR
-            </button>
+              <option value="7days">7 ngày qua</option>
+              <option value="30days">30 ngày qua</option>
+            </select>
           </div>
-          {activeTab === 'dashboard' && (
-            <div className="period-selector">
-              <select 
-                value={selectedPeriod} 
-                onChange={e => setSelectedPeriod(e.target.value)}
-                className="period-select"
-              >
-                <option value="7days">7 ngày qua</option>
-                <option value="30days">30 ngày qua</option>
-              </select>
-            </div>
-          )}
         </div>
       </div>
 
       {/* Dashboard Content */}
-      {activeTab === 'dashboard' && (
+      <>(
         <>
           {/* Statistics Cards */}
           <div className="stats-grid">

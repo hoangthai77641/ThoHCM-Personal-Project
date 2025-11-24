@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import api from '../api'
-import NotificationManager from '../components/NotificationManager'
 
 export default function BannerManagement() {
   const [banners, setBanners] = useState([])
@@ -17,7 +16,6 @@ export default function BannerManagement() {
     isActive: true,
     image: null
   })
-  const [activeTab, setActiveTab] = useState('banners')
 
   const user = JSON.parse(localStorage.getItem('user') || '{}')
   const isAdmin = user.role === 'admin'

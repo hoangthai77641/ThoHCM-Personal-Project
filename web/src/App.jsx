@@ -31,7 +31,7 @@ function AppContent() {
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || 'null'))
   
   // Check if current route is an admin route
-  const isAdminRoute = ['/admin', '/users', '/administrators', '/banners', '/notifications', '/wallet', '/qr-deposit'].some(
+  const isAdminRoute = ['/admin', '/users', '/administrators', '/banners', '/notifications', '/wallet'].some(
     route => location.pathname.startsWith(route)
   )
 
@@ -162,8 +162,7 @@ function AppContent() {
           <Route path="/administrators" element={<AdministratorManagement/>} />
           <Route path="/banners" element={<BannerManagement/>} />
           <Route path="/notifications" element={<NotificationsPage/>} />
-          <Route path="/wallet" element={<WalletManagementPage/>} />
-          <Route path="/qr-deposit" element={<QRDepositPage/>} />
+          <Route path="/wallet/*" element={<WalletManagementPage/>} />
         </Routes>
       </AdminLayout>
     )

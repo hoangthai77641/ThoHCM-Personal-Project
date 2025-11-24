@@ -83,10 +83,9 @@ export default function AdminLayout({ children, user, onLogout }) {
     ...(isAdmin ? [
       { text: 'Người dùng', path: '/users', icon: <PeopleIcon /> },
       { text: 'Quản trị viên', path: '/administrators', icon: <AdminIcon /> },
-      { text: 'Banner & Thông báo', path: '/banners', icon: <CampaignIcon /> },
+      { text: 'Banners', path: '/banners', icon: <CampaignIcon /> },
       { text: 'Thông báo', path: '/notifications', icon: <NotificationsIcon /> },
       { text: 'Quản lý Ví', path: '/wallet', icon: <WalletIcon /> },
-      { text: 'Nạp tiền QR', path: '/qr-deposit', icon: <QrCodeIcon /> },
     ] : []),
   ];
 
