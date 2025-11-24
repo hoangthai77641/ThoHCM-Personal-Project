@@ -179,48 +179,27 @@ export default function BannerManagement() {
       )}
       
       <div className="page-header">
-        <h1>Quản lý Banner & Thông báo</h1>
+        <h1>Quản lý Banner</h1>
         
-        {/* Tab Navigation */}
-        <div className="tab-navigation">
-          <button 
-            className={`tab-btn ${activeTab === 'banners' ? 'active' : ''}`}
-            onClick={() => setActiveTab('banners')}
-          >
-            🖼️ Quản lý Banner
-          </button>
-          <button 
-            className={`tab-btn ${activeTab === 'notifications' ? 'active' : ''}`}
-            onClick={() => setActiveTab('notifications')}
-          >
-            📢 Gửi Thông báo
-          </button>
-        </div>
-        
-        {activeTab === 'banners' && (
-          <button 
-            className="add-banner-btn"
-            onClick={() => {
-              setShowForm(true)
-              setEditingBanner(null)
-              setFormData({
-                title: '',
-                content: '',
-                type: 'notification',
-                isActive: true,
-                image: null
-              })
-            }}
-          >
-            + Thêm
-          </button>
-        )}
+        <button 
+          className="add-banner-btn"
+          onClick={() => {
+            setShowForm(true)
+            setEditingBanner(null)
+            setFormData({
+              title: '',
+              content: '',
+              type: 'notification',
+              isActive: true,
+              image: null
+            })
+          }}
+        >
+          + Thêm
+        </button>
       </div>
 
-      {/* Banner Management Tab */}
-      {activeTab === 'banners' && (
-        <>
-          {showForm && (
+      {showForm && (
         <div className="modal-overlay">
           <div className="modal">
             <div className="modal-header">
@@ -415,13 +394,6 @@ export default function BannerManagement() {
         </div>
       </div>
         </>
-      )}
-
-      {/* Notification Management Tab */}
-      {activeTab === 'notifications' && (
-        <div className="notifications-tab">
-          <NotificationManager />
-        </div>
       )}
 
       {/* Banner Detail Modal */}
