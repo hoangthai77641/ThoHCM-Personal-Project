@@ -393,8 +393,6 @@ export default function BannerManagement() {
           )}
         </div>
       </div>
-        </>
-      )}
 
       {/* Banner Detail Modal */}
       {showDetailModal && selectedBanner && (
