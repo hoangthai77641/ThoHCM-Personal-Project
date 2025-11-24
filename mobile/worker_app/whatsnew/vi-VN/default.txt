@@ -1,7 +1,6 @@
 🚀 Cập nhật mới:
-- Sửa lỗi đăng nhập
-- Cải thiện hiệu suất chat
-- Thêm tính năng lọc booking
-- Tối ưu hóa giao diện
+- Sửa lỗi hiển thị dịch vụ: Thợ giờ chỉ thấy dịch vụ của mình
+- Cải thiện hiệu suất tải danh sách dịch vụ
+- Tối ưu hóa giao diện quản lý dịch vụ
 
 📱 Cập nhật ngay để trải nghiệm tốt hơn!
