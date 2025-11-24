@@ -34,6 +34,16 @@ function AppContent() {
   const isAdminRoute = ['/admin', '/users', '/administrators', '/banners', '/notifications', '/wallet', '/qr-deposit'].some(
     route => location.pathname.startsWith(route)
   )
+
+  // Auto redirect admin/worker to dashboard if they're on homepage
+  useEffect(() => {
+    if (user && (user.role === 'admin' || user.role === 'worker')) {
+      // If admin/worker is on homepage or login page, redirect to admin dashboard
+      if (location.pathname === '/' || location.pathname === '/login') {
+        navigate('/admin', { replace: true })
+      }
+    }
+  }, [user, location.pathname, navigate])
   
   // Fetch fresh user data on mount to ensure avatar is up-to-date
   useEffect(() => {
