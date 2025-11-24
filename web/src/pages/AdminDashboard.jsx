@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api'
-import NotificationManager from '../components/NotificationManager'
-import ManualDepositManagement from '../components/ManualDepositManagement'
 
 export default function AdminDashboard(){
   const navigate = useNavigate()
@@ -18,11 +16,7 @@ export default function AdminDashboard(){
   const [actionMsg, setActionMsg] = useState(null)
   const [revenueData, setRevenueData] = useState([])
   const [selectedPeriod, setSelectedPeriod] = useState('7days')
-  const [activeTab, setActiveTab] = useState('dashboard')
-  const [platformFeeConfig, setPlatformFeeConfig] = useState(null)
   const [walletStats, setWalletStats] = useState(null)
-  const [wallets, setWallets] = useState([])
-  const [feeConfigLoading, setFeeConfigLoading] = useState(false)
 
   useEffect(()=>{
     if (!isAdmin){
@@ -31,20 +25,18 @@ export default function AdminDashboard(){
     }
     async function load(){
       try{
-        const [b,s,c,w,ws,wl] = await Promise.all([
+        const [b,s,c,w,ws] = await Promise.all([
           api.get('/api/bookings'),
           api.get('/api/services'),
           api.get('/api/users/customers'),
           api.get('/api/users', { params: { role: 'worker', limit: 100 } }),
-          api.get('/api/wallet/stats'),
-          api.get('/api/wallet/all')
+          api.get('/api/wallet/stats')
         ])
         setBookings(Array.isArray(b.data) ? b.data : b.data?.items || [])
         setServices(Array.isArray(s.data) ? s.data : s.data?.items || [])
         setCustomers(Array.isArray(c.data) ? c.data : c.data?.items || [])
         setWorkers(Array.isArray(w.data) ? w.data : w.data?.items || [])
         setWalletStats(ws.data || {})
-        setWallets(Array.isArray(wl.data) ? wl.data : wl.data?.wallets || [])
         
         // try dedicated pending endpoint first; if 404, fallback to filtered users
         try {
@@ -97,48 +89,6 @@ export default function AdminDashboard(){
     }
     load()
   },[isAdmin, navigate, selectedPeriod])
-
-  // Load wallet data when wallet tab is active
-  useEffect(() => {
-    if (activeTab === 'wallet' && isAdmin) {
-      loadWalletData()
-    }
-  }, [activeTab, isAdmin])
-
-  async function loadWalletData() {
-    try {
-      setFeeConfigLoading(true)
-      const [configRes, statsRes, walletsRes] = await Promise.all([
-        api.get('/api/wallet/platform-fee-config'),
-        api.get('/api/wallet/stats'),
-        api.get('/api/wallet/all?limit=50')
-      ])
-      
-      setPlatformFeeConfig(configRes.data.data)
-      setWalletStats(statsRes.data.data)
-      setWallets(walletsRes.data.data?.wallets || [])
-    } catch (error) {
-      console.error('Error loading wallet data:', error)
-      setError(error.response?.data?.message || 'Lỗi tải dữ liệu ví')
-    } finally {
-      setFeeConfigLoading(false)
-    }
-  }
-
-  async function updatePlatformFeeConfig(newConfig) {
-    try {
-      setFeeConfigLoading(true)
-      const res = await api.put('/api/wallet/platform-fee-config', newConfig)
-      setPlatformFeeConfig(res.data.data)
-      setActionMsg('Cập nhật cấu hình thành công!')
-      setTimeout(() => setActionMsg(null), 3000)
-    } catch (error) {
-      console.error('Error updating platform fee config:', error)
-      setError(error.response?.data?.message || 'Lỗi cập nhật cấu hình')
-    } finally {
-      setFeeConfigLoading(false)
-    }
-  }
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -497,49 +447,6 @@ export default function AdminDashboard(){
           </div>
         </div>
       </div>
-        </>
-      )}
-
-      {/* Notifications Content */}
-      {activeTab === 'notifications' && (
-        <div className="notifications-content">
-          <NotificationManager />
-        </div>
-      )}
-
-      {/* Wallet Management Content */}
-      {activeTab === 'wallet' && (
-        <div className="wallet-management">
-          <h2>💰 Quản lý Ví & Thanh toán</h2>
-          
-          {feeConfigLoading && <div className="loading">Đang tải...</div>}
-          
-          {/* Platform Fee Configuration */}
-          {platformFeeConfig && (
-            <div className="config-section">
-              <h3>Cấu hình Phí & Thanh toán</h3>
-              <PlatformFeeConfig 
-                config={platformFeeConfig}
-                onUpdate={updatePlatformFeeConfig}
-                loading={feeConfigLoading}
-              />
-            </div>
-          )}
-
-          {/* Wallet Statistics */}
-          {walletStats && (
-            <div className="stats-section">
-              <h3>Thống kê Ví</h3>
-              <WalletStats stats={walletStats} />
-            </div>
-          )}
-
-          {/* Wallets List */}
-          <div className="wallets-section">
-            <h3>Danh sách Ví ({wallets.length})</h3>
-            <WalletsList wallets={wallets} />
-          )}
-        </div>
       </>
     </div>
   )
