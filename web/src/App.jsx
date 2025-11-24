@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Routes, Route, useNavigate } from 'react-router-dom'
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { Box, Container } from '@mui/material'
 import Home from './pages/Home'
 import Login from './pages/Login'
@@ -18,12 +18,19 @@ import ResetPassword from "./pages/ResetPassword";
 import NearbyWorkers from "./pages/NearbyWorkers";
 
 import ResponsiveNav from './components/ResponsiveNav'
+import AdminLayout from './components/AdminLayout'
 import api from './api'
 
 
 function AppContent() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || 'null'))
+  
+  // Check if current route is an admin route
+  const isAdminRoute = ['/admin', '/users', '/administrators', '/banners'].some(
+    route => location.pathname.startsWith(route)
+  )
   
   // Fetch fresh user data on mount to ensure avatar is up-to-date
   useEffect(() => {
@@ -132,6 +139,20 @@ function AppContent() {
     navigate('/')
   }
   
+  // Use AdminLayout for admin routes, otherwise use regular layout
+  if (isAdminRoute && user && (user.role === 'admin' || user.role === 'worker')) {
+    return (
+      <AdminLayout user={user} onLogout={logout}>
+        <Routes>
+          <Route path="/admin" element={<AdminDashboard/>} />
+          <Route path="/users" element={<Users/>} />
+          <Route path="/administrators" element={<AdministratorManagement/>} />
+          <Route path="/banners" element={<BannerManagement/>} />
+        </Routes>
+      </AdminLayout>
+    )
+  }
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <ResponsiveNav user={user} onLogout={logout} />
@@ -150,10 +171,6 @@ function AppContent() {
             <Route path="/my-bookings" element={<MyBookings/>} />
             <Route path="/nearby-workers" element={<NearbyWorkers/>} />
             <Route path="/profile" element={<Profile/>} />
-            <Route path="/admin" element={<AdminDashboard/>} />
-            <Route path="/users" element={<Users/>} />
-            <Route path="/administrators" element={<AdministratorManagement/>} />
-            <Route path="/banners" element={<BannerManagement/>} />
           </Routes>
         </Container>
       </Box>
