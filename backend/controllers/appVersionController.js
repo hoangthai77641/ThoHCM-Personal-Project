@@ -5,17 +5,18 @@
 
 const APP_VERSIONS = {
   worker: {
-    currentVersion: '1.1.4', // Version hiện tại từ pubspec.yaml
+    currentVersion: '1.1.5', // Version hiện tại từ pubspec.yaml
     minRequiredVersion: '1.1.0', // Version tối thiểu được phép sử dụng
-    latestVersion: '1.1.4', // Version mới nhất trên Play Store
+    latestVersion: '1.1.5', // Version mới nhất trên Play Store
     updateUrl:
       'https://play.google.com/store/apps/details?id=com.thohcm.workerapp', // URL Play Store
     forceUpdate: false, // Bắt buộc cập nhật hay không
-    updateMessage: 'Có phiên bản mới với nhiều cải tiến và sửa lỗi!',
+    updateMessage: 'Cải thiện tính năng nạp ví và sửa lỗi!',
     features: [
-      'Cải thiện hiệu suất ví',
-      'Tối ưu giao diện nạp tiền',
-      'Sửa lỗi thông báo',
+      'Chỉ còn phương thức QR Banking - nhanh hơn',
+      'Sửa lỗi upload ảnh chuyển khoản',
+      'Tự động quay về ví sau upload thành công',
+      'Cải thiện hiệu suất',
     ],
   },
   customer: {
