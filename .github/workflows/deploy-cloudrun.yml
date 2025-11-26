@@ -62,7 +62,8 @@ jobs:
           --max-instances 3 \
           --min-instances 0 \
           --timeout 300 \
-          --set-env-vars "NODE_ENV=production,GCS_BUCKET_NAME=thohcm-storage,MONGODB_URI=${{ secrets.MONGODB_URI }},JWT_SECRET=${{ secrets.JWT_SECRET }},REDIS_HOST=10.106.178.204,REDIS_PORT=6379"
+          --no-cpu-throttling \
+          --set-env-vars "NODE_ENV=production,GCS_BUCKET_NAME=thohcm-storage,MONGODB_URI=${{ secrets.MONGODB_URI }},JWT_SECRET=${{ secrets.JWT_SECRET }},REDIS_HOST=10.106.178.204,REDIS_PORT=6379,RUN_MIGRATIONS_ON_START=false"
         
     - name: Get Service URL
       id: get-url

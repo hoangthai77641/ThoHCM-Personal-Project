@@ -418,12 +418,19 @@ const mongooseOptions = {
   maxPoolSize: 50,        // Increased from default 10 (supports more concurrent connections)
   minPoolSize: 10,        // Keep 10 connections ready
   socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
-  serverSelectionTimeoutMS: 5000,
+  serverSelectionTimeoutMS: 30000, // Increased from 5s to 30s for Cloud Run
   heartbeatFrequencyMS: 10000,
   // Connection pool monitoring
   monitorCommands: process.env.NODE_ENV === 'development',
 };
 
+// Start server FIRST (Cloud Run needs this to pass health check)
+server.listen(PORT, HOST, () => {
+  console.log(`Server listening at http://${HOST === '0.0.0.0' ? '0.0.0.0' : HOST}:${PORT}`);
+  console.log('Server started, connecting to MongoDB...');
+});
+
+// Connect to MongoDB in background (don't block server startup)
 mongoose.connect(MONGODB_URI, mongooseOptions)
   .then(() => {
     const conn = mongoose.connection;
@@ -467,11 +474,8 @@ mongoose.connect(MONGODB_URI, mongooseOptions)
     } else {
       console.log('[bootstrap] disabled by RUN_MIGRATIONS_ON_START=false');
     }
-
-    server.listen(PORT, HOST, () => {
-      console.log(`Server listening at http://${HOST === '0.0.0.0' ? '0.0.0.0' : HOST}:${PORT}`);
-    });
   })
   .catch((err) => {
     console.error('MongoDB connection error:', err);
+    console.error('Server will continue running but DB features unavailable');
   });
