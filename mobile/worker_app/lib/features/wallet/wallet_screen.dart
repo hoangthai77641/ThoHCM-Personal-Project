@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'wallet_provider.dart';
-import 'card_payment_screen.dart';
 import 'qr_deposit_screen.dart';
 
 class WalletScreen extends StatefulWidget {
@@ -130,7 +129,7 @@ class _WalletScreenState extends State<WalletScreen> {
               Expanded(
                 child: Text(
                   isNegative
-                      ? 'Negative Balance - Need to Top Up'
+                      ? 'Số dư âm - Cần nạp ví'
                       : 'Wallet Balance',
                   style: const TextStyle(
                     color: Colors.white,
@@ -212,7 +211,7 @@ class _WalletScreenState extends State<WalletScreen> {
           child: ElevatedButton.icon(
             onPressed: () => _showTopUpDialog(context, walletProvider),
             icon: Icon(Icons.add),
-            label: Text('Top Up'),
+            label: Text('Nạp ví'),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
             ),
@@ -370,32 +369,27 @@ class _WalletScreenState extends State<WalletScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: selectedMethod,
-                  decoration: const InputDecoration(
-                    labelText: 'Phương thức thanh toán',
-                    border: OutlineInputBorder(),
+                // Chỉ hỗ trợ QR Banking
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.green.shade200),
                   ),
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'manual_qr',
-                      child: Text('🔥 QR Banking'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'bank_transfer',
-                      child: Text('Chuyển khoản NH'),
-                    ),
-                    DropdownMenuItem(value: 'momo', child: Text('Ví MoMo')),
-                    DropdownMenuItem(
-                      value: 'card',
-                      child: Text('Thẻ tín dụng'),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      selectedMethod = value!;
-                    });
-                  },
+                  child: Row(
+                    children: [
+                      Icon(Icons.qr_code, color: Colors.green.shade700),
+                      const SizedBox(width: 12),
+                      const Text(
+                        '🔥 QR Banking',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -429,43 +423,22 @@ class _WalletScreenState extends State<WalletScreen> {
                 );
 
                 if (success && parentContext.mounted) {
-                  print('✅ Success and context mounted - checking method...');
-                  if (selectedMethod == 'manual_qr') {
-                    print('📱 Navigating to QR deposit screen...');
-                    try {
-                      // Navigate to QR deposit screen
-                      Navigator.push(
-                        parentContext,
-                        MaterialPageRoute(
-                          builder: (context) => QRDepositScreen(
-                            depositResponse:
-                                walletProvider.lastDepositResponse!,
-                          ),
-                        ),
-                      );
-                      print('✅ Navigation successful');
-                    } catch (e) {
-                      print('❌ Navigation error: $e');
-                    }
-                  } else if (selectedMethod == 'card') {
-                    // Navigate to card payment screen
-                    final transactionInfo =
-                        walletProvider.lastDepositResponse?['transaction'];
-
+                  print('✅ Success and context mounted - navigating to QR screen...');
+                  // Chỉ hỗ trợ QR Banking
+                  try {
+                    // Navigate to QR deposit screen
                     Navigator.push(
                       parentContext,
                       MaterialPageRoute(
-                        builder: (context) => CardPaymentScreen(
-                          amount: amount,
-                          paymentReference:
-                              transactionInfo?['paymentReference'] ?? '',
+                        builder: (context) => QRDepositScreen(
+                          depositResponse:
+                              walletProvider.lastDepositResponse!,
                         ),
                       ),
                     );
-                  } else if (selectedMethod == 'bank_transfer') {
-                    _showBankInfoDialog(parentContext, walletProvider, amount);
-                  } else if (selectedMethod == 'momo') {
-                    _showMoMoInfoDialog(parentContext, walletProvider, amount);
+                    print('✅ Navigation successful');
+                  } catch (e) {
+                    print('❌ Navigation error: $e');
                   }
                 } else {
                   print('❌ Navigation blocked - success: $success');
@@ -475,80 +448,6 @@ class _WalletScreenState extends State<WalletScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showBankInfoDialog(
-    BuildContext context,
-    WalletProvider walletProvider,
-    double amount,
-  ) {
-    final bankAccount = walletProvider.bankAccount;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Thông tin chuyển khoản'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Số tiền: ${walletProvider.formatCurrency(amount)}'),
-            const Divider(),
-            _buildBankInfo(
-              'Ngân hàng:',
-              bankAccount['bankName']?.toString() ?? 'Vietcombank',
-            ),
-            _buildBankInfo(
-              'Số tài khoản:',
-              bankAccount['accountNumber']?.toString() ?? '0441000765886',
-            ),
-            _buildBankInfo(
-              'Tên tài khoản:',
-              bankAccount['accountName']?.toString() ?? 'CTY TNHH THỢ HCM',
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Sau khi chuyển khoản, hệ thống sẽ tự động xác nhận và cộng tiền vào ví của bạn.',
-              style: TextStyle(fontStyle: FontStyle.italic),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              final accountNumber =
-                  bankAccount['accountNumber']?.toString() ?? '0441000765886';
-              Clipboard.setData(ClipboardData(text: accountNumber));
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Đã copy số tài khoản')),
-              );
-            },
-            child: const Text('Copy STK'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Đã hiểu'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBankInfo(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          SizedBox(width: 100, child: Text(label)),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -571,59 +470,6 @@ class _WalletScreenState extends State<WalletScreen> {
             const Text(
               '⚠️ Lưu ý: Nếu ví của bạn bị âm, dịch vụ sẽ bị ẩn khỏi ứng dụng khách hàng cho đến khi bạn nạp tiền.',
             ),
-          ],
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Đã hiểu'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showMoMoInfoDialog(
-    BuildContext context,
-    WalletProvider walletProvider,
-    double amount,
-  ) {
-    final depositResponse = walletProvider.lastDepositResponse;
-    final paymentInfo = depositResponse?['paymentInfo'];
-    final transactionInfo = depositResponse?['transaction'];
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Thanh toán MoMo'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Số tiền: ${walletProvider.formatCurrency(amount)}'),
-            const Divider(),
-            _buildBankInfo(
-              'Số MoMo:',
-              paymentInfo?['momoNumber']?.toString() ?? '0987654321',
-            ),
-            _buildBankInfo(
-              'Nội dung:',
-              paymentInfo?['description']?.toString() ?? 'NAPVI',
-            ),
-            _buildBankInfo(
-              'Mã giao dịch:',
-              transactionInfo?['paymentReference']?.toString() ?? '',
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              '💡 Hướng dẫn:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const Text('1. Mở ứng dụng MoMo'),
-            const Text('2. Chọn "Chuyển tiền"'),
-            const Text('3. Nhập số điện thoại MoMo'),
-            const Text('4. Nhập chính xác số tiền và nội dung'),
-            const Text('5. Xác nhận chuyển tiền'),
           ],
         ),
         actions: [

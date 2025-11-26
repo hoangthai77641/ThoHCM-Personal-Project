@@ -117,8 +117,8 @@ class _RootDeciderState extends State<_RootDecider> {
     if (!mounted) return;
 
     if (ok) {
-      // Kiểm tra cập nhật từ Play Store sau khi vào app
-      AppUpdateService.silentCheckForUpdate(context);
+      // Kiểm tra cập nhật từ Backend API (ưu tiên) hoặc Play Store
+      AppUpdateService.checkForUpdateFromBackend(context);
 
       Navigator.of(
         context,

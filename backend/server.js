@@ -249,6 +249,7 @@ app.use('/api/schedules', workerScheduleRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/wallet', walletRoutes);
 app.use('/api/banking', require('./routes/bankingRoutes'));
+app.use('/api/app-version', require('./routes/appVersionRoutes'));
 
 // Initialize NotificationService
 const NotificationService = require('./services/NotificationService');

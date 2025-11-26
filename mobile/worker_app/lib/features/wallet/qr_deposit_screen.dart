@@ -54,7 +54,7 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nạp tiền QR'),
+        title: const Text('Nạp ví'),
         backgroundColor: Colors.green.shade600,
         foregroundColor: Colors.white,
       ),
@@ -63,10 +63,6 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Step indicator
-            _buildStepIndicator(),
-            const SizedBox(height: 24),
-
             // QR Code Section
             _buildQRSection(qrData, amount),
             const SizedBox(height: 24),
@@ -88,60 +84,6 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildStepIndicator() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.shade200),
-      ),
-      child: Row(
-        children: [
-          _buildStep(1, 'Quét QR', true),
-          const Expanded(child: Divider()),
-          _buildStep(2, 'Chuyển khoản', false),
-          const Expanded(child: Divider()),
-          _buildStep(3, 'Upload ảnh', false),
-          const Expanded(child: Divider()),
-          _buildStep(4, 'Chờ duyệt', false),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStep(int stepNumber, String title, bool isActive) {
-    return Column(
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isActive ? Colors.green : Colors.grey.shade300,
-          ),
-          child: Center(
-            child: Text(
-              stepNumber.toString(),
-              style: TextStyle(
-                color: isActive ? Colors.white : Colors.grey.shade600,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 12,
-            color: isActive ? Colors.green : Colors.grey.shade600,
-          ),
-        ),
-      ],
     );
   }
 
@@ -634,14 +576,18 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
       );
 
       if (success && mounted) {
+        // Hiển thị thông báo thành công
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
-              '✅ Đã gửi ảnh thành công! Vui lòng chờ admin xác nhận.',
+              '✅ Đã gửi ảnh chuyển khoản thành công! Admin sẽ xác nhận và cộng tiền vào ví của bạn trong vòng 24h.',
             ),
             backgroundColor: Colors.green,
+            duration: Duration(seconds: 4),
           ),
         );
+        
+        // Quay về màn hình My Wallet
         Navigator.pop(context);
       }
     } catch (e) {
