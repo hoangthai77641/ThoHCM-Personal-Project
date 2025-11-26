@@ -436,32 +436,6 @@ mongoose.connect(MONGODB_URI, mongooseOptions)
     const conn = mongoose.connection;
     console.log('MongoDB connected', { db: conn.name, host: conn.host });
     
-    // Health endpoint to verify DB connection at runtime
-    app.get('/api/health/db', async (req, res) => {
-      try {
-        const status = {
-          db: conn.name,
-          host: conn.host,
-          readyState: conn.readyState,
-          collections: Object.keys(conn.collections || {})
-        };
-        res.json(status);
-      } catch (err) {
-        res.status(500).json({ error: err.message });
-      }
-    });
-
-    // Manual bootstrap endpoint for production (admin only)
-    app.post('/api/admin/bootstrap', auth(['admin']), async (req, res) => {
-      try {
-        const bootstrap = require('./scripts/bootstrap');
-        await bootstrap();
-        res.json({ success: true, message: 'Bootstrap completed' });
-      } catch (err) {
-        console.error('[bootstrap API] failed:', err);
-        res.status(500).json({ error: err.message });
-      }
-    });
     // Run lightweight bootstrap/migrations on start unless disabled
     const runBootstrap = (process.env.RUN_MIGRATIONS_ON_START || 'true').toLowerCase() !== 'false';
     if (runBootstrap) {
