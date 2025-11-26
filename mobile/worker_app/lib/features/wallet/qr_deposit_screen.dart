@@ -570,8 +570,18 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
     setState(() => _isUploading = true);
 
     try {
+      // Get transaction ID - MongoDB uses _id field
+      final transaction = widget.depositResponse['transaction'] as Map<String, dynamic>?;
+      final transactionId = transaction?['_id'] as String?;
+      
+      if (transactionId == null) {
+        throw Exception('Transaction ID not found');
+      }
+      
+      print('📤 Uploading proof for transaction: $transactionId');
+      
       final success = await context.read<WalletProvider>().uploadProofOfPayment(
-        widget.depositResponse['transaction']['id'] as String,
+        transactionId,
         _proofImage!,
       );
 
@@ -591,6 +601,7 @@ class _QRDepositScreenState extends State<QRDepositScreen> {
         Navigator.pop(context);
       }
     } catch (e) {
+      print('❌ Upload proof error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
